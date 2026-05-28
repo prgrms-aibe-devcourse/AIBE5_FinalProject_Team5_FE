@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import logo from '../assets/bootsignal_transparent.png'
+import logo from '../../assets/bootsignal_transparent.png'
 
 const communityLinks = ['게시판', 'Q&A', '모집', '아티클']
 const userMenuLinks = ['대시보드', '찜 목록', '내가 쓴 글', '일정', '내 정보', '문의', 'AI 포트폴리오']

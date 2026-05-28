@@ -1,4 +1,4 @@
-import logo from '../assets/bootsignal_transparent.png'
+import logo from '../../assets/bootsignal_transparent.png'
 
 const serviceLinks = ['과정 탐색', '게시판', 'Q&A', '모집', '아티클']
 const infoLinks = ['이용약관', '개인정보처리방침']
