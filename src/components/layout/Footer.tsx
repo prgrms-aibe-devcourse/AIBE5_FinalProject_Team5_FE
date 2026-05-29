@@ -20,27 +20,27 @@ export default function Footer() {
 
           <div className="grid grid-cols-3 gap-10">
             <div className="space-y-2">
-              <p className="text-lg font-semibold text-[#2d3748] font-pretendard">서비스</p>
+              <p className="text-base font-semibold text-[#2d3748] font-pretendard">서비스</p>
               {serviceLinks.map((label) => (
-                <a key={label} href="/" className="block text-sm text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
+                <a key={label} href="/" className="block text-xs text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
                   {label}
                 </a>
               ))}
             </div>
 
             <div className="space-y-2">
-              <p className="text-lg font-semibold text-[#2d3748] font-pretendard">정보</p>
+              <p className="text-base font-semibold text-[#2d3748] font-pretendard">정보</p>
               {infoLinks.map((label) => (
-                <a key={label} href="/" className="block text-sm text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
+                <a key={label} href="/" className="block text-xs text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
                   {label}
                 </a>
               ))}
             </div>
 
             <div className="space-y-2">
-              <p className="text-lg font-semibold text-[#2d3748] font-pretendard">고객지원</p>
+              <p className="text-base font-semibold text-[#2d3748] font-pretendard">고객지원</p>
               {supportLinks.map((label) => (
-                <a key={label} href="/" className="block text-sm text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
+                <a key={label} href="/" className="block text-xs text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
                   {label}
                 </a>
               ))}
