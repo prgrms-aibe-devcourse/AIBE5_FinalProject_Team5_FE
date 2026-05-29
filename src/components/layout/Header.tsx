@@ -14,16 +14,16 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   return (
-    <header className="w-full bg-white border-b border-gray-100 px-6 md:px-12 relative z-50">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between">
+    <header className="w-full bg-white px-6 md:px-12 relative z-50">
+      <div className="mx-auto flex h-24 w-full items-center justify-between">
       {/* Logo */}
       <a href="/">
-        <img src={logo} alt="BootSignal" className="h-10 w-auto" />
+        <img src={logo} alt="BootSignal" className="h-14 w-auto" />
       </a>
 
       {/* Nav */}
-      <nav className="flex items-center gap-8">
-        <a href="/courses" className="text-sm text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
+      <nav className="hidden items-center gap-14 md:flex">
+        <a href="/courses" className="text-lg font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
           과정 조회
         </a>
 
@@ -32,7 +32,7 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
           <button
             onClick={() => setCommunityOpen(!communityOpen)}
             onBlur={() => setTimeout(() => setCommunityOpen(false), 150)}
-            className="flex items-center gap-1 text-sm text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard"
+            className="flex items-center gap-1 text-lg font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard"
           >
             커뮤니티
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
@@ -53,7 +53,7 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
           )}
         </div>
 
-        <a href="/support" className="text-sm text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
+        <a href="/support" className="text-lg font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
           고객센터
         </a>
 
@@ -103,11 +103,11 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
         ) : (
           <div className="flex items-center gap-3">
             <a href="/signup"
-              className="text-sm px-4 py-1.5 rounded border border-deepOceanNavy text-deepOceanNavy hover:bg-foamWhite transition-colors font-pretendard">
+              className="min-w-28 rounded border border-deepOceanNavy px-6 py-3 text-center text-base font-semibold text-deepOceanNavy hover:bg-foamWhite transition-colors font-pretendard">
               회원가입
             </a>
             <a href="/login"
-              className="text-sm px-4 py-1.5 rounded bg-deepOceanNavy text-white hover:bg-waterlineBlue transition-colors font-pretendard">
+              className="min-w-28 rounded bg-deepOceanNavy px-6 py-3 text-center text-base font-semibold text-white hover:bg-waterlineBlue transition-colors font-pretendard">
               로그인
             </a>
           </div>
