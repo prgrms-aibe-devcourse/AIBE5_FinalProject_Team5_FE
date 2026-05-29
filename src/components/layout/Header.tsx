@@ -14,7 +14,8 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   return (
-    <header className="w-full bg-white border-b border-gray-100 px-8 flex items-center justify-between h-16 relative z-50">
+    <header className="w-full bg-white border-b border-gray-100 px-6 md:px-12 relative z-50">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between">
       {/* Logo */}
       <a href="/">
         <img src={logo} alt="BootSignal" className="h-10 w-auto" />
@@ -112,6 +113,7 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
           </div>
         )}
       </nav>
+      </div>
     </header>
   )
 }
