@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
-import heroVideo from './assets/watercolour_main_hero.mp4'
+import heroVideoWebm from './assets/watercolour_main_hero.webm'
+import heroVideoMp4 from './assets/watercolour_main_hero.mp4'
 
 function App() {
   const [heroVideoReady, setHeroVideoReady] = useState(true)
@@ -14,14 +15,16 @@ function App() {
           {heroVideoReady && (
             <video
               className="hero-video__media"
-              src={heroVideo}
               autoPlay
               muted
               loop
               playsInline
               onCanPlay={() => setHeroVideoReady(true)}
               onError={() => setHeroVideoReady(false)}
-            />
+            >
+              <source src={heroVideoWebm} type="video/webm" />
+              <source src={heroVideoMp4} type="video/mp4" />
+            </video>
           )}
           <div className="hero-video__fallback" aria-hidden="true">
             <div className="hero-video__horizon" />
