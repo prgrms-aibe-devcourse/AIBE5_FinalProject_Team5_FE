@@ -14,7 +14,7 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   return (
-    <header className="w-full bg-white px-6 md:px-12 relative z-50">
+    <header className="fixed left-0 right-0 top-0 z-50 w-full bg-transparent px-6 md:px-12">
       <div className="mx-auto flex h-24 w-full items-center justify-between">
       {/* Logo */}
       <a href="/">
@@ -103,11 +103,11 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
         ) : (
           <div className="flex items-center gap-3">
             <a href="/signup"
-              className="min-w-28 rounded border border-deepOceanNavy px-6 py-3 text-center text-base font-semibold text-deepOceanNavy hover:bg-foamWhite transition-colors font-pretendard">
+              className="min-w-28 rounded border border-deepOceanNavy bg-white px-6 py-3 text-center text-base font-semibold text-deepOceanNavy hover:bg-deepOceanNavy hover:text-white transition-colors font-pretendard">
               회원가입
             </a>
             <a href="/login"
-              className="min-w-28 rounded bg-deepOceanNavy px-6 py-3 text-center text-base font-semibold text-white hover:bg-waterlineBlue transition-colors font-pretendard">
+              className="min-w-28 rounded border border-transparent bg-deepOceanNavy px-6 py-3 text-center text-base font-semibold text-white hover:bg-waterlineBlue transition-colors font-pretendard">
               로그인
             </a>
           </div>

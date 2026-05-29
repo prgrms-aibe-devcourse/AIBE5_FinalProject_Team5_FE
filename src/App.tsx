@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
-import heroVideo from './assets/watercolour_main_1080p30_stream.mp4'
+import heroVideo from './assets/watercolour_main_hero.mp4'
 
 function App() {
   const [heroVideoReady, setHeroVideoReady] = useState(true)
