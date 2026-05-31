@@ -9,6 +9,7 @@ interface HeaderProps {
   nickname?: string
 }
 
+/** 사이트 상단 네비게이션 헤더 */
 export default function Header({ isLoggedIn = false, nickname = '닉네임' }: HeaderProps) {
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)

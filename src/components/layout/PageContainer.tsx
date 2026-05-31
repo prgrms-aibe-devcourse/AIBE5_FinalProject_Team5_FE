@@ -5,7 +5,7 @@ interface PageContainerProps {
   className?: string
 }
 
-/** Header / Footer 와 동일 — tailwind.config.js max-w-desktop-content */
+/** 페이지 콘텐츠 max-width 컨테이너 */
 export default function PageContainer({ children, className = '' }: PageContainerProps) {
   return (
     <div className={`mx-auto w-full max-w-desktop-content px-6 md:px-12 ${className}`}>

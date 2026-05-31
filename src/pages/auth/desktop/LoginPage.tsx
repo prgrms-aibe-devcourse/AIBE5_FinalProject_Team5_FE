@@ -2,11 +2,11 @@ import { useState } from 'react'
 import AuthInput from '../components/AuthInput.tsx'
 import AuthPasswordInput from '../components/AuthPasswordInput.tsx'
 import AuthButton from '../components/AuthButton.tsx'
-import AuthSocialLogin from '../components/AuthSocialLogin.tsx'
+import AuthSocial from '../components/AuthSocial.tsx'
 import LoginVisualPanel from '../components/LoginVisualPanel.tsx'
 import AuthExitButton from '../components/AuthExitButton.tsx'
 
-/** 데스크톱 로그인 — 전체 화면 50:50 (폼 | 사이드 배경) */
+/** 데스크톱 로그인 페이지 (50:50 — 폼 | 사이드 배경) */
 export default function LoginPage() {
   const [email, setEmail] = useState('yogavwijaya@gmail.com')
 
@@ -71,7 +71,7 @@ export default function LoginPage() {
                 </div>
               </div>
               {/* 소셜 로그인 */}
-              <AuthSocialLogin />
+              <AuthSocial />
               
             </div>
           </div>

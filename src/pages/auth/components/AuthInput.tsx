@@ -6,7 +6,7 @@ interface AuthInputProps extends InputHTMLAttributes<HTMLInputElement> {
   suffix?: ReactNode
 }
 
-/** 라벨 + 인풋 (suffix로 우측 아이콘) */
+/** 라벨 + 텍스트 입력 폼 (이메일, 닉네임 등) */
 export default function AuthInput({ label, error, id, suffix, className = '', ...props }: AuthInputProps) {
   const inputId = id ?? label
 

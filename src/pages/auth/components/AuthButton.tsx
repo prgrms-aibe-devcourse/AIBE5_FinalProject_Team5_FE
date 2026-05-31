@@ -5,7 +5,7 @@ interface AuthButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean
 }
 
-/** primary / outline 버튼 */
+/** Auth 주요 액션 버튼 (로그인, 회원가입) */
 export default function AuthButton({
   variant = 'primary',
   fullWidth = true,

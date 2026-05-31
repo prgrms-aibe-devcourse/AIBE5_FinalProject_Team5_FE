@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, type ChangeEventHandler } from 'react'
 import AuthInput from './AuthInput'
 
 interface AuthPasswordInputProps {
   label?: string
   placeholder?: string
   autoComplete?: string
+  value?: string
+  onChange?: ChangeEventHandler<HTMLInputElement>
 }
 
 function EyeOffIcon() {
@@ -36,11 +38,13 @@ function EyeIcon() {
   )
 }
 
-/** 비밀번호 인풋 — 보기/숨기기 토글 */
+/** 비밀번호 입력 폼 (보기/숨기기 토글) */
 export default function AuthPasswordInput({
   label = '비밀번호',
   placeholder = 'Input password',
   autoComplete = 'current-password',
+  value,
+  onChange,
 }: AuthPasswordInputProps) {
   const [visible, setVisible] = useState(false)
 
@@ -50,6 +54,8 @@ export default function AuthPasswordInput({
       type={visible ? 'text' : 'password'}
       placeholder={placeholder}
       autoComplete={autoComplete}
+      value={value}
+      onChange={onChange}
       suffix={
         <button
           type="button"

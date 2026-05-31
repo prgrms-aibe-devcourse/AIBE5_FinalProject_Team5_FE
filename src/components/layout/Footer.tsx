@@ -10,6 +10,7 @@ const linkColumns = [
   { title: '정보', links: infoLinks },
 ]
 
+/** 사이트 하단 푸터 */
 export default function Footer() {
   return (
     <footer className="w-full min-w-desktop bg-deepOceanNavy px-6 py-12 font-pretendard text-foamWhite md:px-12 md:py-16">

@@ -1,4 +1,4 @@
-/** 홈(/) 이동 — 좌상단 뒤로가기 */
+/** Auth 페이지 뒤로가기 버튼 — 홈(/) 이동 */
 export default function AuthExitButton() {
   return (
     <a
