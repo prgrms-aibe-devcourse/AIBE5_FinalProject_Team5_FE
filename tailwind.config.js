@@ -6,13 +6,13 @@ export default {
   ],
   theme: {
     extend: {
-      // 레이아웃(Header/Footer/Page) — (모바일은 desktop 미만 구간에서 추후 적응형 추가 예정)
+      // 레이아웃 — 디자인·데스크톱 기준 1920px (1920 이하 w-full, 초과 시 중앙 정렬)
       screens: {
-        desktop: '1024px',
+        desktop: '1024px', // 데스크톱 레이아웃 시작
       },
       maxWidth: {
-        'desktop-content': '1280px', // 데스크톱 (콘텐츠 영역) 최대 너비
-        'desktop-site': '1920px',   // 데스크톱 (화면 전체) 최대 너비
+        'desktop-content': '1920px', // 콘텐츠 최대 
+        'desktop-site': '1920px',    // 화면 전체 최대
         // 'mobile-view': '...',    // 추후 — 특정 비율 모바일 뷰 너비
       },
       minWidth: {
