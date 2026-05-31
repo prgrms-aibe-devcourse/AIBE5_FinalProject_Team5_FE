@@ -1,56 +1,55 @@
-import logo from '../../assets/bootsignal_transparent.png'
+import favicon from '../../assets/bootsignal_fabicon.png'
 
 const serviceLinks = ['과정 탐색', '게시판', 'Q&A', '모집', '아티클']
 const infoLinks = ['이용약관', '개인정보처리방침']
 const supportLinks = ['고객센터', '문의하기']
 
+const linkColumns = [
+  { title: '서비스', links: serviceLinks },
+  { title: '고객지원', links: supportLinks },
+  { title: '정보', links: infoLinks },
+]
+
 export default function Footer() {
   return (
-    <footer className="w-full bg-white px-6 py-8 md:px-12 md:py-10">
-      <div className="mx-auto w-full max-w-6xl">
-        <div className="flex flex-col gap-10 md:flex-row md:justify-between">
-          <div className="max-w-md">
-            <a href="/" className="inline-block">
-              <img src={logo} alt="BootSignal" className="h-12 w-auto" />
-            </a>
-            <p className="mt-4 text-sm text-[#4a5568] font-pretendard">
-              KDT 예비 수강생을 위한 후기 데이터 기반 의사결정 플랫폼
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-10">
-            <div className="space-y-2">
-              <p className="text-base font-semibold text-[#2d3748] font-pretendard">서비스</p>
-              {serviceLinks.map((label) => (
-                <a key={label} href="/" className="block text-xs text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
-                  {label}
-                </a>
-              ))}
+    <footer className="w-full min-w-desktop bg-deepOceanNavy px-6 py-12 font-pretendard text-foamWhite md:px-12 md:py-16">
+      
+      {/* tailwind.config.js — max-w-desktop-content */}
+      <div className="mx-auto w-full max-w-desktop-content">
+        <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
+          
+          {/* 좌측: 브랜드 소개 + 주소·저작권 */}
+          <div className="flex max-w-md flex-col gap-16 md:min-h-44 md:justify-between">
+            <div className="flex items-center gap-2 text-base leading-snug md:text-lg">
+              <img src={favicon} alt="BootSignal logo" className="h-[1.5lh] w-auto shrink-0"/>
+              <p>BOOTSIGNAL | 데이터 기반 부트캠프 의사결정 플랫폼</p>
             </div>
-
-            <div className="space-y-2">
-              <p className="text-base font-semibold text-[#2d3748] font-pretendard">정보</p>
-              {infoLinks.map((label) => (
-                <a key={label} href="/" className="block text-xs text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
-                  {label}
-                </a>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-base font-semibold text-[#2d3748] font-pretendard">고객지원</p>
-              {supportLinks.map((label) => (
-                <a key={label} href="/" className="block text-xs text-[#4a5568] hover:text-[#2f5fd0] font-pretendard">
-                  {label}
-                </a>
-              ))}
+            <div className="space-y-1.5 text-sm leading-relaxed">
+              <p>주소 | 서울특별시 서초구 반포대로 45 4층</p>
+              <p>Designed &amp; Developed by AIBE5 Final Project Team 1</p>
+              <p>COPYRIGHT ⓒ 2026 BOOTSIGNAL. All rights reserved.</p>
             </div>
           </div>
+
+          {/* 우측: 서비스·고객지원·정보 링크 3열 */}
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-8 md:gap-3">
+            {linkColumns.map(({ title, links }) => (
+              <div key={title} className="space-y-3">
+                <p className="text-base font-semibold">{title}</p>
+                <ul className="space-y-2">
+                  {links.map((label) => (
+                    <li key={label}>
+                      <a href="/" className="text-sm transition-colors hover:text-waterlineBlue">
+                        {label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          
         </div>
-
-        <hr className="my-8 border-[#5b6575]" />
-
-        <p className="text-center text-sm text-[#4a5568] font-pretendard">© 2026 InnerJoin</p>
       </div>
     </footer>
   )

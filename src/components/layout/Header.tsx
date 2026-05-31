@@ -14,16 +14,18 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 w-full bg-transparent px-6 md:px-12">
-      <div className="mx-auto flex h-24 w-full items-center justify-between">
+    <header className="fixed left-0 right-0 top-0 z-50 w-full min-w-desktop bg-transparent px-6 md:px-12">
+
+      {/* tailwind.config.js — max-w-desktop-content */}
+      <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
       {/* Logo */}
       <a href="/">
-        <img src={logo} alt="BootSignal" className="h-14 w-auto" />
+        <img src={logo} alt="BootSignal" className="h-11 w-auto" />
       </a>
 
-      {/* Nav */}
-      <nav className="hidden items-center gap-14 md:flex">
-        <a href="/courses" className="text-lg font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
+      {/* 네비게이션 바 (메뉴) */}
+      <nav className="hidden items-center gap-10 md:flex">
+        <a href="/courses" className="text-base font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
           과정 조회
         </a>
 
@@ -32,10 +34,10 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
           <button
             onClick={() => setCommunityOpen(!communityOpen)}
             onBlur={() => setTimeout(() => setCommunityOpen(false), 150)}
-            className="flex items-center gap-1 text-lg font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard"
+            className="flex items-center gap-1 text-base font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard"
           >
             커뮤니티
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none"
               className={`transition-transform duration-200 ${communityOpen ? 'rotate-180' : ''}`}>
               <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -53,16 +55,22 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
           )}
         </div>
 
-        <a href="/support" className="text-lg font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
+        <a href="/support" className="text-base font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard">
           고객센터
         </a>
 
+        {/* 로그인 여부에 따른 유저 메뉴 — 고정 너비로 nav 시프트 방지 */}
+        <div className="flex w-56 shrink-0 items-center justify-end">
         {isLoggedIn ? (
           <div className="flex items-center gap-4">
             {/* 알림 벨 */}
-            <button className="relative text-deepOceanNavy hover:text-waterlineBlue transition-colors">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 01-2-2h4a2 2 0 01-2 2z" />
+            <button
+              type="button"
+              aria-label="알림"
+              className="relative text-deepOceanNavy hover:text-waterlineBlue transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
               </svg>
             </button>
 
@@ -71,12 +79,12 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 onBlur={() => setTimeout(() => setUserMenuOpen(false), 150)}
-                className="flex items-center gap-2 text-sm text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard"
+                className="flex max-w-full items-center gap-2 text-base font-semibold text-deepOceanNavy hover:text-waterlineBlue transition-colors font-pretendard"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" className="shrink-0">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
-                {nickname}
+                <span className="truncate">{nickname}</span>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                   className={`transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}>
                   <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -103,15 +111,16 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
         ) : (
           <div className="flex items-center gap-3">
             <a href="/signup"
-              className="min-w-28 rounded border border-deepOceanNavy bg-white px-6 py-3 text-center text-base font-semibold text-deepOceanNavy hover:bg-deepOceanNavy hover:text-white transition-colors font-pretendard">
+              className="min-w-24 rounded border border-deepOceanNavy bg-white px-5 py-2 text-center text-sm font-semibold text-deepOceanNavy hover:border-waterlineBlue hover:bg-waterlineBlue hover:text-white transition-colors font-pretendard">
               회원가입
             </a>
             <a href="/login"
-              className="min-w-28 rounded border border-transparent bg-deepOceanNavy px-6 py-3 text-center text-base font-semibold text-white hover:bg-waterlineBlue transition-colors font-pretendard">
+              className="min-w-24 rounded border border-transparent bg-deepOceanNavy px-5 py-2 text-center text-sm font-semibold text-white hover:bg-waterlineBlue transition-colors font-pretendard">
               로그인
             </a>
           </div>
         )}
+        </div>
       </nav>
       </div>
     </header>
