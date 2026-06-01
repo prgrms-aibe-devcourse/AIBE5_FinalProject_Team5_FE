@@ -14,7 +14,7 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 w-full bg-transparent px-6 md:px-12">
+    <header className="fixed left-0 right-0 top-0 z-50 w-full bg-[#fbfbfb] px-6 md:px-12">
       <div className="mx-auto flex h-24 w-full items-center justify-between">
       {/* Logo */}
       <a href="/">
