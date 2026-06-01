@@ -7,6 +7,7 @@ interface AuthPasswordInputProps {
   autoComplete?: string
   value?: string
   onChange?: ChangeEventHandler<HTMLInputElement>
+  error?: string
 }
 
 function EyeOffIcon() {
@@ -45,6 +46,7 @@ export default function AuthPasswordInput({
   autoComplete = 'current-password',
   value,
   onChange,
+  error,
 }: AuthPasswordInputProps) {
   const [visible, setVisible] = useState(false)
 
@@ -56,6 +58,7 @@ export default function AuthPasswordInput({
       autoComplete={autoComplete}
       value={value}
       onChange={onChange}
+      error={error}
       suffix={
         <button
           type="button"

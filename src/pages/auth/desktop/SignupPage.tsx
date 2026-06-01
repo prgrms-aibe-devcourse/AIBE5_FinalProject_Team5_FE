@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import AuthInput from '../components/AuthInput.tsx'
 import AuthInputWithButton from '../components/AuthInputWithButton.tsx'
 import AuthPasswordInput from '../components/AuthPasswordInput.tsx'
@@ -8,30 +8,45 @@ import LoginVisualPanel from '../components/LoginVisualPanel.tsx'
 import AuthExitButton from '../components/AuthExitButton.tsx'
 import {
   EMAIL_INVALID_MESSAGE,
+  isSignupFormValid,
   isValidEmail,
+  isNicknameTooLong,
+  NICKNAME_LENGTH_MESSAGE,
+  PASSWORD_CONFIRM_REQUIRED_MESSAGE,
   PASSWORD_MATCH_MESSAGE,
   PASSWORD_MISMATCH_MESSAGE,
   passwordsMatch,
 } from '../../../utils/validation.ts'
+import type { SignupRequest } from '../../../services/auth.ts'
 
 /** 데스크톱 회원가입 페이지 (50:50 — 사이드 배경 | 폼) */
 export default function SignupPage() {
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [emailError, setEmailError] = useState<string | null>(null)
+  const [nicknameError, setNicknameError] = useState<string | null>(null)
   const [passwordConfirmError, setPasswordConfirmError] = useState<string | null>(null)
   const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false)
+
+  const canSubmit = isSignupFormValid(
+    email,
+    name,
+    nickname,
+    password,
+    confirmPassword,
+    isPasswordConfirmed,
+  )
 
   const resetPasswordConfirmState = () => {
     setPasswordConfirmError(null)
     setIsPasswordConfirmed(false)
   }
 
-  // 이메일 중복 확인 
   const handleEmailDuplicateCheck = () => {
-    if (!isValidEmail(email)) { // 이메일 형식 유효성 검사
+    if (!isValidEmail(email)) {
       setEmailError(EMAIL_INVALID_MESSAGE)
       return
     }
@@ -41,6 +56,12 @@ export default function SignupPage() {
   }
 
   const handlePasswordConfirm = () => {
+    if (!confirmPassword.trim()) {
+      setPasswordConfirmError('비밀번호 확인을 입력해 주세요.')
+      setIsPasswordConfirmed(false)
+      return
+    }
+
     if (passwordsMatch(password, confirmPassword)) {
       setPasswordConfirmError(null)
       setIsPasswordConfirmed(true)
@@ -49,6 +70,36 @@ export default function SignupPage() {
 
     setPasswordConfirmError(PASSWORD_MISMATCH_MESSAGE)
     setIsPasswordConfirmed(false)
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    if (!isValidEmail(email)) {
+      setEmailError(EMAIL_INVALID_MESSAGE)
+      return
+    }
+
+    if (isNicknameTooLong(nickname)) {
+      setNicknameError(NICKNAME_LENGTH_MESSAGE)
+      return
+    }
+
+    if (!isPasswordConfirmed || !passwordsMatch(password, confirmPassword)) {
+      setPasswordConfirmError(
+        isPasswordConfirmed ? PASSWORD_MISMATCH_MESSAGE : PASSWORD_CONFIRM_REQUIRED_MESSAGE,
+      )
+      setIsPasswordConfirmed(false)
+      return
+    }
+
+    setEmailError(null)
+    setNicknameError(null)
+    setPasswordConfirmError(null)
+
+    const body: SignupRequest = { email, password, name, nickname }
+    // TODO: await signup(body) — POST /api/auth/signup
+    void body
   }
 
   return (
@@ -70,7 +121,7 @@ export default function SignupPage() {
               회원가입
             </h1>
             {/* 입력 영역 */}
-            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <AuthInputWithButton
                 label="이메일"
                 type="email"
@@ -88,12 +139,30 @@ export default function SignupPage() {
               />
 
               <AuthInput
+                label="이름"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="홍길동"
+                autoComplete="name"
+              />
+
+              <AuthInput
                 label="닉네임"
                 type="text"
                 value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setNickname(value)
+                  if (isNicknameTooLong(value)) {
+                    setNicknameError(NICKNAME_LENGTH_MESSAGE)
+                  } else if (nicknameError) {
+                    setNicknameError(null)
+                  }
+                }}
                 placeholder="Input nickname"
                 autoComplete="username"
+                error={nicknameError ?? undefined}
               />
 
               <AuthPasswordInput
@@ -123,7 +192,11 @@ export default function SignupPage() {
                 success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
               />
 
-              <AuthButton type="submit" className="mt-2 rounded-full py-3.5 text-base">
+              <AuthButton
+                type="submit"
+                disabled={!canSubmit}
+                className="mt-2 rounded-full py-3.5 text-base"
+              >
                 회원가입
               </AuthButton>
             </form>
@@ -140,7 +213,6 @@ export default function SignupPage() {
 
             {/* 소셜 회원가입 */}
             <AuthSocial variant="signup" />
-          
           </div>
         </div>
       </div>

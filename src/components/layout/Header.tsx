@@ -1,18 +1,29 @@
 ﻿import { useState } from 'react'
 import logo from '../../assets/bootsignal_transparent.png'
+import { clearAuthSession, getAuthSession } from '../../services/auth.ts'
 
 const communityLinks = ['게시판', 'Q&A', '모집', '아티클']
 const userMenuLinks = ['알림함', '찜목록', '내 글', '일정', '학습', '문의', 'AI 튜터']
 
 interface HeaderProps {
+  /** 미전달 시 localStorage 세션으로 판단 */
   isLoggedIn?: boolean
   nickname?: string
 }
 
-export default function Header({ isLoggedIn = false, nickname = '닉네임' }: HeaderProps) {
+/** 사이트 상단 네비게이션 헤더 */
+export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameProp }: HeaderProps) {
+  const session = getAuthSession()
+  const isLoggedIn = isLoggedInProp ?? Boolean(session?.accessToken)
+  const nickname = nicknameProp ?? session?.user.nickname ?? '닉네임'
+
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
+  const handleLogout = () => {
+    clearAuthSession()
+    window.location.href = '/'
+  }
   return (
     <header className="fixed left-0 right-0 top-0 z-50 w-full bg-[#fbfbfb] px-6 md:px-12">
       <div className="mx-auto flex h-24 w-full max-w-desktop-content items-center justify-between">
@@ -92,7 +103,11 @@ export default function Header({ isLoggedIn = false, nickname = '닉네임' }: H
                         </a>
                       ))}
                       <div className="mt-1 border-t border-gray-100 px-3 pb-1 pt-1">
-                        <button className="w-full rounded border border-deepOceanNavy px-3 py-1.5 text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite font-pretendard">
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="w-full rounded border border-deepOceanNavy px-3 py-1.5 text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite font-pretendard"
+                        >
                           로그아웃
                         </button>
                       </div>
