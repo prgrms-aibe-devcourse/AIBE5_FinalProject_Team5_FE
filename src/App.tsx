@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage.tsx'
 import LoginPage from './pages/auth/desktop/LoginPage.tsx'
 import SignupPage from './pages/auth/desktop/SignupPage.tsx'
 import CourseSearchPage from './pages/course/desktop/CourseSearchPage.tsx'
+import CourseDetailPage from './pages/course/desktop/CourseDetailPage.tsx'
 
 function App() {
   return (
@@ -11,8 +12,9 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      {/* course — 과정 조회 (desktop/CourseSearchPage) */}
+      {/* course — 과정 조회·상세 */}
       <Route path="/courses" element={<CourseSearchPage />} />
+      <Route path="/courses/:courseId" element={<CourseDetailPage />} />
 
       {/* home 관련 페이지 */}
       <Route path="/" element={<HomePage />} />

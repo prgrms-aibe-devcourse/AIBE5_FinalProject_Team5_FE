@@ -1,13 +1,16 @@
 /** 과정 카드 1장 — 썸네일(이미지) / 메타 / 통계 / 비교·찜 액션 **/
 
+import type { KeyboardEvent } from 'react'
 import type { Course } from '../../../services/course.ts'
 
-interface CourseCardProps {  course: Course
+interface CourseCardProps {
+  course: Course
   isSelected: boolean
   isBookmarked: boolean
   canAddToCompare: boolean
   onToggleCompare: (course: Course) => void
   onToggleBookmark: (courseId: string) => void
+  onOpenDetail?: (course: Course) => void
 }
 
 /** 카드 본문 아이콘  */
@@ -68,16 +71,36 @@ function StarIcon() {  // 별점 아이콘
   )
 }
 
-export default function CourseCard({  course, // 과정 정보
-  isSelected, // 비교 목록 여부
-  isBookmarked, // 찜 목록 여부
-  canAddToCompare, // 비교 가능 여부
-  onToggleCompare, // 비교 버튼 상태 
-  onToggleBookmark, // 찜 버튼 상태 
+export default function CourseCard({
+  course,
+  isSelected,
+  isBookmarked,
+  canAddToCompare,
+  onToggleCompare,
+  onToggleBookmark,
+  onOpenDetail,
 }: CourseCardProps) {
+  const handleCardClick = () => {
+    onOpenDetail?.(course)
+  }
+
+  const handleCardKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onOpenDetail?.(course)
+    }
+  }
+
   return (
-    // 과정 카드 컨테이너
-    <article className="@container flex aspect-[340/450] w-full max-w-full origin-center flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.03] hover:shadow-md font-pretendard">
+    <article
+      role={onOpenDetail ? 'button' : undefined}
+      tabIndex={onOpenDetail ? 0 : undefined}
+      onClick={onOpenDetail ? handleCardClick : undefined}
+      onKeyDown={onOpenDetail ? handleCardKeyDown : undefined}
+      className={`@container flex aspect-[340/450] w-full max-w-full origin-center flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.03] hover:shadow-md font-pretendard ${
+        onOpenDetail ? 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-waterlineBlue' : ''
+      }`}
+    >
       {/* 상단: 썸네일 영역 */}
       <div className="relative aspect-[16/9] w-full shrink-0 bg-foamWhite">
         {/* 썸네일 이미지 */}
@@ -89,7 +112,10 @@ export default function CourseCard({  course, // 과정 정보
             type="button"
             aria-label={isSelected ? '비교 목록에서 제거' : '비교 목록에 추가'}
             disabled={!isSelected && !canAddToCompare} // 비교 가능 여부에 따라 버튼 비활성화
-            onClick={() => onToggleCompare(course)} // 비교 버튼 클릭 시 과정 추가/제거
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleCompare(course)
+            }}
             className={`flex h-7 w-7 items-center justify-center rounded-full border bg-white/90 text-base leading-none shadow-sm transition-colors sm:h-8 sm:w-8 sm:text-lg ${
               isSelected // 비교 목록 여부에 따라 버튼 상태 변경
                 ? 'border-waterlineBlue text-waterlineBlue'
@@ -102,7 +128,10 @@ export default function CourseCard({  course, // 과정 정보
           <button
             type="button"
             aria-label={isBookmarked ? '찜 해제' : '찜하기'}
-            onClick={() => onToggleBookmark(course.id)} // 찜 버튼 클릭 시 과정 추가/제거
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleBookmark(course.id)
+            }}
             className={`flex h-7 w-7 items-center justify-center rounded-full border bg-white/90 shadow-sm transition-colors sm:h-8 sm:w-8 ${
               isBookmarked // 찜 목록 여부에 따라 버튼 상태 변경
                 ? 'border-waterlineBlue text-waterlineBlue'

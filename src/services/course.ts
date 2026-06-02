@@ -31,6 +31,40 @@ export interface Course {
   logoUrl?: string
 }
 
+/** 모집 현황 — GET /api/courses/:id */
+export interface CourseRecruitment {
+  capacity: number
+  applicants: number
+  confirmed: number
+}
+
+/** 연락처 — GET /api/courses/:id */
+export interface CourseContact {
+  phone: string
+  email: string
+  homepage: string
+}
+
+/** GET /api/courses/:id — 상세 */
+export interface CourseDetail extends Course {
+  batch: string
+  recruitment: CourseRecruitment
+  eligibility: string
+  goals: string
+  otherInfo: string
+  institutionInfo: string
+  contact: CourseContact
+  websiteUrl: string
+}
+
+/** GET /api/courses/:id Response 200 */
+export interface CourseDetailResponse {
+  success: boolean
+  code: string
+  message: string
+  data: CourseDetail
+}
+
 /** GET /api/courses Response 200 */
 export interface CourseListResponse {
   success: boolean
@@ -56,6 +90,12 @@ export interface CourseFilterConfig {
   options: CourseFilterOption[]
   /** true면 목록 높이 제한·스크롤 없이 전체 표시 */
   expandList?: boolean
+}
+
+/** GET /api/courses/:id */
+export async function getCourseDetail(courseId: string): Promise<CourseDetailResponse> {
+  void courseId
+  throw new Error('과정 상세 API가 연결되지 않았습니다.')
 }
 
 /** GET /api/courses */

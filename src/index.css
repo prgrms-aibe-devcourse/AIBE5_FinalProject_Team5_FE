@@ -29,6 +29,26 @@ body {
   overflow-x: hidden;
 }
 
+/* 과정 상세 — 모집 현황 셰브론 세그먼트 */
+.recruitment-chevron-first {
+  clip-path: polygon(0 0, calc(100% - 0.5rem) 0, 100% 50%, calc(100% - 0.5rem) 100%, 0 100%);
+}
+
+.recruitment-chevron-middle {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 0.5rem) 0,
+    100% 50%,
+    calc(100% - 0.5rem) 100%,
+    0 100%,
+    0.5rem 50%
+  );
+}
+
+.recruitment-chevron-last {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0.5rem 50%);
+}
+
 .hero-video {
   position: relative;
   width: 100vw !important;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 // 공통 컴포넌트
 import Header from '../../../components/layout/Header.tsx'
 import Footer from '../../../components/layout/Footer.tsx'
@@ -25,6 +26,8 @@ function buildInitialFilterValues(): Record<string, string> {  return COURSE_FIL
 }
 
 export default function CourseSearchPage() {
+  const navigate = useNavigate()
+
   // --- 검색·필터·정렬·페이지 ---
   const [keyword, setKeyword] = useState('')
   const [filterValues, setFilterValues] = useState(buildInitialFilterValues)
@@ -127,7 +130,8 @@ export default function CourseSearchPage() {
                     isBookmarked={bookmarkedIds.has(course.id)} // 찜 목록 여부
                     canAddToCompare={selectedCourses.length < MAX_COMPARE_COURSES} // 비교 가능 여부
                     onToggleCompare={handleToggleCompare} // 비교 버튼 상태 
-                    onToggleBookmark={handleToggleBookmark} // 찜 버튼 상태 
+                    onToggleBookmark={handleToggleBookmark}
+                    onOpenDetail={(c) => navigate(`/courses/${c.id}`)}
                   />
                 </div>
               ))}
