@@ -6,6 +6,7 @@ import CourseDetailBreadcrumb from '../components/CourseDetailBreadcrumb.tsx'
 import CourseDetailHeader from '../components/CourseDetailHeader.tsx'
 import CourseDetailTabs, { type CourseDetailTab } from '../components/CourseDetailTabs.tsx'
 import CourseDetailInfoSections from '../components/CourseDetailInfoSections.tsx'
+import CourseDetailReviewsSection from '../components/CourseDetailReviewsSection.tsx'
 import CourseDetailSidebar from '../components/CourseDetailSidebar.tsx'
 import { getMockCourseDetail } from '../data/mockCourseDetail.ts'
 
@@ -54,12 +55,11 @@ export default function CourseDetailPage() {
             onTabChange={setActiveTab} // 탭 변경 감지 
           /> 
 
-          {/* 과정 상세 정보 섹션  (좌측: 정보 섹션, 우측: 사이드바) */}
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
-            
             {/* 정보 섹션 (탭 콘텐츠) */}
             <div className="min-w-0 flex-1" role="tabpanel">
               {activeTab === 'info' ? <CourseDetailInfoSections course={course} /> : null}
+              {activeTab === 'reviews' ? <CourseDetailReviewsSection /> : null}
             </div>
 
             {/* 과정 상세 사이드바 */}
