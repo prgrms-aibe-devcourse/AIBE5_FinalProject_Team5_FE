@@ -21,24 +21,24 @@ body,
   padding: 0 !important;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   background: #ffffff;
-  overflow-x: hidden;
+  /* hidden 대신 clip: 가로 넘침은 잘라내되 스크롤 컨테이너를 만들지 않아
+     html의 scroll-snap이 정상 작동하도록 함 */
+  overflow-x: clip;
 }
 
 .home-page .site-header {
-  opacity: 0;
-  transform: translateY(-100%);
-  animation: home-header-enter 0.55s ease 3.05s forwards;
-}
-
-@keyframes home-header-enter {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  opacity: 1;
+  transform: translateY(0);
+  animation: none;
 }
 
 .hero-video {
@@ -48,10 +48,89 @@ body {
   margin: 0 !important;
   left: 50%;
   transform: translateX(-50%);
-  height: calc(100dvh - 6rem);
-  min-height: calc(100vh - 6rem);
+  height: calc(100dvh - 5rem);
+  min-height: calc(100vh - 5rem);
   overflow: hidden;
   background: #ffffff;
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 5;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  transform: translateX(-50%);
+  color: #ffffff;
+  text-decoration: none;
+  text-shadow: 0 1px 10px rgba(28, 57, 93, 0.45);
+}
+
+.hero-scroll-indicator__text {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.hero-scroll-indicator__line {
+  width: 1px;
+  height: 2.6rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.35));
+  transform-origin: center top;
+  animation: hero-scroll-load 1.1s linear infinite;
+}
+
+@keyframes hero-scroll-load {
+  0% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  75% {
+    transform: scaleY(0.18);
+    opacity: 0.35;
+  }
+
+  100% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-scroll-pulse {
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* 휠 스크롤은 useSmoothSectionScroll(JS)이 easing으로 섹션 이동을 담당하고,
+   CSS 스냅은 터치·키보드용 가벼운 보조 역할(proximity)만 한다.
+   proximity는 긴 섹션에서 스크롤이 갇히지 않게 해준다. */
+html.home-snap {
+  scroll-snap-type: y proximity;
+}
+
+.home-page [data-home-section] {
+  /* scroll-padding-top(5rem)으로 헤더 오프셋이 처리되므로 margin은 0으로 둬 중복 오프셋 방지 */
+  scroll-margin-top: 0;
+  scroll-snap-align: start;
+}
+
+/* 사용자가 모션 최소화를 선호하면 스냅·부드러운 스크롤 모두 해제 */
+@media (prefers-reduced-motion: reduce) {
+  html.home-snap {
+    scroll-snap-type: none;
+  }
+
+  .hero-scroll-indicator__line {
+    animation: none;
+  }
 }
 
 .hero-video__media,
@@ -138,8 +217,21 @@ body {
 
 @media (max-width: 768px) {
   .hero-video {
-    height: calc(100dvh - 6rem);
-    min-height: calc(100vh - 6rem);
+    height: calc(100dvh - 5rem);
+    min-height: calc(100vh - 5rem);
+  }
+
+  .hero-scroll-indicator {
+    bottom: 1.2rem;
+    gap: 0.55rem;
+  }
+
+  .hero-scroll-indicator__text {
+    font-size: 0.7rem;
+  }
+
+  .hero-scroll-indicator__line {
+    height: 2rem;
   }
 
   .hero-video__fallback {

@@ -11,17 +11,16 @@ function Avatar() {
   )
 }
 
-/** 메인 — 수강생들의 후기 */
 export default function ReviewsSection() {
   return (
-    <section className="w-full px-6 py-16 md:px-12 md:py-20" aria-label="수강생들의 후기">
+    <section id="reviews" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="수강생들의 후기" data-home-section>
       <div className="mx-auto w-full max-w-desktop-content">
         <h2 className="text-center text-2xl font-bold text-deepOceanNavy font-pretendard md:text-[28px]">수강생들의 후기</h2>
         <p className="mt-2 text-center text-sm text-[#7b8795] font-pretendard">
           실제 수강생들이 남긴 솔직한 후기를 확인해보세요
         </p>
 
-        <ul className="mt-14 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+        <ul className="mt-10 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
           {reviews.map((review, index) => {
             const featured = index === Math.floor(reviews.length / 2)
             return (

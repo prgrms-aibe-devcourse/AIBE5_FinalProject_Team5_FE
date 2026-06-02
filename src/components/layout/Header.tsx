@@ -32,6 +32,9 @@ export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameP
   const nickname = nicknameProp ?? session?.user?.nickname ?? '닉네임'
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const isHomePage = typeof window !== 'undefined' && window.location.pathname === '/'
+  const homeLink = isHomePage ? '#hero' : '/#hero'
+  const courseLink = isHomePage ? '#courses' : '/#courses'
 
   const handleLogout = () => {
     clearAuthSession()
@@ -41,13 +44,13 @@ export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameP
   return (
     <header className="site-header fixed left-0 right-0 top-0 z-50 w-full min-w-desktop bg-[#fbfbfb] px-6 md:px-12">
       <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
-        <a href="/" aria-label="BootSignal 홈">
+        <a href={homeLink} aria-label="BootSignal 홈">
           <img src={logo} alt="BootSignal" className="h-11 w-auto" />
         </a>
 
         <div className="hidden items-center gap-8 md:flex">
           <nav className="flex items-center justify-end gap-10" aria-label="주요 메뉴">
-            <a href="/courses" className="font-pretendard text-base font-semibold text-deepOceanNavy transition-colors hover:text-waterlineBlue">
+            <a href={courseLink} className="font-pretendard text-base font-semibold text-deepOceanNavy transition-colors hover:text-waterlineBlue">
               과정 조회
             </a>
 

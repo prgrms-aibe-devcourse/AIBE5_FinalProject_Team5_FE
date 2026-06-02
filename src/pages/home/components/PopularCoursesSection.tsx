@@ -9,7 +9,6 @@ function CourseLogo() {
   )
 }
 
-/** 메인 — 이번 주 인기 과정 캐러셀 */
 export default function PopularCoursesSection() {
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -31,27 +30,27 @@ export default function PopularCoursesSection() {
   }
 
   return (
-    <section className="w-full bg-[#f6f9fc] px-6 py-16 md:px-12 md:py-20" aria-label="이번 주 인기 과정">
+    <section id="popular-courses" className="w-full bg-white px-6 py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
       <div className="mx-auto w-full max-w-desktop-content">
         <h2 className="text-center text-2xl font-bold text-deepOceanNavy font-pretendard md:text-[28px]">이번 주 인기 과정</h2>
         <p className="mt-2 text-center text-sm text-[#7b8795] font-pretendard">
           사용자들이 이번 주 가장 관심있어 한 과정을 확인해보세요
         </p>
 
-        <div className="relative mt-10">
+        <div className="relative mt-8">
           <button
             type="button"
             onClick={() => scrollByCard(-1)}
             aria-label="이전 과정"
             className="absolute -left-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-[#e1e5ea] bg-white text-[#7c8796] shadow-[0_4px_12px_rgba(52,74,100,0.1)] transition-colors hover:border-waterlineBlue hover:text-deepOceanNavy md:-left-5"
           >
-            ‹
+            ←
           </button>
 
           <div
             ref={scrollerRef}
             onScroll={handleScroll}
-            className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="mx-auto flex w-max snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {popularCourses.map((course) => (
               <article
@@ -87,11 +86,11 @@ export default function PopularCoursesSection() {
             aria-label="다음 과정"
             className="absolute -right-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-[#e1e5ea] bg-white text-[#7c8796] shadow-[0_4px_12px_rgba(52,74,100,0.1)] transition-colors hover:border-waterlineBlue hover:text-deepOceanNavy md:-right-5"
           >
-            ›
+            →
           </button>
         </div>
 
-        <div className="mt-8 flex items-center justify-center gap-2">
+        <div className="mt-6 flex items-center justify-center gap-2">
           {popularCourses.map((course, index) => (
             <span
               key={course.id}
