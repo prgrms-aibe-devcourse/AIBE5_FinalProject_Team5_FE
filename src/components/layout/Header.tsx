@@ -9,10 +9,16 @@ interface HeaderProps {
   /** 미전달 시 localStorage 세션으로 판단 */
   isLoggedIn?: boolean
   nickname?: string
+  /** false면 스크롤 시 헤더도 함께 이동 (기본: true — 상단 고정) */
+  fixed?: boolean
 }
 
 /** 사이트 상단 네비게이션 헤더 */
-export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameProp }: HeaderProps) {
+export default function Header({
+  isLoggedIn: isLoggedInProp,
+  nickname: nicknameProp,
+  fixed = true,
+}: HeaderProps) {
   const session = getAuthSession()
   const isLoggedIn = isLoggedInProp ?? Boolean(session?.accessToken)
   const nickname = nicknameProp ?? session?.user.nickname ?? '닉네임'
@@ -25,7 +31,9 @@ export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameP
     window.location.href = '/'
   }
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 w-full bg-[#fbfbfb] px-6 md:px-12">
+    <header
+      className={`z-50 w-full bg-[#fbfbfb] px-6 md:px-12 ${fixed ? 'fixed left-0 right-0 top-0' : 'relative'}`}
+    >
       <div className="mx-auto flex h-24 w-full max-w-desktop-content items-center justify-between">
         <a href="/">
           <img src={logo} alt="BootSignal" className="h-11 w-auto" />
