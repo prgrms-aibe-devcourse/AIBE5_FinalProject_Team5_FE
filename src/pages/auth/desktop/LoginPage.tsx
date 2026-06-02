@@ -1,14 +1,45 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import AuthInput from '../components/AuthInput.tsx'
 import AuthPasswordInput from '../components/AuthPasswordInput.tsx'
 import AuthButton from '../components/AuthButton.tsx'
 import AuthSocial from '../components/AuthSocial.tsx'
 import LoginVisualPanel from '../components/LoginVisualPanel.tsx'
 import AuthExitButton from '../components/AuthExitButton.tsx'
+import { EMAIL_INVALID_MESSAGE, isLoginFormValid, isValidEmail } from '../../../utils/validation.ts'
+import { DUMMY_LOGIN, login, USE_AUTH_DUMMY } from '../../../services/auth.ts'
 
 /** 데스크톱 로그인 페이지 (50:50 — 폼 | 사이드 배경) */
 export default function LoginPage() {
-  const [email, setEmail] = useState('yogavwijaya@gmail.com')
+  // 더미 끄기: USE_AUTH_DUMMY = false 후 아래를 useState('') 두 줄로 교체
+  const [email, setEmail] = useState(USE_AUTH_DUMMY ? DUMMY_LOGIN.request.email : '')
+  const [password, setPassword] = useState(USE_AUTH_DUMMY ? DUMMY_LOGIN.request.password : '')
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const canSubmit = isLoginFormValid(email, password)
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    if (!isValidEmail(email)) {
+      setEmailError(EMAIL_INVALID_MESSAGE)
+      return
+    }
+
+    setEmailError(null)
+    setLoginError(null)
+    setIsSubmitting(true)
+
+    try {
+      await login({ email, password })
+      window.location.href = '/'
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : '로그인에 실패했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="flex h-dvh w-full overflow-hidden font-pretendard">
@@ -27,16 +58,30 @@ export default function LoginPage() {
               </h1>
 
               {/* 입력 영역 */}
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleSubmit}>
                 {/* 이메일 */}
-                <AuthInput label="이메일" type="email" value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                <AuthInput
+                  label="이메일"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    if (emailError) setEmailError(null)
+                    if (loginError) setLoginError(null)
+                  }}
                   placeholder="example@email.com"
                   autoComplete="email"
+                  error={emailError ?? undefined}
                 />
                 {/* 비밀번호 */}
                 <div className="space-y-2">
-                  <AuthPasswordInput />
+                  <AuthPasswordInput
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      if (loginError) setLoginError(null)
+                    }}
+                  />
                   <div className="flex justify-end">
                     <a href="/forgot-password"
                       className="text-sm text-waterlineBlue underline underline-offset-2 transition-colors hover:text-deepOceanNavy"
@@ -46,9 +91,19 @@ export default function LoginPage() {
                   </div>
                 </div>
 
+                {loginError && (
+                  <p className="text-sm text-red-500 font-pretendard" role="alert">
+                    {loginError}
+                  </p>
+                )}
+
                 {/* 제출 버튼 */}
-                <AuthButton type="submit" className="mt-2 rounded-full py-3.5 text-base">
-                  로그인
+                <AuthButton
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                  className="mt-2 rounded-full py-3.5 text-base"
+                >
+                  {isSubmitting ? '로그인 중...' : '로그인'}
                 </AuthButton>
               </form>
 

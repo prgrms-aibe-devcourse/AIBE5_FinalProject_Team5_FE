@@ -21,7 +21,7 @@ export default function AuthSocial({ variant = 'login' }: AuthSocialProps) {
           key={name}
           type="button"
           aria-label={`${name} ${actionLabel}`}
-          className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-mistSkyBlue transition-shadow hover:shadow-md"
+          className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-mistSkyBlue transition-all duration-200 hover:scale-110 hover:shadow-md"
         >
           <img src={icon} alt="" className="h-full w-full object-contain p-2" />
         </button>

@@ -1,35 +1,18 @@
-import { useEffect, useState } from 'react'
+import { Route, Routes } from 'react-router-dom'
 import HomePage from './pages/HomePage'
+import DashboardPage from './pages/dashboard/DashboardPage'
 import LoginPage from './pages/auth/desktop/LoginPage'
 import SignupPage from './pages/auth/desktop/SignupPage'
 
-function getRoute(pathname: string) {
-  const normalized = pathname.replace(/\/+$/, '') || '/'
-
-  if (normalized === '/login') return 'login'
-  if (normalized === '/signup') return 'signup'
-  return 'home'
-}
-
 function App() {
-  const [route, setRoute] = useState(() => getRoute(window.location.pathname))
-
-  useEffect(() => {
-    const handlePopState = () => setRoute(getRoute(window.location.pathname))
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
-
-  if (route === 'login') {
-    return <LoginPage />
-  }
-
-  if (route === 'signup') {
-    return <SignupPage />
-  }
-
-  return <HomePage />
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+    </Routes>
+  )
 }
 
 export default App
