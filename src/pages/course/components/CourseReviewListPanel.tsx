@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import Pagination from '../../../components/common/Pagination.tsx'
-import { MOCK_REVIEWS, MOCK_VERIFIED_REVIEWS } from '../data/mockCourseReviews.ts'
+import { MOCK_REVIEWS, MOCK_VERIFIED_REVIEWS, type VerifiedReviewDetail } from '../data/mockCourseReviews.ts'
 
 const ITEMS_PER_PAGE = 5
+
+interface CourseReviewListPanelProps {
+  onClickWriteReview?: () => void
+}
 
 function ReviewIcon() {
   return (
@@ -27,8 +31,80 @@ function Stars({ count }: { count: number }) {
   )
 }
 
+function DetailChip({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <span className="inline-flex max-w-full items-center gap-1 rounded-md border border-mistSkyBlue/30 bg-foamWhite/60 px-2 py-1 text-[0.82rem] leading-snug">
+      <span className="shrink-0 text-secondary">{label}</span>
+      <span className="font-semibold text-deepOceanNavy">{value}</span>
+    </span>
+  )
+}
+
+function VerifiedDetailSectionRow({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-2 border-b border-mistSkyBlue/25 py-2.5 last:border-b-0 last:pb-0 sm:flex-row sm:items-start sm:gap-4">
+      <h4 className="w-[4.5rem] shrink-0 text-xs font-bold leading-snug text-deepOceanNavy sm:pt-1">{title}</h4>
+      <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">{children}</div>
+    </section>
+  )
+}
+
+function formatDropoutReason(major?: string, sub?: string) {
+  if (!major && !sub) return '-'
+  if (!sub) return major ?? '-'
+  if (!major) return sub
+  return `${major}>${sub}`
+}
+
+function VerifiedReviewDetailPanel({ detail }: { detail: VerifiedReviewDetail }) {
+  return (
+    <div className="mt-3 rounded-xl border border-mistSkyBlue/40 bg-white px-3.5 py-2 shadow-[0_1px_4px_rgba(52,74,100,0.05)] md:px-4">
+      <VerifiedDetailSectionRow title="기본 정보">
+        <DetailChip label="선수 지식" value={detail.priorKnowledgeLevel} />
+        <DetailChip label="연령" value={`${detail.age}세`} />
+        <DetailChip label="목적" value={detail.learningGoal} />
+        <DetailChip label="형태" value={detail.attendanceType} />
+        <DetailChip label="기수" value={`${detail.cohort}기`} />
+      </VerifiedDetailSectionRow>
+
+      <VerifiedDetailSectionRow title="수료 정보">
+        <DetailChip label="수료 여부" value={detail.completionStatus} />
+        {detail.completionStatus === '수료' && detail.employmentStatusIn6Months ? (
+          <DetailChip label="6개월 취업" value={detail.employmentStatusIn6Months} />
+        ) : null}
+        {detail.completionStatus === '중도 포기' ? (
+          <DetailChip
+            label="포기 사유"
+            value={formatDropoutReason(detail.dropoutMajorReason, detail.dropoutSubReason)}
+          />
+        ) : null}
+      </VerifiedDetailSectionRow>
+
+      <VerifiedDetailSectionRow title="과정 난이도">
+        <DetailChip label="난이도" value={detail.courseDifficulty} />
+        <DetailChip label="진도" value={detail.progressSpeed} />
+        <DetailChip label="팀플" value={detail.teamProjectDifficulty} />
+        <DetailChip label="자습" value={`${detail.avgSelfStudyHours}시간`} />
+      </VerifiedDetailSectionRow>
+
+      <VerifiedDetailSectionRow title="과정 품질">
+        <DetailChip label="강사" value={<Stars count={detail.instructorDeliveryRating} />} />
+        <DetailChip label="커리큘럼" value={<Stars count={detail.curriculumRating} />} />
+        <DetailChip label="취업 지원" value={<Stars count={detail.employmentSupportSatisfactionRating} />} />
+      </VerifiedDetailSectionRow>
+
+      <VerifiedDetailSectionRow title="프로젝트">
+        <DetailChip label="프로젝트" value={`${detail.projectCount}개`} />
+        <DetailChip label="성취도" value={<Stars count={detail.projectAchievementRating} />} />
+        <DetailChip label="툴지원" value={<Stars count={detail.toolSupportRating} />} />
+        <DetailChip label="멘토링" value={<Stars count={detail.mentoringSatisfactionRating} />} />
+      </VerifiedDetailSectionRow>
+    </div>
+  )
+}
+
 // 과정 후기 내역 패널
-export default function CourseReviewListPanel() {
+export default function CourseReviewListPanel({ onClickWriteReview }: CourseReviewListPanelProps) {
   const [reviewTab, setReviewTab] = useState<'general' | 'verified'>('general')
   const [expandedVerifiedReviewIds, setExpandedVerifiedReviewIds] = useState<Set<number>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
@@ -93,9 +169,15 @@ export default function CourseReviewListPanel() {
       </div>
 
       <div className="p-4 md:p-5">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[0.95rem] text-secondary">
+          총{' '}
+          <span className="font-bold text-deepOceanNavy">{reviewPool.length}</span>
+          개의 {reviewTab === 'general' ? '일반' : '인증'} 리뷰
+        </p>
         <button
           type="button"
+          onClick={onClickWriteReview}
           className="inline-flex items-center gap-2 rounded-lg border border-deepOceanNavy/15 bg-deepOceanNavy px-4 py-2 text-[0.95rem] font-semibold text-white shadow-[0_3px_10px_rgba(52,74,100,0.18)] transition-colors hover:bg-waterlineBlue"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -142,42 +224,7 @@ export default function CourseReviewListPanel() {
                 {/* 일반 리뷰 내용 */}
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-deepOceanNavy/90 md:text-base">{review.content}</p>
                 
-                {/* 인증된 리뷰 상세 영역 (펼치기/접기 상태에 따라 표시)*/}
-                {expandedVerifiedReviewIds.has(review.id) ? ( 
-                  <div className="mt-4 rounded-lg border border-mistSkyBlue/35 bg-white/90 p-3.5">
-                    <div className="grid gap-1 text-[0.95rem] md:grid-cols-2">
-                      <p className="text-deepOceanNavy">
-                        <span className="font-medium">전공 여부</span>
-                        <span className="mx-1.5 text-mistSkyBlue">|</span>
-                        {review.detail.majorStatus}
-                      </p>
-                      <p className="text-deepOceanNavy">
-                        <span className="font-medium">추천 대상</span>
-                        <span className="mx-1.5 text-mistSkyBlue">|</span>
-                        {review.detail.recommendTarget}
-                      </p>
-                    </div>
-
-                    <p className="mt-2 text-[0.95rem] text-deepOceanNavy/90 md:text-base">{review.detail.overallComment}</p>
-
-                    <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 md:grid-cols-3">
-                      {review.detail.metrics.map((item) => (
-                        <li key={`${review.id}-${item.label}`} className="text-[0.9rem] text-deepOceanNavy md:text-[0.95rem]">
-                          <div className="flex items-center justify-between">
-                            <span>{item.label}</span>
-                            <span className="font-semibold text-secondary">{item.value}</span>
-                          </div>
-                          <div className="mt-1 h-1.5 rounded-full bg-mistSkyBlue/25">
-                            <div
-                              className="h-full rounded-full bg-waterlineBlue"
-                              style={{ width: `${item.value * 20}%` }}
-                            />
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
+                {expandedVerifiedReviewIds.has(review.id) ? <VerifiedReviewDetailPanel detail={review.detail} /> : null}
                 {/* 인증된 리뷰 상세 버튼 */}
                 <div className="mt-3 flex justify-end">
                   <button type="button"

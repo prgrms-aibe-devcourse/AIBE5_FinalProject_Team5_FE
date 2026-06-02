@@ -1,4 +1,8 @@
-import { MOCK_KEYWORD_BARS, MOCK_RATING_BARS } from '../data/mockCourseReviews.ts'
+import {
+  MOCK_VERIFIED_REVIEWS,
+  buildPriorKnowledgeConicGradient,
+  getVerifiedReviewStats,
+} from '../data/mockCourseReviews.ts'
 
 function StatsIcon() {
   return (
@@ -8,9 +12,13 @@ function StatsIcon() {
   )
 }
 
-// 과정 후기 통계 패널
+// 과정 후기 통계 패널 (인증 리뷰 항목 기반)
 export default function CourseReviewStatsPanel() {
-  const maxRatingCount = Math.max(...MOCK_RATING_BARS.map((item) => item.count))
+  const { reviewCount, averageRating, ratingBars, priorKnowledgeDistribution, qualityMetrics } =
+    getVerifiedReviewStats(MOCK_VERIFIED_REVIEWS)
+
+  const maxRatingCount = Math.max(...ratingBars.map((item) => item.count), 1)
+  const priorKnowledgeGradient = buildPriorKnowledgeConicGradient(priorKnowledgeDistribution)
 
   return (
     <div className="overflow-hidden rounded-2xl border border-mistSkyBlue/45 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
@@ -22,75 +30,78 @@ export default function CourseReviewStatsPanel() {
       </div>
 
       <div className="p-4 md:p-5">
-
-      {/* 리뷰 별점 통계 카드 영역 */}
-      <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
-        <div className="flex h-full items-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/35 p-4">
-          <div className="grid w-full items-center gap-4 md:grid-cols-[auto_1fr] md:gap-6">
-            <div className="flex min-w-[105px] flex-col items-center justify-center">
-              <div className="flex items-center gap-1.5">
-                <p className="text-2xl font-bold text-deepOceanNavy md:text-[1.7rem]">4.5</p>
-                <span className="text-[1.7rem] leading-none text-waterlineBlue" aria-hidden="true">★</span>
-              </div>
-              <p className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-mistSkyBlue/55 bg-white px-3 py-1 text-[0.72rem] font-semibold text-deepOceanNavy md:text-xs">
-                <span className="text-waterlineBlue">후기</span>
-                <span>33개</span>
-              </p>
-            </div>
-            <ul className="w-full min-w-0 space-y-1.5">
-              {MOCK_RATING_BARS.map((item) => (
-                <li key={item.score} className="flex items-center gap-2 text-[0.9rem] md:text-[0.95rem]">
-                  <span className="w-3 text-right font-medium text-deepOceanNavy">{item.score}</span>
-                  <span className="w-3 text-waterlineBlue">★</span>
-                  <div className="h-1.5 flex-1 rounded-full bg-mistSkyBlue/25">
-                    <div
-                      className="h-full rounded-full bg-waterlineBlue"
-                      style={{ width: `${(item.count / maxRatingCount) * 100}%` }}
-                    />
-                  </div>
-                  <span className="w-8 text-right text-[0.8rem] font-medium text-deepOceanNavy/80 md:text-[0.85rem]">
-                    {item.count}
+        <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
+          <div className="flex h-full items-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/35 p-4">
+            <div className="grid w-full items-center gap-4 md:grid-cols-[auto_1fr] md:gap-6">
+              <div className="flex min-w-[105px] flex-col items-center justify-center">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-2xl font-bold text-deepOceanNavy md:text-[1.7rem]">
+                    {reviewCount === 0 ? '-' : averageRating.toFixed(1)}
+                  </p>
+                  <span className="text-[1.7rem] leading-none text-waterlineBlue" aria-hidden="true">
+                    ★
                   </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* 전공 여부 카드 영역 */}
-        <div className="flex h-full flex-col justify-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/20 p-4">
-          <p className="text-[0.95rem] font-semibold text-deepOceanNavy md:text-base">전공 여부</p>
-          <div className="mx-auto mt-3 h-36 w-36 rounded-full bg-[conic-gradient(#5C6AC4_0deg_160deg,#E88EB0_160deg_250deg,#8BB4D2_250deg_360deg)]" />
-          <div className="mt-3 flex flex-wrap justify-center gap-3 text-[0.9rem] text-deepOceanNavy md:text-sm">
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-[#5C6AC4]" />8 비전공자
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-[#E88EB0]" />13 전공자
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-[#8BB4D2]" />2 기타
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 리뷰 항목별 분포 카드 영역 */}
-      <div className="mt-4 rounded-xl border border-mistSkyBlue/35 bg-foamWhite/20 p-5">
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {MOCK_KEYWORD_BARS.map((item) => (
-            <li key={item.label} className="text-center">
-              <div className="mx-auto flex h-24 w-4 items-end rounded-full bg-mistSkyBlue/25">
-                <div className="w-full rounded-full bg-waterlineBlue" style={{ height: `${item.value * 20}%` }} />
+                </div>
+                <p className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-mistSkyBlue/55 bg-white px-3 py-1 text-[0.72rem] font-semibold text-deepOceanNavy md:text-xs">
+                  <span className="text-waterlineBlue">인증 리뷰</span>
+                  <span>{reviewCount}개</span>
+                </p>
               </div>
-              <p className="mt-2 text-sm text-deepOceanNavy">{item.label}</p>
-              <p className="text-sm font-semibold text-secondary">{item.value}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
+              <ul className="w-full min-w-0 space-y-1.5">
+                {ratingBars.map((item) => (
+                  <li key={item.score} className="flex items-center gap-2 text-[0.9rem] md:text-[0.95rem]">
+                    <span className="w-3 text-right font-medium text-deepOceanNavy">{item.score}</span>
+                    <span className="w-3 text-waterlineBlue">★</span>
+                    <div className="h-1.5 flex-1 rounded-full bg-mistSkyBlue/25">
+                      <div
+                        className="h-full rounded-full bg-waterlineBlue"
+                        style={{ width: `${(item.count / maxRatingCount) * 100}%` }}
+                      />
+                    </div>
+                    <span className="w-8 text-right text-[0.8rem] font-medium text-deepOceanNavy/80 md:text-[0.85rem]">
+                      {item.count}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex h-full flex-col justify-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/20 p-4">
+            <p className="text-[0.95rem] font-semibold text-deepOceanNavy md:text-base">선수 지식 수준</p>
+            <div
+              className="mx-auto mt-3 h-36 w-36 rounded-full"
+              style={{ background: priorKnowledgeGradient }}
+            />
+            <div className="mt-3 flex flex-wrap justify-center gap-3 text-[0.9rem] text-deepOceanNavy md:text-sm">
+              {priorKnowledgeDistribution.map((item) => (
+                <span key={item.level} className="flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
+                  {item.count} {item.level}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-mistSkyBlue/35 bg-foamWhite/20 p-5">
+          <p className="mb-3 text-right text-xs text-secondary">*5점 만점</p>
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {qualityMetrics.map((item) => (
+              <li key={item.label} className="text-center">
+                <div className="mx-auto flex h-24 w-4 items-end rounded-full bg-mistSkyBlue/25">
+                  <div
+                    className="w-full rounded-full bg-waterlineBlue"
+                    style={{ height: `${(item.value / 5) * 100}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-sm text-deepOceanNavy">{item.label}</p>
+                <p className="text-sm font-semibold text-secondary">{item.value.toFixed(1)}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   )
 }
-
