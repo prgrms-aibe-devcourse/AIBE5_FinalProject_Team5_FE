@@ -12,7 +12,7 @@ import CourseCard from '../components/CourseCard.tsx'
 import CourseComparisonSidebar from '../components/CourseComparisonSidebar.tsx'
 import { COURSE_FILTERS, MAX_COMPARE_COURSES, MOCK_COURSES, TOTAL_MOCK_RESULTS} from '../data/mockCourses.ts' // 테스트용 과정 데이터 (API 연동 시 제거)
 import type { Course, CourseSortKey } from '../../../services/course.ts' 
-import { clearCompareCourses, loadCompareCourses, saveCompareCourses, toCompareCourseItem, type CompareCourseItem,} from '../../../services/courseCompare.ts'
+import { loadCompareCourses, saveCompareCourses, toCompareCourseItem, type CompareCourseItem } from '../../../services/courseCompare.ts'
 
 /** 조회 결과 그리드 3열 × 3행 */
 const ITEMS_PER_PAGE = 9
@@ -91,11 +91,9 @@ export default function CourseSearchPage() {
     })
   }
 
-  const handleCompare = () => { // 과정 비교 버튼 클릭 시 비교 목록 초기화 (비교 사이드 영역 버튼)
+  const handleCompare = () => {
     if (selectedCourses.length < 2) return
-    // TODO: 비교 페이지 연동 — 현재는 storage·선택 목록만 초기화
-    clearCompareCourses()
-    setSelectedCourses([])
+    navigate('/courses/compare')
   }
 
   return (

@@ -151,7 +151,7 @@ export default function CourseVerifiedReviewStep2RatingModal({
 
             <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
               <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-                <p className="text-lg font-semibold text-deepOceanNavy">평균 자습 시간</p>
+                <p className="text-lg font-semibold text-deepOceanNavy">하루 평균 자습 시간</p>
                 <div className="relative">
                   <input
                     type="number"

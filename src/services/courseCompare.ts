@@ -56,7 +56,7 @@ export function saveCompareCourses(items: CompareCourseItem[]): void {
   }
 }
 
-/** 비교하기(또는 비교 페이지 진입) 시 — 저장 목록 제거 */
+/** 비교 목록 비우기 (사용자가 명시적으로 초기화할 때) */
 export function clearCompareCourses(): void {
   localStorage.removeItem(COMPARE_STORAGE_KEY)
 }
