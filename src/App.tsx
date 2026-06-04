@@ -1,5 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
+import CourseSearchPage from './pages/course/desktop/CourseSearchPage'
+import CourseComparePage from './pages/course/desktop/CourseComparePage'
+import CourseDetailPage from './pages/course/desktop/CourseDetailPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import SchedulePage from './pages/dashboard/SchedulePage'
 import ProfilePage from './pages/dashboard/ProfilePage'
@@ -17,42 +20,43 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/dashboard/schedule" element={<SchedulePage />} />
-        <Route path="/dashboard/profile" element={<ProfilePage />} />
-        <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
-        <Route
-          path="/dashboard/favorites"
-          element={
-            <SectionPlaceholderPage
-              title="찜 목록"
-              description="찜 목록 페이지는 아직 백엔드 없이 자리만 잡아둔 상태예요."
-            />
-          }
-        />
-        <Route
-          path="/dashboard/posts"
-          element={
-            <SectionPlaceholderPage
-              title="내가 쓴 글"
-              description="내가 쓴 글 페이지는 현재 목업 상태입니다."
-            />
-          }
-        />
-        <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
-        <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="/admin/certifications" element={<AdminCertificationsPage />} />
-        <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
-        <Route path="/admin/reports" element={<AdminReportsPage />} />
-        <Route path="/admin/notices" element={<AdminNoticesPage />} />
-        <Route path="/admin/reviews" element={<AdminReviewsPage />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/courses" element={<CourseSearchPage />} />
+      <Route path="/courses/compare" element={<CourseComparePage />} />
+      <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/dashboard/schedule" element={<SchedulePage />} />
+      <Route path="/dashboard/profile" element={<ProfilePage />} />
+      <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
+      <Route
+        path="/dashboard/favorites"
+        element={
+          <SectionPlaceholderPage
+            title="찜 목록"
+            description="찜 목록 페이지는 아직 백엔드 없이 자리만 잡아둔 상태예요."
+          />
+        }
+      />
+      <Route
+        path="/dashboard/posts"
+        element={
+          <SectionPlaceholderPage
+            title="내가 쓴 글"
+            description="내가 쓴 글 페이지는 현재 목업 상태입니다."
+          />
+        }
+      />
+      <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
+      <Route path="/admin" element={<AdminDashboardPage />} />
+      <Route path="/admin/certifications" element={<AdminCertificationsPage />} />
+      <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
+      <Route path="/admin/reports" element={<AdminReportsPage />} />
+      <Route path="/admin/notices" element={<AdminNoticesPage />} />
+      <Route path="/admin/reviews" element={<AdminReviewsPage />} />
+    </Routes>
   )
 }
 
