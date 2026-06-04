@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import Pagination from '../../components/common/Pagination'
+import Tabs from '../../components/common/Tabs'
 import AdminShell from './components/AdminShell'
 import AdminPageHeader from './components/AdminPageHeader'
 import CertificationRequestList from './components/certification/CertificationRequestList'
-import CertificationStatusTabs from './components/certification/CertificationStatusTabs'
 import CertificationReviewModal from './components/modal/CertificationReviewModal'
-import { initialCertificationRequests } from './data/certificationRequests'
+import { CERTIFICATION_STATUS_TABS, initialCertificationRequests } from './data/certificationRequests'
 
 export type CertificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
@@ -92,7 +92,14 @@ export default function AdminCertificationsPage() {
       <AdminPageHeader title="인증 관리" className="mb-6" />
 
       {/* 관리자 인증 관리 상태 탭 */}
-      <CertificationStatusTabs activeTab={statusTab} tabCounts={tabCounts} onTabChange={setStatusTab} />
+      <Tabs<StatusTab>
+        tabs={CERTIFICATION_STATUS_TABS}
+        activeTab={statusTab}
+        tabCounts={tabCounts}
+        onTabChange={setStatusTab}
+        ariaLabel="인증 요청 상태 필터"
+        className="mb-5"
+      />
 
       {/* 관리자 인증 관리 요청 리스트 */}
       <CertificationRequestList

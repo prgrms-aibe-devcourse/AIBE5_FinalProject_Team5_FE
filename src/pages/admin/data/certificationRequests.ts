@@ -1,4 +1,4 @@
-import type { CertificationRequest } from '../AdminCertificationsPage'
+import type { CertificationRequest, StatusTab } from '../AdminCertificationsPage'
 
 /** API 연동 후 제거 예정 — 인증 관리 목록 더미 데이터 */
 export const initialCertificationRequests: CertificationRequest[] = [
@@ -53,4 +53,11 @@ export const initialCertificationRequests: CertificationRequest[] = [
       { id: 3, name: '출석증빙.pdf', uploadedAt: '2026-05-24' },
     ],
   },
+]
+
+export const CERTIFICATION_STATUS_TABS: { key: StatusTab; label: string }[] = [
+  { key: 'ALL', label: '전체' },
+  { key: 'PENDING', label: '대기' },
+  { key: 'APPROVED', label: '승인' },
+  { key: 'REJECTED', label: '반려' },
 ]
