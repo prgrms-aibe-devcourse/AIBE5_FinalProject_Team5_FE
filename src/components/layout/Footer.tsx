@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="flex max-w-md flex-col gap-16 md:min-h-44 md:justify-between">
             <div className="flex items-center gap-2 text-base leading-snug md:text-lg">
               <img src={favicon} alt="BootSignal logo" className="h-[1.5lh] w-auto shrink-0" />
-              <p>BOOTSIGNAL | 후기 데이터 기반 비사정 플랫폼</p>
+              <p>BOOTSIGNAL | 후기 데이터 기반 의사결정 플랫폼</p>
             </div>
             <div className="space-y-1.5 text-sm leading-relaxed">
               <p>주소 | 서울특별시 서초구 반포대로 45 4층</p>

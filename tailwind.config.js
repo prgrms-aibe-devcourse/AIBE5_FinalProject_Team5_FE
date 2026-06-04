@@ -13,6 +13,7 @@ export default {
       maxWidth: {
         'desktop-content': '1920px', // 콘텐츠 최대 
         'desktop-site': '1920px',    // 화면 전체 최대
+        'course-main': '1440px',     // 과정 조회 메인 (헤더·푸터보다 좁게)
         // 'mobile-view': '...',    // 추후 — 특정 비율 모바일 뷰 너비
       },
       minWidth: {

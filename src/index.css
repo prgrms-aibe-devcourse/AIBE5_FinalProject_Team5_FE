@@ -1,8 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
-
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 :root {
   color-scheme: light;
@@ -39,6 +36,26 @@ body {
   opacity: 1;
   transform: translateY(0);
   animation: none;
+}
+
+/* 과정 상세 — 모집 현황 셰브론 세그먼트 */
+.recruitment-chevron-first {
+  clip-path: polygon(0 0, calc(100% - 0.5rem) 0, 100% 50%, calc(100% - 0.5rem) 100%, 0 100%);
+}
+
+.recruitment-chevron-middle {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 0.5rem) 0,
+    100% 50%,
+    calc(100% - 0.5rem) 100%,
+    0 100%,
+    0.5rem 50%
+  );
+}
+
+.recruitment-chevron-last {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0.5rem 50%);
 }
 
 .hero-video {
@@ -250,5 +267,30 @@ html.home-snap {
     right: 12%;
     bottom: 17%;
     width: 22vw;
+  }
+}
+
+/* 과정 비교 — PDF(인쇄) 출력 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .course-compare-main {
+    padding: 0 !important;
+  }
+
+  #course-compare-print {
+    gap: 1rem !important;
+  }
+
+  #course-compare-print section,
+  #course-compare-print article {
+    break-inside: avoid;
+    box-shadow: none !important;
   }
 }

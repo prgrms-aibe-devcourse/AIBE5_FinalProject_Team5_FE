@@ -1,21 +1,24 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import logo from '../../assets/bootsignal_transparent.png'
 import { clearAuthSession, getAuthSession } from '../../services/auth'
 
 const communityLinks = ['게시판', 'Q&A', '모집', '아티클']
 const userMenuLinks = [
-  { label: '대시보드', href: '/dashboard' },
-  { label: '찜 목록', href: '/my/favorites' },
-  { label: '내가 쓴 글', href: '/my/posts' },
-  { label: '일정', href: '/my/schedule' },
-  { label: '내 정보', href: '/my/profile' },
-  { label: '문의', href: '/my/inquiries' },
-  { label: 'AI 포트폴리오', href: '/my/portfolio' },
+  { label: '대시보드', to: '/dashboard' },
+  { label: '찜 목록', to: '/dashboard/favorites' },
+  { label: '내가 쓴 글', to: '/dashboard/posts' },
+  { label: '일정', to: '/dashboard/schedule' },
+  { label: '내 정보', to: '/dashboard/profile' },
+  { label: '문의', to: '/dashboard/inquiries' },
+  { label: 'AI 포트폴리오', to: '/dashboard/portfolio' },
 ]
 
 interface HeaderProps {
   isLoggedIn?: boolean
   nickname?: string
+  /** false면 스크롤 시 헤더도 함께 이동 (기본: true — 상단 고정) */
+  fixed?: boolean
 }
 
 function ChevronDownIcon({ open = false }: { open?: boolean }) {
@@ -26,33 +29,37 @@ function ChevronDownIcon({ open = false }: { open?: boolean }) {
   )
 }
 
-export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameProp }: HeaderProps) {
+export default function Header({
+  isLoggedIn: isLoggedInProp,
+  nickname: nicknameProp,
+  fixed = true,
+}: HeaderProps) {
+  const navigate = useNavigate()
   const session = getAuthSession()
   const isLoggedIn = isLoggedInProp ?? Boolean(session?.accessToken)
   const nickname = nicknameProp ?? session?.user?.nickname ?? '닉네임'
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const isHomePage = typeof window !== 'undefined' && window.location.pathname === '/'
-  const homeLink = isHomePage ? '#hero' : '/#hero'
-  const courseLink = isHomePage ? '#courses' : '/#courses'
 
   const handleLogout = () => {
     clearAuthSession()
-    window.location.href = '/'
+    navigate('/', { replace: true })
   }
 
+  const headerPositionClass = fixed ? 'fixed left-0 right-0 top-0' : 'relative'
+
   return (
-    <header className="site-header fixed left-0 right-0 top-0 z-50 w-full min-w-desktop bg-[#fbfbfb] px-6 md:px-12">
+    <header className={`site-header z-50 w-full min-w-desktop bg-[#fbfbfb] px-6 md:px-12 ${headerPositionClass}`}>
       <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
-        <a href={homeLink} aria-label="BootSignal 홈">
+        <Link to="/" aria-label="BootSignal 홈">
           <img src={logo} alt="BootSignal" className="h-11 w-auto" />
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-8 md:flex">
           <nav className="flex items-center justify-end gap-10" aria-label="주요 메뉴">
-            <a href={courseLink} className="font-pretendard text-base font-semibold text-deepOceanNavy transition-colors hover:text-waterlineBlue">
+            <Link to="/courses" className="font-pretendard text-base font-semibold text-deepOceanNavy transition-colors hover:text-waterlineBlue">
               과정 조회
-            </a>
+            </Link>
 
             <div className="relative">
               <button
@@ -107,9 +114,14 @@ export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameP
                 {userMenuOpen ? (
                   <div className="absolute right-0 top-full mt-2 w-40 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
                     {userMenuLinks.map((item) => (
-                      <a key={item.label} href={item.href} className="font-pretendard block px-4 py-2 text-center text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite">
+                      <Link
+                        key={item.label}
+                        to={item.to}
+                        className="font-pretendard block px-4 py-2 text-center text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
                         {item.label}
-                      </a>
+                      </Link>
                     ))}
                     <div className="mt-1 border-t border-gray-100 px-3 pb-1 pt-1">
                       <button
@@ -126,18 +138,18 @@ export default function Header({ isLoggedIn: isLoggedInProp, nickname: nicknameP
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <a
-                href="/signup"
+              <Link
+                to="/signup"
                 className="font-pretendard inline-flex min-w-[96px] items-center justify-center whitespace-nowrap rounded border border-deepOceanNavy bg-white px-5 py-2 text-center text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:bg-waterlineBlue hover:text-white"
               >
                 회원가입
-              </a>
-              <a
-                href="/login"
+              </Link>
+              <Link
+                to="/login"
                 className="font-pretendard inline-flex min-w-[96px] items-center justify-center whitespace-nowrap rounded border border-[#344A64] bg-[#344A64] px-5 py-2 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:border-waterlineBlue hover:bg-waterlineBlue"
               >
                 로그인
-              </a>
+              </Link>
             </div>
           )}
         </div>
