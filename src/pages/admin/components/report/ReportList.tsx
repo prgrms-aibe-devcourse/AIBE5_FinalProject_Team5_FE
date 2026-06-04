@@ -2,8 +2,18 @@ import type { Report, ReportType } from '../../AdminReportsPage'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 import AdminListActionButton from '../AdminListActionButton'
 import AdminListSection from '../AdminListSection'
-import { adminListIconProps } from '../adminListIcons'
 import ReportStatusBadge from './ReportStatusBadge'
+
+const adminListIconProps = {
+  width: 16,
+  height: 16,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
 
 const REPORT_TYPE_LABEL: Record<ReportType, string> = {
   REVIEW: '리뷰',

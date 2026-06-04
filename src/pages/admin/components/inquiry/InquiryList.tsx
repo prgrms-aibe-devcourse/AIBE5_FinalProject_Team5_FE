@@ -2,8 +2,18 @@ import type { Inquiry } from '../../AdminInquiriesPage'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 import AdminListActionButton from '../AdminListActionButton'
 import AdminListSection from '../AdminListSection'
-import { adminListIconProps } from '../adminListIcons'
 import InquiryStatusBadge from './InquiryStatusBadge'
+
+const adminListIconProps = {
+  width: 16,
+  height: 16,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
 
 const LIST_GRID_CLASS = 'md:grid-cols-[minmax(160px,1.1fr)_minmax(0,2fr)_100px_140px]'
 

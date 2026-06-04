@@ -3,7 +3,17 @@ import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 import { truncateText } from '../../../../utils/truncateText'
 import AdminListActionButton from '../AdminListActionButton'
 import AdminListSection from '../AdminListSection'
-import { adminListIconProps } from '../adminListIcons'
+
+const adminListIconProps = {
+  width: 16,
+  height: 16,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
 
 const LIST_GRID_CLASS = 'md:grid-cols-[140px_minmax(0,2fr)_120px]'
 

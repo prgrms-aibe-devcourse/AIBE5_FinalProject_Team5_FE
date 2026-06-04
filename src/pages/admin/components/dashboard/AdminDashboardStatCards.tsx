@@ -1,7 +1,17 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { adminStatCards, type AdminStatCardIcon } from '../../data/adminDashboardData'
-import { dashboardIconProps } from './dashboardIcons'
+
+const dashboardIconProps = {
+  width: 20,
+  height: 20,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
 
 // 관리자 통계 카드 아이콘
 function StatCardIcon({ icon }: { icon: AdminStatCardIcon }) {

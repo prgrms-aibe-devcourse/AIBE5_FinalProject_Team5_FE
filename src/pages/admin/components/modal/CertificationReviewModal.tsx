@@ -2,8 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import type { CertificationRequest } from '../../AdminCertificationsPage'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 import StatusBadge from '../certification/StatusBadge'
-import { certificationIconProps } from '../certification/certificationIcons'
 import DocumentPreview from './DocumentPreview'
+
+const certificationIconProps = {
+  width: 16,
+  height: 16,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+}
 
 type FooterMode = 'idle' | 'reject' | 'approve_confirm'
 

@@ -1,7 +1,7 @@
 import type { CertificationRequest } from '../../AdminCertificationsPage'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
+import AdminListActionButton from '../AdminListActionButton'
 import AdminListSection from '../AdminListSection'
-import ReviewButton from './ReviewButton'
 import StatusBadge from './StatusBadge'
 
 const LIST_GRID_CLASS = 'md:grid-cols-[minmax(160px,1.1fr)_minmax(0,2fr)_100px_140px]'
@@ -59,7 +59,11 @@ export default function CertificationRequestList({
             </div>
 
             <div className="mt-3 flex justify-center md:mt-0">
-              <ReviewButton count={item.documents.length} onClick={() => onReview(item.id)} />
+              <AdminListActionButton
+                label="열람"
+                count={item.documents.length}
+                onClick={() => onReview(item.id)}
+              />
             </div>
           </div>
         </li>
