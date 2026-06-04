@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import Header from '../../../components/layout/Header.tsx'
-import Footer from '../../../components/layout/Footer.tsx'
-import CourseCompareBreadcrumb from '../components/CourseCompareBreadcrumb.tsx'
-import CourseCompareSummaryCards from '../components/CourseCompareSummaryCards.tsx'
-import CourseCompareOverviewPanel from '../components/CourseCompareOverviewPanel.tsx'
-import CourseCompareTable from '../components/CourseCompareTable.tsx'
-import { getCompareLayoutConfig } from '../components/compareLayout.ts'
-import { getCompareStatsForCourse, getCourseDetailForCompare } from '../data/mockCourseCompare.ts'
-import { loadCompareCourses } from '../../../services/courseCompare.ts'
+import Header from '../../components/layout/Header.tsx'
+import Footer from '../../components/layout/Footer.tsx'
+import CourseCompareBreadcrumb from './components/CourseCompareBreadcrumb.tsx'
+import CourseCompareSummaryCards from './components/CourseCompareSummaryCards.tsx'
+import CourseCompareOverviewPanel from './components/CourseCompareOverviewPanel.tsx'
+import CourseCompareTable from './components/CourseCompareTable.tsx'
+import { getCompareLayoutConfig } from './components/compareLayout.ts'
+import { getCompareStatsForCourse, getCourseDetailForCompare } from './data/mockCourseCompare.ts'
+import { loadCompareCourses } from '../../services/courseCompare.ts'
 export default function CourseComparePage() {
   const [isPdfExporting, setIsPdfExporting] = useState(false)
   const compareItems = useMemo(() => loadCompareCourses(), [])
@@ -30,8 +30,8 @@ export default function CourseComparePage() {
     setIsPdfExporting(true)
     try { // PDF 출력 시도
       const [{ buildCourseComparePdfPayload }, { downloadCourseComparePdf }] = await Promise.all([
-        import('../components/pdf/buildCourseComparePdfPayload.ts'),
-        import('../components/pdf/downloadCourseComparePdf.tsx'),
+        import('./components/pdf/buildCourseComparePdfPayload.ts'),
+        import('./components/pdf/downloadCourseComparePdf.tsx'),
       ])
       const payload = buildCourseComparePdfPayload(courses, statsByColumn)
       await downloadCourseComparePdf(payload)

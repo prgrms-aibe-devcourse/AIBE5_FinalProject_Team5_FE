@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import AuthInput from '../components/AuthInput.tsx'
-import AuthPasswordInput from '../components/AuthPasswordInput.tsx'
-import AuthButton from '../components/AuthButton.tsx'
-import AuthSocial from '../components/AuthSocial.tsx'
-import LoginVisualPanel from '../components/LoginVisualPanel.tsx'
-import AuthExitButton from '../components/AuthExitButton.tsx'
-import { EMAIL_INVALID_MESSAGE, isLoginFormValid, isValidEmail } from '../../../utils/validation.ts'
-import { DUMMY_LOGIN, login, USE_AUTH_DUMMY } from '../../../services/auth.ts'
+import AuthInput from './components/AuthInput.tsx'
+import AuthPasswordInput from './components/AuthPasswordInput.tsx'
+import AuthButton from './components/AuthButton.tsx'
+import AuthSocial from './components/AuthSocial.tsx'
+import LoginVisualPanel from './components/LoginVisualPanel.tsx'
+import AuthExitButton from './components/AuthExitButton.tsx'
+import { EMAIL_INVALID_MESSAGE, isLoginFormValid, isValidEmail } from '../../utils/validation.ts'
+import { DUMMY_LOGIN, login, USE_AUTH_DUMMY } from '../../services/auth.ts'
 
 /** 데스크톱 로그인 페이지 (50:50 — 폼 | 사이드 배경) */
 export default function LoginPage() {

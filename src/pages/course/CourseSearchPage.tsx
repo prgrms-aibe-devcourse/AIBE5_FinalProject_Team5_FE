@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 // 공통 컴포넌트
-import Header from '../../../components/layout/Header.tsx'
-import Footer from '../../../components/layout/Footer.tsx'
-import Pagination from '../../../components/common/Pagination.tsx' 
+import Header from '../../components/layout/Header.tsx'
+import Footer from '../../components/layout/Footer.tsx'
+import Pagination from '../../components/common/Pagination.tsx' 
 
 // 조회 페이지 컴포넌트
-import CourseSearchHero from '../components/CourseSearchHero.tsx'
-import CourseResultsToolbar from '../components/CourseResultsToolbar.tsx'
-import CourseCard from '../components/CourseCard.tsx'
-import CourseComparisonSidebar from '../components/CourseComparisonSidebar.tsx'
-import { COURSE_FILTERS, MAX_COMPARE_COURSES, MOCK_COURSES, TOTAL_MOCK_RESULTS} from '../data/mockCourses.ts' // 테스트용 과정 데이터 (API 연동 시 제거)
-import type { Course, CourseSortKey } from '../../../services/course.ts' 
-import { loadCompareCourses, saveCompareCourses, toCompareCourseItem, type CompareCourseItem } from '../../../services/courseCompare.ts'
+import CourseSearchHero from './components/CourseSearchHero.tsx'
+import CourseResultsToolbar from './components/CourseResultsToolbar.tsx'
+import CourseCard from './components/CourseCard.tsx'
+import CourseComparisonSidebar from './components/CourseComparisonSidebar.tsx'
+import { COURSE_FILTERS, MAX_COMPARE_COURSES, MOCK_COURSES, TOTAL_MOCK_RESULTS} from './data/mockCourses.ts' // 테스트용 과정 데이터 (API 연동 시 제거)
+import type { Course, CourseSortKey } from '../../services/course.ts' 
+import { loadCompareCourses, saveCompareCourses, toCompareCourseItem, type CompareCourseItem } from '../../services/courseCompare.ts'
 
 /** 조회 결과 그리드 3열 × 3행 */
 const ITEMS_PER_PAGE = 9

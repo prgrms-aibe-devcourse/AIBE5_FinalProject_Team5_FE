@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import AuthInput from '../components/AuthInput.tsx'
-import AuthInputWithButton from '../components/AuthInputWithButton.tsx'
-import AuthPasswordInput from '../components/AuthPasswordInput.tsx'
-import AuthButton from '../components/AuthButton.tsx'
-import AuthSocial from '../components/AuthSocial.tsx'
-import LoginVisualPanel from '../components/LoginVisualPanel.tsx'
-import AuthExitButton from '../components/AuthExitButton.tsx'
+import AuthInput from './components/AuthInput.tsx'
+import AuthInputWithButton from './components/AuthInputWithButton.tsx'
+import AuthPasswordInput from './components/AuthPasswordInput.tsx'
+import AuthButton from './components/AuthButton.tsx'
+import AuthSocial from './components/AuthSocial.tsx'
+import LoginVisualPanel from './components/LoginVisualPanel.tsx'
+import AuthExitButton from './components/AuthExitButton.tsx'
 import {
   EMAIL_INVALID_MESSAGE,
   isSignupFormValid,
@@ -16,8 +16,8 @@ import {
   PASSWORD_MATCH_MESSAGE,
   PASSWORD_MISMATCH_MESSAGE,
   passwordsMatch,
-} from '../../../utils/validation.ts'
-import type { SignupRequest } from '../../../services/auth.ts'
+} from '../../utils/validation.ts'
+import type { SignupRequest } from '../../services/auth.ts'
 
 /** 데스크톱 회원가입 페이지 (50:50 — 사이드 배경 | 폼) */
 export default function SignupPage() {
