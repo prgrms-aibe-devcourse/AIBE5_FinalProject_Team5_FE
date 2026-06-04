@@ -1,3 +1,4 @@
+import { Link, useLocation } from 'react-router-dom'
 import logo from '../../../assets/bootsignal_transparent.png'
 
 type SidebarItem = {
@@ -84,35 +85,32 @@ function SidebarIcon({ icon }: { icon: SidebarItem['icon'] }) {
   }
 }
 
-function normalizePath(pathname: string) {
-  return pathname.replace(/\/+$/, '') || '/'
-}
-
 export default function DashboardSidebar() {
-  const currentPath = normalizePath(window.location.pathname)
+  const { pathname } = useLocation()
+  const currentPath = pathname.replace(/\/+$/, '') || '/'
 
   return (
     <aside className="flex min-h-screen w-[250px] shrink-0 flex-col border-r border-[#edf1f5] bg-white px-4 py-6">
-      <a href="/dashboard" className="mb-10 flex items-center px-1" aria-label="BootSignal 홈">
+      <Link to="/dashboard" className="mb-10 flex items-center px-1" aria-label="BootSignal 홈">
         <img src={logo} alt="BootSignal" className="h-10 w-auto" />
-      </a>
+      </Link>
 
       <nav aria-label="대시보드 사이드바">
         <ul className="space-y-2">
           {sidebarItems.map((item) => {
-            const isActive = currentPath === item.href || (item.href === '/dashboard' && currentPath === '/')
+            const isActive = currentPath === item.href
 
             return (
               <li key={item.label}>
-                <a
-                  href={item.href}
+                <Link
+                  to={item.href}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
                     isActive ? 'bg-[#eaf0f6] text-[#1f2f45]' : 'text-[#536173] hover:bg-[#f5f8fb] hover:text-[#1f2f45]'
                   }`}
                 >
                   <SidebarIcon icon={item.icon} />
                   <span>{item.label}</span>
-                </a>
+                </Link>
               </li>
             )
           })}
