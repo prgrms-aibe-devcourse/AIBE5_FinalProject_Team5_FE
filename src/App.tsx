@@ -8,6 +8,12 @@ import SectionPlaceholderPage from './pages/dashboard/SectionPlaceholderPage'
 import AiPortfolioPage from './pages/dashboard/AiPortfolioPage'
 import LoginPage from './pages/auth/desktop/LoginPage'
 import SignupPage from './pages/auth/desktop/SignupPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminCertificationsPage from './pages/admin/AdminCertificationsPage'
+import AdminInquiriesPage from './pages/admin/AdminInquiriesPage'
+import AdminReportsPage from './pages/admin/AdminReportsPage'
+import AdminNoticesPage from './pages/admin/AdminNoticesPage'
+import AdminReviewsPage from './pages/admin/AdminReviewsPage'
 
 function App() {
   return (
@@ -39,6 +45,12 @@ function App() {
           }
         />
         <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/certifications" element={<AdminCertificationsPage />} />
+        <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
+        <Route path="/admin/reports" element={<AdminReportsPage />} />
+        <Route path="/admin/notices" element={<AdminNoticesPage />} />
+        <Route path="/admin/reviews" element={<AdminReviewsPage />} />
       </Routes>
     </BrowserRouter>
   )
