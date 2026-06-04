@@ -1,86 +1,129 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Pagination from '../../components/common/Pagination'
+import Tabs from '../../components/common/Tabs'
 import AdminShell from './components/AdminShell'
+import AdminPageHeader from './components/AdminPageHeader'
+import ReportList from './components/report/ReportList'
+import ReportDetailModal from './components/modal/ReportDetailModal'
+import { REPORT_STATUS_TABS, initialReports } from './data/reports'
 
-type Report = {
+export type ReportStatus = 'PENDING' | 'COMPLETED'
+
+export type ReportContentAction = 'HIDE' | 'INVALID_REASON'
+
+export type ReportType = 'REVIEW' | 'POST' | 'COMMENT'
+
+export type Report = {
   id: number
-  name: string
-  content: string
-  status: string
-  type: string
-  avatar: string
+  reporterName: string
+  reportedAt: string
+  type: ReportType
+  /** 신고 대상 식별 (작성자·콘텐츠 요약) */
+  targetLabel: string
+  reasonCategory: string
+  reasonDetail: string
+  /** 신고된 콘텐츠 본문 */
+  contentBody: string
+  contentUrl: string
+  status: ReportStatus
+  profileImageUrl?: string
+  contentAction?: ReportContentAction
 }
 
-const mockReports: Report[] = [
-  {
-    id: 1,
-    name: '김지원',
-    content: '[프로그래밍] 국비지원......',
-    status: '저처험',
-    type: '리뷰',
-    avatar: 'https://i.pravatar.cc/40?img=1',
-  },
-]
+export type ReportStatusTab = 'ALL' | ReportStatus
 
+export const PAGE_SIZE = 10
+
+// 관리자 신고 관리 페이지
 export default function AdminReportsPage() {
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [reports, setReports] = useState(initialReports)
+  const [viewId, setViewId] = useState<number | null>(null)
+  const [statusTab, setStatusTab] = useState<ReportStatusTab>('ALL')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const viewReport = useMemo(
+    () => reports.find((item) => item.id === viewId) ?? null,
+    [reports, viewId],
+  )
+
+  const tabCounts = useMemo(
+    () => ({
+      ALL: reports.length,
+      PENDING: reports.filter((item) => item.status === 'PENDING').length,
+      COMPLETED: reports.filter((item) => item.status === 'COMPLETED').length,
+    }),
+    [reports],
+  )
+
+  const filteredReports = useMemo(() => {
+    if (statusTab === 'ALL') return reports
+    return reports.filter((item) => item.status === statusTab)
+  }, [reports, statusTab])
+
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / PAGE_SIZE))
+
+  const paginatedReports = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE
+    return filteredReports.slice(start, start + PAGE_SIZE)
+  }, [filteredReports, currentPage])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [statusTab])
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
+
+  const completeReport = (id: number, contentAction: ReportContentAction) => {
+    setReports((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status: 'COMPLETED', contentAction } : item,
+      ),
+    )
+    setViewId(null)
+  }
 
   return (
     <AdminShell>
-      <h1 className="mb-6 text-base font-semibold text-[#151b24]">신고 내역</h1>
+      {/* 관리자 신고 관리 헤더 */}
+      <AdminPageHeader title="신고 내역" className="mb-6" />
 
-      <div className="rounded-xl border border-[#eef2f6] bg-white overflow-hidden">
-        <div className="border-b border-[#eef2f6] px-5 py-4">
-          <div className="flex items-center gap-4 text-xs font-semibold text-[#536173]">
-            <div className="flex-1">이름</div>
-            <div className="flex-1">내용</div>
-            <div className="flex-1">신고 상태</div>
-            <div className="flex-1">신고 내용</div>
-            <div className="w-20">신고 유형</div>
-          </div>
-        </div>
+      {/* 관리자 신고 관리 상태 탭 */}
+      <Tabs<ReportStatusTab>
+        tabs={REPORT_STATUS_TABS}
+        activeTab={statusTab}
+        tabCounts={tabCounts}
+        onTabChange={setStatusTab}
+        ariaLabel="신고 상태 필터"
+        className="mb-5"
+      />
 
-        <div className="divide-y divide-[#eef2f6]">
-          {mockReports.map((item) => (
-            <div key={item.id}>
-              <div className="flex items-center gap-4 px-5 py-4 bg-[#f8fafc] hover:bg-[#f1f5f9] transition-colors">
-                <div className="flex-1 flex items-center gap-3">
-                  <img src={item.avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
-                  <span className="text-sm font-medium text-[#151b24]">{item.name}</span>
-                </div>
-                <div className="flex-1 text-sm text-[#64748b]">{item.content}</div>
-                <div className="flex-1 text-sm text-[#64748b]">{item.status}</div>
-                <div className="flex-1 text-sm text-[#64748b]">비속어</div>
-                <div className="w-20 flex items-center justify-end">
-                  <button
-                    onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-                    className="text-[#94a3b8] hover:text-[#536173]"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+      {/* 관리자 신고 관리 신고 리스트 */}
+      <ReportList
+        reports={paginatedReports}
+        isEmpty={filteredReports.length === 0}
+        onView={setViewId}
+      />
 
-              {expandedId === item.id && (
-                <div className="border-t border-[#eef2f6] bg-white px-5 py-4">
-                  <div className="rounded-lg border border-[#eef2f6] bg-[#f8fafc] p-4">
-                    <p className="text-sm text-[#536173]">신고 상세 내용이 여기에 표시됩니다.</p>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <button className="flex-1 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-xs font-medium text-[#536173] hover:bg-[#f8fafc]">
-                      거절
-                    </button>
-                    <button className="flex-1 rounded-lg bg-[#151b24] px-3 py-2 text-xs font-medium text-white hover:bg-[#2d3748]">
-                      확인
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* 관리자 신고 관리 신고 리스트 페이지네이션 */}
+      {filteredReports.length > 0 ? (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          className="mt-6"
+        />
+      ) : null}
+
+      {/* 관리자 신고 관리 신고 상세 모달 */}
+      {viewReport ? (
+        <ReportDetailModal
+          report={viewReport}
+          onClose={() => setViewId(null)}
+          onComplete={completeReport}
+        />
+      ) : null}
     </AdminShell>
   )
 }

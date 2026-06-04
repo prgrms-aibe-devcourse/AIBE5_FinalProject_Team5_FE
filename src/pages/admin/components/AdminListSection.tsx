@@ -13,6 +13,7 @@ type AdminListSectionProps = {
   emptyTitle: string
   emptyDescription?: string
   emptyIcon?: ReactNode
+  gridGapClass?: string
   children: ReactNode
 }
 
@@ -39,12 +40,13 @@ export default function AdminListSection({
   emptyTitle,
   emptyDescription = '다른 탭을 선택해 보세요.',
   emptyIcon,
+  gridGapClass = 'md:gap-4',
   children,
 }: AdminListSectionProps) {
   return (
     <section className="overflow-hidden rounded-2xl border border-mistSkyBlue/45 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
       <div
-        className={`hidden border-b border-mistSkyBlue/45 bg-foamWhite px-6 py-3.5 md:grid ${gridColsClass} md:items-center md:gap-4`}
+        className={`hidden border-b border-mistSkyBlue/45 bg-foamWhite px-6 py-3.5 md:grid ${gridColsClass} md:items-center ${gridGapClass}`}
       >
         {columns.map((column) => (
           <span
