@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import logo from '../../../assets/bootsignal_transparent.png'
 
 type SidebarItem = {
@@ -93,9 +94,9 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="flex min-h-screen w-[250px] shrink-0 flex-col border-r border-[#edf1f5] bg-white px-4 py-6">
-      <a href="/dashboard" className="mb-10 flex items-center px-1" aria-label="BootSignal 홈">
+      <Link to="/" className="mb-10 flex items-center px-1" aria-label="BootSignal 홈">
         <img src={logo} alt="BootSignal" className="h-10 w-auto" />
-      </a>
+      </Link>
 
       <nav aria-label="대시보드 사이드바">
         <ul className="space-y-2">
