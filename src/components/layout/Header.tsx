@@ -3,7 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import logo from '../../assets/bootsignal_transparent.png'
 import { clearAuthSession, getAuthSession, isAdminRole } from '../../services/auth'
 
-const communityLinks = ['게시판', 'Q&A', '모집', '아티클']
+const communityLinks = [
+  { label: '게시판', to: '/community/posts' },
+  { label: 'Q&A', to: '/community/qna' },
+  { label: '모집', to: '/community/recruit' },
+  { label: '아티클', to: '/community/article' },
+]
 
 const userMenuLinks = [
   { label: '대시보드', to: '/dashboard' },
@@ -128,9 +133,9 @@ export default function Header({
         {communityOpen ? (
           <div className="absolute left-1/2 top-full z-50 mt-2 w-28 -translate-x-1/2 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
             {communityLinks.map((item) => (
-              <a key={item} href={`/community/${item}`} className={dropdownItemClass}>
-                {item}
-              </a>
+              <Link key={item.to} to={item.to} className={dropdownItemClass}>
+                {item.label}
+              </Link>
             ))}
           </div>
         ) : null}
