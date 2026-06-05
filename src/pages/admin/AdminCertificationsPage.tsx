@@ -29,17 +29,21 @@ export type StatusTab = 'ALL' | CertificationStatus
 
 export const PAGE_SIZE = 10
 
+// 관리자 인증 관리 페이지 컴포넌트
 export default function AdminCertificationsPage() {
+  // 인증 요청 데이터
   const [requests, setRequests] = useState(initialCertificationRequests)
   const [reviewId, setReviewId] = useState<number | null>(null)
   const [statusTab, setStatusTab] = useState<StatusTab>('ALL')
   const [currentPage, setCurrentPage] = useState(1)
 
+  // 인증 요청 데이터 조회
   const reviewRequest = useMemo(
     () => requests.find((item) => item.id === reviewId) ?? null,
     [requests, reviewId],
   )
 
+  // 인증 요청 데이터 카운트
   const tabCounts = useMemo(
     () => ({
       ALL: requests.length,

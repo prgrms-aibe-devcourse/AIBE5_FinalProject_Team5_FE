@@ -1,4 +1,4 @@
-import { Navigate, Routes, Route } from 'react-router-dom'
+import { Navigate, Outlet, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import CourseSearchPage from './pages/course/CourseSearchPage'
 import CourseComparePage from './pages/course/CourseComparePage'
@@ -18,10 +18,11 @@ import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminNoticesPage from './pages/admin/AdminNoticesPage'
 import AdminReviewsPage from './pages/admin/AdminReviewsPage'
 import CommunityLayout from './pages/community/CommunityLayout'
+import CommunityArticlePage from './pages/community/CommunityArticlePage'
 import CommunityPostsPage from './pages/community/CommunityPostsPage'
 import CommunityQnaPage from './pages/community/CommunityQnaPage'
 import CommunityRecruitPage from './pages/community/CommunityRecruitPage'
-import CommunityArticlePage from './pages/community/CommunityArticlePage'
+import CommunityWritePage from './pages/community/CommunityWritePage'
 import CommunityDetailLayout from './pages/community/CommunityDetailLayout'
 import CommunityPostDetailPage from './pages/community/CommunityPostDetailPage'
 import CommunityQnaDetailPage from './pages/community/CommunityQnaDetailPage'
@@ -67,20 +68,31 @@ function App() {
       />
       <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
       
-      {/* 커뮤니티 목록 */}
-      <Route path="/community" element={<CommunityLayout />}>
-        <Route index element={<Navigate to="posts" replace />} />
-        <Route path="posts" element={<CommunityPostsPage />} />
-        <Route path="qna" element={<CommunityQnaPage />} />
-        <Route path="recruit" element={<CommunityRecruitPage />} />
-        <Route path="article" element={<CommunityArticlePage />} />
-      </Route>
+      {/* 커뮤니티 */}
+      <Route path="/community" element={<Outlet />}>
+        {/* 커뮤니티 목록 (게시판 + Q&A + 모집 + 아티클) */}
+        <Route element={<CommunityLayout />}>
+          {/*  path="/community" 유입시, path="/community/posts" 로 리다이렉트 */}
+          <Route index element={<Navigate to="posts" replace />} />
+          
+          {/* 커뮤니티 작성 페이지 */}
+          <Route path="posts/new" element={<CommunityWritePage />} />
+          <Route path="qna/new" element={<CommunityWritePage />} />
+          <Route path="recruit/new" element={<CommunityWritePage />} />
 
-      {/* 커뮤니티 상세 (아티클 제외) */}
-      <Route element={<CommunityDetailLayout />}>
-        <Route path="/community/posts/:postId" element={<CommunityPostDetailPage />} />
-        <Route path="/community/qna/:qnaId" element={<CommunityQnaDetailPage />} />
-        <Route path="/community/recruit/:recruitId" element={<CommunityRecruitDetailPage />} />
+          {/* 커뮤니티 목록 페이지 */}
+          <Route path="posts" element={<CommunityPostsPage />} />
+          <Route path="qna" element={<CommunityQnaPage />} />
+          <Route path="recruit" element={<CommunityRecruitPage />} />
+          <Route path="article" element={<CommunityArticlePage />} />
+        </Route>
+
+        {/* 커뮤니티 상세 (아티클 제외) */}
+        <Route element={<CommunityDetailLayout />}>
+          <Route path="posts/:postId" element={<CommunityPostDetailPage />} />
+          <Route path="qna/:qnaId" element={<CommunityQnaDetailPage />} />
+          <Route path="recruit/:recruitId" element={<CommunityRecruitDetailPage />} />
+        </Route>
       </Route>
 
       {/* 관리자*/}
