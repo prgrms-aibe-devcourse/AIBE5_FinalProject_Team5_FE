@@ -1,16 +1,16 @@
 import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
-import CourseSearchPage from './pages/course/desktop/CourseSearchPage'
-import CourseComparePage from './pages/course/desktop/CourseComparePage'
-import CourseDetailPage from './pages/course/desktop/CourseDetailPage'
+import CourseSearchPage from './pages/course/CourseSearchPage'
+import CourseComparePage from './pages/course/CourseComparePage'
+import CourseDetailPage from './pages/course/CourseDetailPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import SchedulePage from './pages/dashboard/SchedulePage'
 import ProfilePage from './pages/dashboard/ProfilePage'
 import InquiriesPage from './pages/dashboard/InquiriesPage'
 import SectionPlaceholderPage from './pages/dashboard/SectionPlaceholderPage'
 import AiPortfolioPage from './pages/dashboard/AiPortfolioPage'
-import LoginPage from './pages/auth/desktop/LoginPage'
-import SignupPage from './pages/auth/desktop/SignupPage'
+import LoginPage from './pages/auth/LoginPage'
+import SignupPage from './pages/auth/SignupPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminCertificationsPage from './pages/admin/AdminCertificationsPage'
 import AdminInquiriesPage from './pages/admin/AdminInquiriesPage'
@@ -21,12 +21,19 @@ import AdminReviewsPage from './pages/admin/AdminReviewsPage'
 function App() {
   return (
     <Routes>
+      {/* 메인 홈 */}
       <Route path="/" element={<HomePage />} />
+
+      {/* 로그인, 회원가입 */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+
+      {/* 과정 조회 */}
       <Route path="/courses" element={<CourseSearchPage />} />
       <Route path="/courses/compare" element={<CourseComparePage />} />
       <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+
+      {/* 대시보드 (마이페이지) */}
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/dashboard/schedule" element={<SchedulePage />} />
       <Route path="/dashboard/profile" element={<ProfilePage />} />
@@ -50,6 +57,10 @@ function App() {
         }
       />
       <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
+      
+      {/* 커뮤니티 (준비중) */}
+
+      {/* 관리자*/}
       <Route path="/admin" element={<AdminDashboardPage />} />
       <Route path="/admin/certifications" element={<AdminCertificationsPage />} />
       <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />

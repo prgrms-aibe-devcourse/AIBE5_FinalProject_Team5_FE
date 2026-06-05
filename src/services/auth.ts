@@ -38,28 +38,35 @@ export interface SignupResponse {
 }
 
 // 사용자 정보
-export interface AuthUser { 
+export type UserRole = 'USER' | 'ADMIN'
+
+export interface AuthUser {
   userId: number
   email: string
   name: string
   nickname: string
-  role: string
+  role: UserRole
   provider: string
 }
 
+export function isAdminRole(role: string | undefined | null): boolean {
+  return role?.toUpperCase() === 'ADMIN'
+}
 
-/** 테스트용 — 로그인 200 응답 구조 **/
-export const DUMMY_LOGIN = {
+type DummyAccount = { request: LoginRequest; response: LoginResponse }
+
+/** 테스트용 일반 사용자 — role: USER */
+export const DUMMY_LOGIN: DummyAccount = {
   request: {
     email: 'test@email.com',
     password: '0000',
-  } satisfies LoginRequest,
+  },
   response: {
     success: true,
     code: 'AUTH_LOGIN_SUCCESS',
     message: '로그인에 성공했습니다.',
     data: {
-      accessToken: 'jwt-access-token-dummy',
+      accessToken: 'jwt-access-token-dummy-user',
       tokenType: 'Bearer',
       expiresIn: 3600,
       user: {
@@ -71,8 +78,36 @@ export const DUMMY_LOGIN = {
         provider: 'LOCAL',
       },
     },
-  } satisfies LoginResponse,
+  },
 }
+
+/** 테스트용 관리자 — role: ADMIN */
+export const DUMMY_ADMIN_LOGIN: DummyAccount = {
+  request: {
+    email: 'admin@email.com',
+    password: '0000',
+  },
+  response: {
+    success: true,
+    code: 'AUTH_LOGIN_SUCCESS',
+    message: '로그인에 성공했습니다.',
+    data: {
+      accessToken: 'jwt-access-token-dummy-admin',
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+      user: {
+        userId: 2,
+        email: 'admin@email.com',
+        name: '관리자',
+        nickname: '관리자닉네임',
+        role: 'ADMIN',
+        provider: 'LOCAL',
+      },
+    },
+  },
+}
+
+const DUMMY_ACCOUNTS: DummyAccount[] = [DUMMY_LOGIN, DUMMY_ADMIN_LOGIN]
 
 const LOGIN_ERROR_MESSAGE = '이메일 또는 비밀번호를 확인해 주세요.'
 
@@ -124,7 +159,7 @@ export function getAuthSession(): AuthSession | null {
       email,
       name: localStorage.getItem(AUTH_STORAGE_KEYS.name) ?? '',
       nickname: localStorage.getItem(AUTH_STORAGE_KEYS.nickname) ?? '',
-      role: localStorage.getItem(AUTH_STORAGE_KEYS.role) ?? 'USER',
+      role: (localStorage.getItem(AUTH_STORAGE_KEYS.role) ?? 'USER') as UserRole,
       provider: localStorage.getItem(AUTH_STORAGE_KEYS.provider) ?? 'LOCAL',
     },
   }
@@ -139,11 +174,13 @@ export function clearAuthSession(): void {
 export async function login(body: LoginRequest): Promise<LoginResponse> {
   // 더미: USE_AUTH_DUMMY === false 로 바꾸면 이 블록 스킵
   if (USE_AUTH_DUMMY) {
-    const { email, password } = DUMMY_LOGIN.request
-    if (body.email === email && body.password === password) {
-      const response = DUMMY_LOGIN.response
-      saveAuthSession(response)
-      return response
+    const matched = DUMMY_ACCOUNTS.find(
+      (account) =>
+        account.request.email === body.email && account.request.password === body.password,
+    )
+    if (matched) {
+      saveAuthSession(matched.response)
+      return matched.response
     }
     throw new Error(LOGIN_ERROR_MESSAGE)
   }
