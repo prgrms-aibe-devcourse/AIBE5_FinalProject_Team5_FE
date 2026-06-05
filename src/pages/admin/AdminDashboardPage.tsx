@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   BarChart,
   Bar,
@@ -40,7 +41,7 @@ type StatCardProps = {
   label: string
   percent: number
   barColor: string
-  icon: JSX.Element
+  icon: ReactNode
 }
 
 function StatCard({ value, label, percent, barColor, icon }: StatCardProps) {
@@ -202,7 +203,6 @@ export default function AdminDashboardPage() {
                 <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
                 <Tooltip
                   contentStyle={{ border: 'none', borderRadius: 8, fontSize: 12 }}
-                  formatter={(v: number) => [v, '방문자']}
                 />
                 <Area
                   type="monotone"

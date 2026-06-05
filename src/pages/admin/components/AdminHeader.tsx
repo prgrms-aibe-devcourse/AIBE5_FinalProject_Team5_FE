@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 export default function AdminHeader() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-[#eef2f6] bg-white px-6">

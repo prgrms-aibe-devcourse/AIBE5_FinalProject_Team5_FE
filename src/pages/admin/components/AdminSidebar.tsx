@@ -1,6 +1,7 @@
+import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-type NavItem = { label: string; href: string; icon: JSX.Element }
+type NavItem = { label: string; href: string; icon: ReactNode }
 
 const navItems: NavItem[] = [
   {
