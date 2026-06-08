@@ -1,5 +1,22 @@
 /** 목록 하단 페이지 이동 [이전·번호·다음] — 여러 페이지 공통 **/
 
+import { useMemo, useState } from 'react'
+
+export function usePaginatedList<T>(items: T[], pageSize = 10) {
+  const [currentPage, setCurrentPage] = useState(1)
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize))
+  const displayedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return items.slice(start, start + pageSize)
+  }, [items, currentPage, pageSize])
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages))
+  }
+
+  return { currentPage, totalPages, displayedItems, onPageChange }
+}
+
 interface PaginationProps {
   currentPage: number
   totalPages: number
