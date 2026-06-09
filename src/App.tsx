@@ -7,7 +7,8 @@ import DashboardPage from './pages/dashboard/DashboardPage'
 import SchedulePage from './pages/dashboard/SchedulePage'
 import ProfilePage from './pages/dashboard/ProfilePage'
 import InquiriesPage from './pages/dashboard/InquiriesPage'
-import SectionPlaceholderPage from './pages/dashboard/SectionPlaceholderPage'
+import FavoritesPage from './pages/dashboard/FavoritesPage'
+import MyPostsPage from './pages/dashboard/MyPostsPage'
 import AiPortfolioPage from './pages/dashboard/AiPortfolioPage'
 import LoginPage from './pages/auth/LoginPage'
 import SignupPage from './pages/auth/SignupPage'
@@ -48,24 +49,8 @@ function App() {
       <Route path="/dashboard/schedule" element={<SchedulePage />} />
       <Route path="/dashboard/profile" element={<ProfilePage />} />
       <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
-      <Route
-        path="/dashboard/favorites"
-        element={
-          <SectionPlaceholderPage
-            title="찜 목록"
-            description="찜 목록 페이지는 아직 백엔드 없이 자리만 잡아둔 상태예요."
-          />
-        }
-      />
-      <Route
-        path="/dashboard/posts"
-        element={
-          <SectionPlaceholderPage
-            title="내가 쓴 글"
-            description="내가 쓴 글 페이지는 현재 목업 상태입니다."
-          />
-        }
-      />
+      <Route path="/dashboard/favorites" element={<FavoritesPage />} />
+      <Route path="/dashboard/posts" element={<MyPostsPage />} />
       <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
       
       {/* 커뮤니티 */}

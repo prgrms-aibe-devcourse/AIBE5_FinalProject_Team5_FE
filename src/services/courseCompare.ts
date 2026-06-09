@@ -9,6 +9,8 @@ const COMPARE_STORAGE_KEY = 'bootsignal:course-compare'
 
 const MAX_ITEMS = 3
 
+export const MAX_COMPARE_COURSES = MAX_ITEMS
+
 /** localStorage·사이드바·비교 페이지에 쓰는 최소 필드 */
 export interface CompareCourseItem {
   id: string
@@ -31,6 +33,18 @@ export function toCompareCourseItem(course: Course): CompareCourseItem {
     id: course.id,
     title: course.title,
     company: course.company,
+  }
+}
+
+export function toCompareCourseItemFromFavorite(course: {
+  id: number
+  title: string
+  academy: string
+}): CompareCourseItem {
+  return {
+    id: String(course.id),
+    title: course.title,
+    company: course.academy,
   }
 }
 

@@ -1,99 +1,108 @@
-import type { Course } from '../dashboardData'
+import type { KeyboardEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import type { Course } from '../data/courses'
+import {
+  CalendarIcon,
+  CourseMetaItems,
+  EnrollmentIcon,
+  LocationIcon,
+  PriceIcon,
+} from './CourseListMeta'
+import DashboardCard from './DashboardCard'
 
 type DashboardCourseListCardProps = {
   courses: Course[]
-  page: number
-  totalPages: number
-  sortLabel: string
-  onPageChange: (page: number) => void
-  onToggleSort: () => void
 }
 
-export default function DashboardCourseListCard({
-  courses,
-  page,
-  totalPages,
-  sortLabel,
-  onPageChange,
-  onToggleSort,
-}: DashboardCourseListCardProps) {
+export default function DashboardCourseListCard({ courses }: DashboardCourseListCardProps) {
+  const navigate = useNavigate()
+
+  const goToCourse = (id: number) => navigate(`/courses/${id}`)
+
+  const handleKeyDown = (event: KeyboardEvent, id: number) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      goToCourse(id)
+    }
+  }
+
   return (
-    <section className="rounded-2xl border border-[#eef2f6] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-[#151b24]">찜 목록</h2>
-
-        <button
-          type="button"
-          onClick={onToggleSort}
-          className="rounded-full border border-[#e1e5ea] px-4 py-2 text-sm font-semibold text-[#7c8796] transition-colors hover:border-[#b7c4d6] hover:text-[#344A64]"
-        >
-          {sortLabel}
-        </button>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[680px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-[#edf1f5] text-[#344A64]">
-              <th className="pb-4 font-bold">과정</th>
-              <th className="pb-4 font-bold">지역</th>
-              <th className="pb-4 font-bold">부담금</th>
-              <th className="pb-4 font-bold">진행 기간</th>
-              <th className="pb-4 font-bold">모집현황</th>
-            </tr>
-          </thead>
-          <tbody>
+    <DashboardCard title="찜 목록">
+      {courses.length > 0 ? (
+        <>
+          <ul className="flex flex-col gap-1 px-1 lg:hidden">
             {courses.map((course) => (
-              <tr key={course.id} className="border-b border-[#f3f5f8] last:border-b-0">
-                <td className="py-4">
-                  <p className="font-semibold text-[#1f2937]">
+              <li key={course.id}>
+                <button
+                  type="button"
+                  onClick={() => goToCourse(course.id)}
+                  className="w-full cursor-pointer rounded-lg px-3 py-4 text-left transition-colors hover:bg-foamWhite/50"
+                >
+                  <p className="font-pretendard text-sm font-semibold text-deepOceanNavy">
                     {course.title}
-                    <span className="ml-2 text-[#23a03b]">★ ({course.rating})</span>
+                    <span className="ml-2 text-waterlineBlue">★ ({course.rating})</span>
                   </p>
-                  <p className="mt-1 text-[#9aa3af]">{course.academy}</p>
-                </td>
-                <td className="py-4 text-[#1f2937]">{course.region}</td>
-                <td className="py-4 text-[#1f2937]">{course.subsidy}</td>
-                <td className="py-4 text-[#1f2937]">{course.period}</td>
-                <td className="py-4 text-[#1f2937]">32/50</td>
-              </tr>
+                  <p className="mt-1 font-pretendard text-xs text-secondary">{course.academy}</p>
+                  <div className="mt-3 grid grid-cols-1 gap-2 font-pretendard text-xs sm:grid-cols-2">
+                    <CourseMetaItems course={course} />
+                  </div>
+                </button>
+              </li>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </ul>
 
-      <div className="mt-6 flex items-center justify-center gap-1">
-        <button
-          type="button"
-          onClick={() => onPageChange(Math.max(1, page - 1))}
-          className="grid h-7 w-7 place-items-center rounded-md border border-[#d7dce2] text-[#8b95a4] disabled:cursor-not-allowed disabled:opacity-40"
-          disabled={page === 1}
-        >
-          ‹
-        </button>
-
-        {Array.from({ length: totalPages }, (_, index) => index + 1).map((number) => (
-          <button
-            key={number}
-            type="button"
-            onClick={() => onPageChange(number)}
-            className={`grid h-7 w-7 place-items-center rounded-md border text-sm transition-colors ${
-              page === number ? 'border-[#344A64] bg-[#344A64] text-white' : 'border-[#d7dce2] bg-white text-[#4a5565]'
-            }`}
-          >
-            {number}
-          </button>
-        ))}
-
-        <button
-          type="button"
-          onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-          className="grid h-7 w-7 place-items-center rounded-md border border-[#d7dce2] text-[#4a5565] disabled:cursor-not-allowed disabled:opacity-40"
-          disabled={page === totalPages}
-        >
-          ›
-        </button>
-      </div>
-    </section>
+          <div className="hidden px-1 lg:block">
+            <table className="w-full text-left font-pretendard text-sm">
+              <tbody>
+                {courses.map((course) => (
+                  <tr
+                    key={course.id}
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => goToCourse(course.id)}
+                    onKeyDown={(event) => handleKeyDown(event, course.id)}
+                    className="cursor-pointer border-b border-mistSkyBlue/20 transition-colors last:border-b-0 hover:bg-foamWhite/50 [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg"
+                  >
+                    <td className="px-3 py-4 pr-4">
+                      <p className="font-semibold text-deepOceanNavy">
+                        {course.title}
+                        <span className="ml-2 text-waterlineBlue">★ ({course.rating})</span>
+                      </p>
+                      <p className="mt-1 text-xs text-secondary">{course.academy}</p>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 pr-4 text-primary/90">
+                      <span className="inline-flex items-center gap-1.5">
+                        <LocationIcon />
+                        {course.region}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 pr-4 text-primary/90">
+                      <span className="inline-flex items-center gap-1.5">
+                        <PriceIcon />
+                        {course.subsidy}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 pr-4 text-primary/90">
+                      <span className="inline-flex items-center gap-1.5">
+                        <CalendarIcon />
+                        {course.period}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-center text-primary/90">
+                      <span className="inline-flex items-center justify-center gap-1.5">
+                        <EnrollmentIcon />
+                        {course.enrollment ?? '32/50'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <p className="py-10 text-center font-pretendard text-sm text-secondary">찜한 과정이 없습니다.</p>
+      )}
+    </DashboardCard>
   )
 }

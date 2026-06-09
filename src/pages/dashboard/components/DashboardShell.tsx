@@ -1,32 +1,29 @@
 import type { ReactNode } from 'react'
 import Header from '../../../components/layout/Header'
 import SideNavbar from '../../../components/layout/SideNavbar'
+import DashboardPageHeader from './DashboardPageHeader'
 
 type DashboardShellProps = {
   title: string
+  description?: string
   action?: ReactNode
   children: ReactNode
 }
 
-// (사이드바 + 헤더 + 메인 컨텐츠 영역) 레이아웃
-export default function DashboardShell({ title, action, children }: DashboardShellProps) {
+// 대시보드 공통 레이아웃 (사이드바·헤더·페이지 헤더)
+export default function DashboardShell({ title, description, action, children }: DashboardShellProps) {
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-[#111827]">
+    <div className="min-h-screen bg-[#fbfbfb] text-primary">
       <div className="flex min-h-screen">
-        {/* 대시보드 사이드바 */}
+        {/* 사이드 네비 */}
         <SideNavbar variant="dashboard" />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* 대시보드 헤더 */}
           <Header variant="shell" fixed={false} />
 
-          {/* 메인 컨텐츠 영역 */}
+          {/* 메인 콘텐츠 */}
           <main className="px-10 pb-14 pt-2">
-            <div className="mb-5 flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-[#151b24]">{title}</h1>
-              {action ? <div>{action}</div> : null}
-            </div>
-
+            <DashboardPageHeader title={title} description={description} action={action} />
             {children}
           </main>
         </div>

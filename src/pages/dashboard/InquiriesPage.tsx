@@ -1,83 +1,173 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Toast from '../../components/common/Toast'
+import Pagination from '../../components/common/Pagination'
+import Tabs from '../../components/common/Tabs'
+import {
+  USER_INQUIRY_STATUS_TABS,
+  faqItems,
+  userInquiries,
+  type UserInquiry,
+  type UserInquiryStatusTab,
+} from './data/inquiries'
+import DashboardActionButton from './components/DashboardActionButton'
+import DashboardCard from './components/DashboardCard'
 import DashboardShell from './components/DashboardShell'
+import InquiryFaqPanel from './components/InquiryFaqPanel'
+import InquiryRowCard from './components/InquiryRowCard'
+import InquiryWriteModal, { type InquiryWritePayload } from './components/modal/InquiryWriteModal'
 
-const inquiryItems = [
-  { title: '결제 문의', date: '2026.06.01', status: '답변 완료', detail: '결제 확인 및 처리 상태를 안내드렸습니다.' },
-  { title: '수강 신청 관련', date: '2026.06.01', status: '진행 중', detail: '신청 자격과 서류 확인 중입니다.' },
-  { title: '계정 정보 수정', date: '2026.05.30', status: '답변 완료', detail: '이메일 변경 절차를 안내드렸습니다.' },
-  { title: '과정 비교 기능', date: '2026.05.28', status: '대기 중', detail: '비교 기능 사용법을 요청하신 상태입니다.' },
-]
+const PAGE_SIZE = 10
 
-const faqItems = [
-  '내 문의는 어디에서 확인하나요?',
-  '수강 신청 후 일정은 어디서 보나요?',
-  '찜한 과정은 어떻게 비교하나요?',
-]
+function formatInquiryDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}.${month}.${day}`
+}
 
+function toInquiryId(inquiries: UserInquiry[]) {
+  return inquiries.length ? Math.max(...inquiries.map((item) => item.id)) + 1 : 1
+}
+
+// 문의 페이지 (나의 문의 내역·자주 하는 문의)
 export default function InquiriesPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0)
+  // --- 탭·페이지·모달 ---
+  const [inquiries, setInquiries] = useState<UserInquiry[]>(() => [...userInquiries])
+  const [statusTab, setStatusTab] = useState<UserInquiryStatusTab>('ALL')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [openInquiryId, setOpenInquiryId] = useState<number | null>(null)
+  const [writeOpen, setWriteOpen] = useState(false)
+  const [toast, setToast] = useState('')
+
+  const filteredInquiries = useMemo(() => {
+    if (statusTab === 'ALL') return inquiries
+    return inquiries.filter((item) => item.status === statusTab)
+  }, [inquiries, statusTab])
+
+  const tabCounts = useMemo(() => {
+    return USER_INQUIRY_STATUS_TABS.reduce(
+      (acc, tab) => {
+        acc[tab.key] =
+          tab.key === 'ALL' ? inquiries.length : inquiries.filter((item) => item.status === tab.key).length
+        return acc
+      },
+      {} as Record<UserInquiryStatusTab, number>,
+    )
+  }, [inquiries])
+
+  const totalPages = Math.max(1, Math.ceil(filteredInquiries.length / PAGE_SIZE))
+  const paginatedInquiries = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE
+    return filteredInquiries.slice(start, start + PAGE_SIZE)
+  }, [currentPage, filteredInquiries])
+
+  // --- 이벤트 핸들러 ---
+  const showToast = (message: string) => {
+    setToast(message)
+    window.setTimeout(() => setToast(''), 2200)
+  }
+
+  const handleWriteSubmit = ({ title, content }: InquiryWritePayload) => {
+    const newInquiry: UserInquiry = {
+      id: toInquiryId(inquiries),
+      title,
+      content,
+      requestedAt: formatInquiryDate(new Date()),
+      status: 'PENDING',
+    }
+
+    setInquiries((current) => [newInquiry, ...current])
+    setWriteOpen(false)
+    setStatusTab('ALL')
+    setCurrentPage(1)
+    showToast('문의를 등록했어요.')
+  }
+
+  useEffect(() => {
+    setCurrentPage(1)
+    setOpenInquiryId(null)
+  }, [statusTab])
+
+  useEffect(() => {
+    setOpenInquiryId(null)
+  }, [currentPage])
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
 
   return (
-    <DashboardShell
-      title="문의"
-      action={
-        <button
-          type="button"
-          className="rounded-full bg-[#3e4f6d] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#344A64]"
-        >
-          문의하기
-        </button>
-      }
-    >
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(0,0.8fr)]">
-        <section className="rounded-2xl border border-[#eef2f6] bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <h2 className="mb-4 text-lg font-bold text-[#151b24]">문의 내역</h2>
-          <div className="space-y-3">
-            {inquiryItems.map((item, index) => {
-              const isOpen = openIndex === index
-
-              return (
-                <article key={item.title} className="overflow-hidden rounded-2xl border border-[#d0d5db] bg-[#d9d9d9]">
-                  <button
-                    type="button"
-                    onClick={() => setOpenIndex(isOpen ? null : index)}
-                    className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
-                  >
-                    <div>
-                      <h3 className="text-sm font-semibold text-[#1f2937]">{item.title}</h3>
-                      <p className="mt-1 text-xs text-[#6b7280]">{item.date}</p>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-xs text-[#6b7280]">
-                      <span>{item.status}</span>
-                      <span className={`grid h-8 w-8 place-items-center rounded-md border border-[#b4bac2] transition-transform ${isOpen ? 'rotate-180' : ''}`}>
-                        ▾
-                      </span>
-                    </div>
-                  </button>
-
-                  {isOpen ? (
-                    <div className="border-t border-[#cdd3db] bg-[#f6f7f9] px-4 py-4 text-sm leading-6 text-[#4b5563]">
-                      {item.detail}
-                    </div>
-                  ) : null}
-                </article>
-              )
-            })}
+    <DashboardShell title="문의">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,0.85fr)] lg:items-start">
+        {/* 좌측: 나의 문의 내역 */}
+        <DashboardCard title="나의 문의 내역">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <Tabs<UserInquiryStatusTab>
+              tabs={USER_INQUIRY_STATUS_TABS}
+              activeTab={statusTab}
+              tabCounts={tabCounts}
+              onTabChange={setStatusTab}
+              ariaLabel="문의 상태 필터"
+            />
+            <DashboardActionButton
+              label="문의하기"
+              variant="primary"
+              onClick={() => setWriteOpen(true)}
+              className="!shrink-0 !rounded-full !px-4 !py-2"
+            />
           </div>
-        </section>
 
-        <section className="rounded-2xl border border-[#eef2f6] bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <h2 className="mb-4 text-lg font-bold text-[#151b24]">자주 하는 문의</h2>
-          <ul className="space-y-3 text-sm font-semibold text-[#1f2937]">
-            {faqItems.map((item) => (
-              <li key={item} className="rounded-xl border border-[#e7edf3] px-4 py-3">
-                {item}
-              </li>
-            ))}
-          </ul>
-        </section>
+          {filteredInquiries.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-mistSkyBlue/45 bg-foamWhite/30 px-6 py-12 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-foamWhite text-waterlineBlue ring-1 ring-mistSkyBlue/50">
+                <svg width={24} height={24} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <p className="mt-4 font-pretendard text-sm font-semibold text-deepOceanNavy">해당 상태의 문의가 없습니다</p>
+              <p className="mt-1.5 font-pretendard text-xs leading-relaxed text-secondary">
+                문의하기 버튼으로 새 문의를 등록해 보세요.
+              </p>
+            </div>
+          ) : (
+            <>
+              <ul className="flex flex-col gap-3">
+                {paginatedInquiries.map((item) => (
+                  <li key={item.id}>
+                    <InquiryRowCard
+                      inquiry={item}
+                      isOpen={openInquiryId === item.id}
+                      onToggle={() => setOpenInquiryId(openInquiryId === item.id ? null : item.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                className="mt-6"
+              />
+            </>
+          )}
+        </DashboardCard>
+
+        {/* 우측: 자주 하는 문의 */}
+        <DashboardCard title="자주 하는 문의">
+          <InquiryFaqPanel items={faqItems} />
+        </DashboardCard>
       </div>
+
+      {/* 모달·토스트 */}
+      {writeOpen ? <InquiryWriteModal onClose={() => setWriteOpen(false)} onSubmit={handleWriteSubmit} /> : null}
+      {toast ? <Toast message={toast} onClose={() => setToast('')} /> : null}
     </DashboardShell>
   )
 }
