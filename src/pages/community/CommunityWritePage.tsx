@@ -27,7 +27,7 @@ export default function CommunityWritePage() {
         : '내용을 작성해 주세요.'
 
   return (
-    <div className="rounded-xl border border-mistSkyBlue/50 bg-white p-6 shadow-sm md:p-8">
+    <div className="rounded-xl glass-panel p-6 shadow-sm md:p-8">
       <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">{section.writeLabel}</h2>
       <p className="mt-2 text-sm text-secondary">
         API 연동 전 작성 화면 자리입니다. 저장 기능은 추후 연결됩니다.

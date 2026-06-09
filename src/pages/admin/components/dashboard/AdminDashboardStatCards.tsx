@@ -59,7 +59,7 @@ type StatCardProps = {
 // 관리자 통계 카드
 function StatCard({ label, value, icon, iconWrapClass, to }: StatCardProps) {
   const body = (
-    <article className="flex h-full flex-col rounded-2xl border border-[#eef2f6] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <article className="glass-panel flex h-full flex-col rounded-2xl p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-pretendard text-sm font-semibold text-[#64748b]">{label}</p>

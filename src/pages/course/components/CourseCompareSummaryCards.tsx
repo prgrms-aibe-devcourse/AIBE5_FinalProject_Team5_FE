@@ -16,7 +16,7 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
         {courses.map((course) => (
           <div key={course.id} className="flex justify-center px-1 sm:px-2">
             <article
-              className={`flex w-full flex-col overflow-hidden rounded-xl border border-mistSkyBlue/50 bg-white shadow-sm ${layout.summaryCardMaxWidth}`}
+              className={`flex w-full flex-col overflow-hidden rounded-xl glass-panel shadow-sm ${layout.summaryCardMaxWidth}`}
             >
               <div className="aspect-[16/10] w-full bg-foamWhite">
                 {course.logoUrl ? (

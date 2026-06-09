@@ -54,7 +54,7 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
         {sections.map((section) => (
           <div
             key={section.label}
-            className="overflow-hidden rounded-2xl border border-mistSkyBlue/45 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]"
+            className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]"
           >
             <div className="flex items-center gap-3 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/45 to-waterlineBlue/30 px-5 py-4 md:px-6">
               <CompareSectionIcon label={section.label} />
@@ -74,7 +74,7 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
                   {courses.map((course) => (
                     <div
                       key={`${section.label}-${field.label}-${course.id}`}
-                      className="flex items-center border-l border-mistSkyBlue/30 bg-white px-4 py-3.5 md:px-5"
+                      className="flex items-center border-l border-mistSkyBlue/30 bg-transparent px-4 py-3.5 md:px-5"
                     >
                       <p className="text-sm font-semibold leading-relaxed text-deepOceanNavy">
                         {field.getValue(course)}
@@ -95,7 +95,7 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
                   {statsByColumn.map((stats, index) => (
                     <div
                       key={`stats-${courses[index]?.id ?? index}`}
-                      className="border-l border-mistSkyBlue/30 bg-white px-4 py-4 md:px-5"
+                      className="border-l border-mistSkyBlue/30 bg-transparent px-4 py-4 md:px-5"
                     >
                       <CompareStatsCell stats={stats} />
                     </div>

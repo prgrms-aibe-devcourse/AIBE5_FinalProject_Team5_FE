@@ -26,7 +26,7 @@ export default function InquiryFaqPanel({ items }: InquiryFaqPanelProps) {
         return (
           <li key={item.id}>
             <div
-              className={`overflow-hidden rounded-xl border bg-white shadow-[0_1px_4px_rgba(52,74,100,0.05)] transition-[border-color,box-shadow] ${
+              className={`overflow-hidden rounded-xl glass-panel shadow-[0_1px_4px_rgba(52,74,100,0.05)] transition-[border-color,box-shadow] ${
                 isOpen
                   ? 'border-waterlineBlue/35 shadow-[0_2px_10px_rgba(84,132,183,0.1)]'
                   : 'border-mistSkyBlue/45 hover:border-waterlineBlue/45 hover:shadow-[0_2px_10px_rgba(84,132,183,0.1)]'

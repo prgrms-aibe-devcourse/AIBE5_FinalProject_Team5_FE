@@ -22,7 +22,7 @@ export default function CertificationRequestRowCard({ request, onViewDocuments }
   const canViewDetails = hasDocuments || (isRejected && Boolean(request.rejectReason))
 
   return (
-    <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-4 shadow-[0_1px_4px_rgba(52,74,100,0.05)] font-pretendard sm:p-5">
+    <article className="rounded-xl border border-mistSkyBlue/35 bg-white/55 p-4 shadow-[0_2px_8px_rgba(30,58,95,0.08)] backdrop-blur-sm font-pretendard sm:p-5">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-deepOceanNavy sm:text-[0.9375rem]">

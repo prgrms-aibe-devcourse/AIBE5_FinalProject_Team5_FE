@@ -17,7 +17,7 @@ export default function ArticleNewsletterSidebar({
     <aside className="flex w-full shrink-0 flex-col gap-5 lg:w-64" aria-label="아티클 사이드바">
       <ArticleNewsletterSubscribe compact />
 
-      <div className="rounded-2xl border border-mistSkyBlue/50 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl glass-panel p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-deepOceanNavy">카테고리</h2>
         <ul className="mt-3 flex flex-col gap-1">
           {articleCategories.map((category) => {
@@ -42,7 +42,7 @@ export default function ArticleNewsletterSidebar({
         </ul>
       </div>
 
-      <div className="rounded-2xl border border-mistSkyBlue/50 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl glass-panel p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-deepOceanNavy">인기 아티클</h2>
         <ol className="mt-3 space-y-3">
           {popularArticles.map((article, index) => (

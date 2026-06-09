@@ -13,7 +13,7 @@ type HeroVideoPhase = 'before' | 'loop'
 
 const HOME_ENTRY_PLAYED_KEY = 'bootsignal-home-entry-played'
 const BEFORE_HERO_EXIT_TIME = 96 / 24
-const LOOP_ENTRY_TIME = 2 / 24
+const LOOP_ENTRY_TIME = BEFORE_HERO_EXIT_TIME
 
 export default function HomePage() {
   const [shouldPlayEntrySequence] = useState(() => {
@@ -172,7 +172,7 @@ export default function HomePage() {
   useSmoothSectionScroll()
 
   return (
-    <div className={`home-page min-h-screen bg-white flex flex-col ${showHeroIntro ? 'home-page--intro-active' : ''}`}>
+    <div className={`home-page min-h-screen flex flex-col ${showHeroIntro ? 'home-page--intro-active' : ''}`}>
       {showHeroIntro && <HeroWaveIntro onComplete={handleIntroComplete} />}
 
       <Header />

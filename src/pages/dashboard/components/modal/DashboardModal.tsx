@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+﻿import { useEffect, type ReactNode } from 'react'
 
 type DashboardModalProps = {
   title: string
@@ -28,18 +28,18 @@ export default function DashboardModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className="fixed inset-0 z-60 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
       role="presentation"
       onClick={onClose}
     >
       <div
-        className={`flex max-h-[90vh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-[0_18px_50px_rgba(36,57,84,0.28)]`}
+        className={`glass-modal flex max-h-[90vh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 shadow-[0_18px_50px_rgba(36,57,84,0.28)]`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={ariaLabelledBy}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="shrink-0 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-5 md:px-7">
+        <div className="shrink-0 border-b border-mistSkyBlue/45 bg-linear-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-5 md:px-7">
           <div className="flex items-start justify-between gap-4">
             <h2 id={ariaLabelledBy} className="font-pretendard text-lg font-bold text-deepOceanNavy md:text-xl">
               {title}
@@ -60,7 +60,7 @@ export default function DashboardModal({
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 md:px-7">{children}</div>
 
         {footer ? (
-          <div className="shrink-0 border-t border-mistSkyBlue/45 bg-white px-6 py-4 md:px-7">{footer}</div>
+          <div className="shrink-0 border-t border-mistSkyBlue/45 bg-transparent px-6 py-4 md:px-7">{footer}</div>
         ) : null}
       </div>
     </div>

@@ -35,7 +35,7 @@ export default function CommunityRecentVisitsSidebar() {
 
   return (
     <aside className="sticky top-6 h-fit w-full shrink-0 lg:w-72" aria-label="최근 방문 내역">
-      <div className="rounded-2xl border border-mistSkyBlue/50 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl glass-panel p-5 shadow-sm">
         {/* 최근 방문 내역 제목 */}
         <h2 className="text-sm font-semibold text-deepOceanNavy">최근 방문 내역</h2>
 

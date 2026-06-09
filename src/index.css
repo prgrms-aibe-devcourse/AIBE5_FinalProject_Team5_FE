@@ -26,10 +26,50 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #ffffff;
+  /* 크림 베이스 — 그 위에 body::before 오브 레이어가 깔린다 */
+  background: #f6f0e6;
   /* hidden 대신 clip: 가로 넘침은 잘라내되 스크롤 컨테이너를 만들지 않아
      html의 scroll-snap이 정상 작동하도록 함 */
   overflow-x: clip;
+}
+
+/* ================================================================
+   전역 배경 필드 — 크림 바탕 + 하이브리드 블러 오브
+   (waterlineBlue 우세 + 분홍/보라 은은한 액센트 + 중앙 확산)
+   radial-gradient만 사용해 GPU blur 없이 가볍게 렌더링.
+   fixed 레이어로 스크롤과 무관하게 일정한 필드 유지.
+   glass 패널의 backdrop-filter가 이 레이어를 블러 처리한다.
+   ================================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(42vw 42vw at 74% 20%, rgba(84, 132, 183, 0.32), transparent 60%),
+    radial-gradient(34vw 34vw at 22% 28%, rgba(246, 94, 164, 0.16), transparent 62%),
+    radial-gradient(36vw 36vw at 28% 80%, rgba(130, 110, 200, 0.16), transparent 62%),
+    radial-gradient(44vw 44vw at 84% 76%, rgba(176, 210, 230, 0.28), transparent 60%),
+    radial-gradient(62vw 52vw at 50% 42%, rgba(255, 255, 255, 0.45), transparent 70%),
+    linear-gradient(160deg, #f6f0e6 0%, #f1ece4 45%, #eef2f7 100%);
+}
+
+/* 실제 콘텐츠는 오브 레이어 위에 올라가도록 stacking context 지정 */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* 모바일에서는 오브 대비를 약간 낮춰 텍스트 가독성 확보 */
+@media (max-width: 768px) {
+  body::before {
+    background:
+      radial-gradient(60vw 60vw at 76% 18%, rgba(84, 132, 183, 0.16), transparent 62%),
+      radial-gradient(56vw 56vw at 22% 82%, rgba(176, 210, 230, 0.16), transparent 62%),
+      radial-gradient(80vw 70vw at 50% 40%, rgba(255, 255, 255, 0.55), transparent 72%),
+      linear-gradient(160deg, #f6f0e6 0%, #f1ece4 45%, #eef2f7 100%);
+  }
 }
 
 .home-page .site-header {
@@ -233,7 +273,7 @@ body {
 }
 
 .hero-scroll-indicator__line {
-  width: 1px;
+  width: 2px;
   height: 2.6rem;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.35));
@@ -312,7 +352,7 @@ html.home-snap {
 }
 
 .hero-video__media--before-exit {
-  transition: opacity 800ms ease;
+  transition: none;
 }
 
 .hero-video__media--loop {
@@ -444,6 +484,75 @@ html.home-snap {
   #course-compare-print article {
     break-inside: avoid;
     box-shadow: none !important;
+  }
+}
+
+/* ================================================================
+   Glass tokens — BootSignal deepOceanNavy 계열
+   deepOceanNavy: #344A64, waterlineBlue: #5484B7, mistSkyBlue: #BBD3E0
+   ================================================================ */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 20px 50px rgba(28, 46, 92, 0.20),
+    0 6px 16px rgba(28, 46, 92, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.glass-sidebar {
+  background: rgba(255, 255, 255, 0.60);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow: 2px 0 24px rgba(28, 46, 92, 0.08);
+}
+
+.glass-topbar {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(84, 132, 183, 0.12);
+}
+
+.glass-modal {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 24px 64px rgba(28, 46, 92, 0.28),
+    0 8px 24px rgba(28, 46, 92, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+/* 드롭다운·툴팁 등 floating 레이어: 가독성을 위해 더 불투명 + 약한 blur */
+.glass-floating {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(84, 132, 183, 0.14);
+  box-shadow: 0 12px 32px rgba(30, 58, 95, 0.16), 0 2px 8px rgba(30, 58, 95, 0.08);
+}
+
+/* 모바일: blur가 무거우므로 강도를 일괄 축소 */
+@media (max-width: 768px) {
+  .glass-panel,
+  .glass-sidebar,
+  .glass-topbar {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-modal {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-floating {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
 }
 

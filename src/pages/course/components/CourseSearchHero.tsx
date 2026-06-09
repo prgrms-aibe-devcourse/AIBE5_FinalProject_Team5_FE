@@ -26,7 +26,7 @@ export default function CourseSearchHero({
 
   return (
     <section
-      className="relative z-20 w-full bg-white pt-8 md:pt-10"
+      className="relative z-20 w-full pt-8 md:pt-10"
       aria-label="과정 검색"
     >
       {/* blur 배경 */}

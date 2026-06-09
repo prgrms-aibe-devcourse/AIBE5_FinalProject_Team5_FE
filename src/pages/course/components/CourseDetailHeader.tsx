@@ -27,7 +27,7 @@ export default function CourseDetailHeader({
   onToggleBookmark, // 찜 토글 핸들러
 }: CourseDetailHeaderProps) {
   return (
-    <section className="rounded-2xl border border-mistSkyBlue/60 bg-white p-5 shadow-sm md:p-8">
+    <section className="rounded-2xl glass-panel p-5 shadow-sm md:p-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-8">
         {/* 과정 이미지 */}
         <div className="w-full shrink-0 lg:w-80 xl:w-96">
@@ -64,7 +64,7 @@ export default function CourseDetailHeader({
           {/* 과정 정보 섹션 */}
           <div className="mt-6 grid gap-4 sm:gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-8">
             {/* 과정 카드 */}
-            <div className="space-y-2 rounded-xl border border-mistSkyBlue/50 bg-white p-4 md:p-5">
+            <div className="space-y-2 rounded-xl glass-panel p-4 md:p-5">
               <InfoRow label="기수" value={course.batch} />
               <InfoRow label="진행 지역" value={course.location} />
               <InfoRow label="부담 비용" value={course.price} />
