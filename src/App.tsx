@@ -28,6 +28,9 @@ import CommunityDetailLayout from './pages/community/CommunityDetailLayout'
 import CommunityPostDetailPage from './pages/community/CommunityPostDetailPage'
 import CommunityQnaDetailPage from './pages/community/CommunityQnaDetailPage'
 import CommunityRecruitDetailPage from './pages/community/CommunityRecruitDetailPage'
+import SupportLayout from './pages/support/SupportLayout'
+import SupportNoticesPage from './pages/support/SupportNoticesPage'
+import SupportCertificationPage from './pages/support/SupportCertificationPage'
 
 function App() {
   return (
@@ -78,6 +81,13 @@ function App() {
           <Route path="qna/:qnaId" element={<CommunityQnaDetailPage />} />
           <Route path="recruit/:recruitId" element={<CommunityRecruitDetailPage />} />
         </Route>
+      </Route>
+
+      {/* 고객센터 (공지사항·인증 가이드) */}
+      <Route path="/support" element={<SupportLayout />}>
+        <Route index element={<Navigate to="notices" replace />} />
+        <Route path="notices" element={<SupportNoticesPage />} />
+        <Route path="certification" element={<SupportCertificationPage />} />
       </Route>
 
       {/* 관리자*/}
