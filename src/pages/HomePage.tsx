@@ -176,7 +176,7 @@ export default function HomePage() {
       {showHeroIntro && <HeroWaveIntro onComplete={handleIntroComplete} />}
 
       <Header />
-      <main className="flex-1 w-full overflow-x-clip pt-20">
+      <main className="flex-1 w-full overflow-x-clip">
         <section
           id="hero"
           className={`hero-video ${showHeroIntro ? 'hero-video--intro-active' : ''}`}

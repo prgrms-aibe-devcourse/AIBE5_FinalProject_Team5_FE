@@ -4,7 +4,7 @@ import { formatCommunityDate } from '../../../utils/formatRequestedDate'
 
 // 게시판 목록 단일 항목 링크 스타일
 export const communityListItemLinkClass =
-  'group block rounded-xl border border-transparent px-4 py-4 transition-colors hover:border-mistSkyBlue/40 hover:bg-foamWhite/70'
+  'group block rounded-xl border border-white/70 bg-white/55 px-4 py-4 [backdrop-filter:blur(10px)] shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] transition-all hover:bg-white/70 hover:shadow-[0_6px_20px_rgba(28,46,92,0.14)] hover:border-mistSkyBlue/40'
 
 // 게시판 목록 단일 항목 제목 스타일
 export const communityListItemTitleClass =

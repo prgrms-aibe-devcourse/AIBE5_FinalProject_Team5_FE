@@ -22,7 +22,7 @@ export default function DashboardShell({ title, description, action, children }:
           <Header variant="shell" fixed={false} />
 
           {/* 메인 콘텐츠 */}
-          <main className="px-10 pb-14 pt-2">
+          <main className="px-10 pb-14 pt-14">
             <DashboardPageHeader title={title} description={description} action={action} />
             {children}
           </main>

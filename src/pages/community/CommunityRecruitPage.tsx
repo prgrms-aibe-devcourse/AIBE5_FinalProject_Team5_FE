@@ -14,7 +14,7 @@ export default function CommunityRecruitPage() {
   return (
     <div>
       {/* 모집 목록 리스트 */}
-      <ul className="divide-y divide-mistSkyBlue/35">
+      <ul className="flex flex-col gap-4">
         {displayedItems.map((item) => (
           // 모집 목록 단일 항목
           <CommunityListItem

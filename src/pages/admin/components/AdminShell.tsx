@@ -14,7 +14,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           {/* 관리자 헤더 */}
           <Header variant="shell" fixed={false} />
           {/* 메인 컨텐츠 영역 */}
-          <main className="px-10 pb-14 pt-2">{children}</main>
+          <main className="px-10 pb-14 pt-14">{children}</main>
         </div>
       </div>
     </div>

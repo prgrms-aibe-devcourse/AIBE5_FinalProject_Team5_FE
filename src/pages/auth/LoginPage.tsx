@@ -6,7 +6,7 @@ import AuthSocial from './components/AuthSocial.tsx'
 import LoginVisualPanel from './components/LoginVisualPanel.tsx'
 import AuthExitButton from './components/AuthExitButton.tsx'
 import { EMAIL_INVALID_MESSAGE, isLoginFormValid, isValidEmail } from '../../utils/validation.ts'
-import { DUMMY_LOGIN, login, USE_AUTH_DUMMY } from '../../services/auth.ts'
+import { DUMMY_ADMIN_LOGIN, DUMMY_LOGIN, login, USE_AUTH_DUMMY } from '../../services/auth.ts'
 
 /** 데스크톱 로그인 페이지 (50:50 — 폼 | 사이드 배경) */
 export default function LoginPage() {
@@ -127,7 +127,41 @@ export default function LoginPage() {
               </div>
               {/* 소셜 로그인 */}
               <AuthSocial />
-              
+
+              {/* 빠른 테스트 로그인 */}
+              {USE_AUTH_DUMMY && (
+                <div className="mt-8 rounded-xl border border-mistSkyBlue/40 bg-foamWhite/50 p-4">
+                  <p className="mb-3 text-center text-xs font-semibold text-secondary">빠른 테스트 로그인</p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await login(DUMMY_LOGIN.request)
+                        window.location.href = '/'
+                      }}
+                      className="flex-1 rounded-lg border border-waterlineBlue/60 bg-white/70 py-2 text-xs font-semibold text-deepOceanNavy transition-colors hover:bg-waterlineBlue hover:text-white"
+                    >
+                      일반 사용자
+                      <span className="mt-0.5 block font-normal text-[#94a3b8] hover:text-white/80 text-[10px]">
+                        {DUMMY_LOGIN.request.email}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await login(DUMMY_ADMIN_LOGIN.request)
+                        window.location.href = '/admin'
+                      }}
+                      className="flex-1 rounded-lg border border-deepOceanNavy/60 bg-white/70 py-2 text-xs font-semibold text-deepOceanNavy transition-colors hover:bg-deepOceanNavy hover:text-white"
+                    >
+                      관리자
+                      <span className="mt-0.5 block font-normal text-[#94a3b8] text-[10px]">
+                        {DUMMY_ADMIN_LOGIN.request.email}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

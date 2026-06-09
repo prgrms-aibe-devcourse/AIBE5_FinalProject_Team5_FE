@@ -25,7 +25,7 @@ export default function SupportNoticeDetailModal({ notice, onClose }: SupportNot
     >
       {/* 모달 컨테이너 */}
       <div
-        className="flex h-[min(560px,90vh)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className="flex h-[min(560px,90vh)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl glass-modal border border-mistSkyBlue/50"
         role="dialog"
         aria-modal="true"
         aria-labelledby="support-notice-detail-title"

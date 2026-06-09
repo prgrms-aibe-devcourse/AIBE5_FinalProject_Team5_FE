@@ -35,7 +35,7 @@ export default function SupportNoticeSection({ notices }: SupportNoticeSectionPr
             <p className="font-pretendard text-sm font-semibold text-deepOceanNavy">등록된 공지가 없습니다.</p>
           </div>
         ) : ( // 공지사항 목록이 있을 경우
-          <ul className="divide-y divide-mistSkyBlue/35">
+          <ul className="flex flex-col gap-4">
             {displayedItems.map((notice) => (
               <li key={notice.id}>
                 <button

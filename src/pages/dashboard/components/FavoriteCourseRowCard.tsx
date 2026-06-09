@@ -122,7 +122,7 @@ export default function FavoriteCourseRowCard({
       tabIndex={onOpenDetail ? 0 : undefined}
       onClick={onOpenDetail}
       onKeyDown={handleKeyDown}
-      className={`relative rounded-xl border border-mistSkyBlue/45 bg-transparent p-4 shadow-[0_1px_4px_rgba(52,74,100,0.05)] transition-colors font-pretendard hover:bg-white/20 sm:p-5 ${interactiveClass}`}
+      className={`relative rounded-xl border border-white/70 bg-white/55 p-4 [backdrop-filter:blur(10px)] shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] transition-all font-pretendard hover:bg-white/70 hover:shadow-[0_6px_20px_rgba(28,46,92,0.14)] sm:p-5 ${interactiveClass}`}
     >
       <div className="absolute right-4 top-4 z-10 sm:right-5 sm:top-5">
         <ActionButtons

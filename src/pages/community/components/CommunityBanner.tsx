@@ -79,7 +79,7 @@ function SectionCard({ sectionKey }: { sectionKey: CommunitySectionKey }) {
 export default function CommunityBanner() {
   return (
     <section className="relative w-full overflow-hidden" aria-label="커뮤니티 소개">
-      <div className="relative overflow-hidden rounded-3xl border border-mistSkyBlue/40 bg-gradient-to-br from-foamWhite/80 via-white to-mistSkyBlue/20 p-8 shadow-[0_20px_60px_rgba(52,74,100,0.08)] ring-1 ring-white/70 md:p-10 lg:p-12">
+      <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-8 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] md:p-10 lg:p-12">
         {/* 배너 내부 배경 그라데이션 */}
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
