@@ -19,7 +19,7 @@ export default function SupportHero({ contact }: SupportHeroProps) {
   return (
     <section className="relative w-full overflow-hidden" aria-label="고객센터 소개">
       {/* 배경 */}
-      <div className="relative overflow-hidden rounded-3xl border border-mistSkyBlue/40 bg-gradient-to-br from-foamWhite/70 via-white to-mistSkyBlue/15 p-8 shadow-[0_16px_48px_rgba(52,74,100,0.07)] md:p-10 lg:p-12">
+      <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-8 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] md:p-10 lg:p-12">
         <div
           className="pointer-events-none absolute -right-12 top-0 h-56 w-56 rounded-full bg-softAquaBlue/15 blur-3xl"
           aria-hidden="true"
@@ -52,7 +52,7 @@ export default function SupportHero({ contact }: SupportHeroProps) {
           </div>
 
           {/* 콘텐츠 영역 오른쪽 (문의 안내) */}
-          <div className="overflow-hidden rounded-2xl border border-mistSkyBlue/35 bg-gradient-to-br from-white via-white to-foamWhite/60 p-6 shadow-[0_6px_24px_rgba(52,74,100,0.06)] sm:p-7">
+          <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/55 p-6 [backdrop-filter:blur(10px)] shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] sm:p-7">
             <h2 className="font-pretendard text-base font-semibold text-deepOceanNavy">문의 안내</h2>
             <p className="mt-2.5 font-pretendard text-sm leading-[1.75] text-secondary">
               기본 문의는 대시보드 문의를 이용해 주세요.

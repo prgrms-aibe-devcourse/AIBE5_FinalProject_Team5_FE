@@ -14,7 +14,7 @@ export default function CommunityPostsPage() {
   return (
     <div>
       {/* 게시판 목록 리스트 */}
-      <ul className="divide-y divide-mistSkyBlue/35">
+      <ul className="flex flex-col gap-4">
         {displayedItems.map((post) => (
           // 게시판 목록 단일 항목
           <CommunityListItem

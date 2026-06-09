@@ -33,7 +33,7 @@ type InquiryRowCardProps = {
 export default function InquiryRowCard({ inquiry, isOpen, onToggle }: InquiryRowCardProps) {
   return (
     <article
-      className={`overflow-hidden rounded-xl border bg-transparent font-pretendard shadow-[0_1px_4px_rgba(52,74,100,0.05)] transition-[border-color,box-shadow] hover:bg-white/20 ${
+      className={`overflow-hidden rounded-xl border bg-white/55 [backdrop-filter:blur(10px)] font-pretendard shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] transition-all hover:bg-white/70 hover:shadow-[0_6px_20px_rgba(28,46,92,0.14)] ${
         isOpen
           ? 'border-waterlineBlue/35 shadow-[0_2px_10px_rgba(84,132,183,0.1)]'
           : 'border-mistSkyBlue/45 hover:border-waterlineBlue/45 hover:shadow-[0_2px_10px_rgba(84,132,183,0.1)]'

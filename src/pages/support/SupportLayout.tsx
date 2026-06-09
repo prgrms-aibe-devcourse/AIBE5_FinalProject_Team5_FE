@@ -8,7 +8,7 @@ import { supportContactInfo } from './data/supportData'
 // 고객센터 레이아웃
 export default function SupportLayout() {
   return (
-    <div className="flex min-h-screen flex-col bg-white font-pretendard">
+    <div className="flex min-h-screen flex-col font-pretendard">
       
       {/* 헤더 */}
       <Header fixed={false} />

@@ -188,7 +188,7 @@ export default function MyPostRowCard({ item, onOpenDetail, onEdit, onDelete }: 
       tabIndex={isClickable ? 0 : undefined}
       onClick={isClickable ? handleCardClick : undefined}
       onKeyDown={isClickable ? handleCardKeyDown : undefined}
-      className={`rounded-xl border border-mistSkyBlue/45 bg-transparent p-4 shadow-[0_1px_4px_rgba(52,74,100,0.05)] font-pretendard transition-[border-color,box-shadow,background-color] hover:bg-white/20 sm:p-5 ${
+      className={`rounded-xl border border-white/70 bg-white/55 p-4 [backdrop-filter:blur(10px)] shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] font-pretendard transition-all hover:bg-white/70 hover:shadow-[0_6px_20px_rgba(28,46,92,0.14)] sm:p-5 ${
         isClickable
           ? 'cursor-pointer hover:border-waterlineBlue/45 hover:bg-foamWhite/60 hover:shadow-[0_2px_10px_rgba(84,132,183,0.1)]'
           : ''

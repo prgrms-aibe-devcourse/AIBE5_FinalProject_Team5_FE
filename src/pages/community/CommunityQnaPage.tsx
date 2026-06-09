@@ -14,7 +14,7 @@ export default function CommunityQnaPage() {
   return (
     <div>
       {/* Q&A 목록 리스트 */}
-      <ul className="divide-y divide-mistSkyBlue/35">
+      <ul className="flex flex-col gap-4">
         {displayedItems.map((q) => (
           // Q&A 목록 단일 항목
           <CommunityListItem
