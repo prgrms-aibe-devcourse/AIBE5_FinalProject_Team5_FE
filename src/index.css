@@ -311,6 +311,10 @@ html.home-snap {
   transition: none;
 }
 
+.hero-video__media--before-exit {
+  transition: opacity 800ms ease;
+}
+
 .hero-video__media--loop {
   z-index: 2;
   opacity: 1;

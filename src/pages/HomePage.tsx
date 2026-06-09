@@ -12,6 +12,8 @@ import HeroWaveIntro from './home/components/HeroWaveIntro'
 type HeroVideoPhase = 'before' | 'loop'
 
 const HOME_ENTRY_PLAYED_KEY = 'bootsignal-home-entry-played'
+const BEFORE_HERO_EXIT_TIME = 96 / 24
+const LOOP_ENTRY_TIME = 2 / 24
 
 export default function HomePage() {
   const [shouldPlayEntrySequence] = useState(() => {
@@ -33,7 +35,11 @@ export default function HomePage() {
   )
   const [beforeHeroVideoEnded, setBeforeHeroVideoEnded] = useState(!shouldPlayEntrySequence)
   const [showHeroIntro, setShowHeroIntro] = useState(shouldPlayEntrySequence)
+  const beforeFrameCallbackRef = useRef<number | null>(null)
+  const beforeTransitionStartedRef = useRef(false)
   const loopFrameReadyRef = useRef(false)
+  const loopEntrySeekedRef = useRef(!shouldPlayEntrySequence)
+  const loopStartPendingRef = useRef(false)
 
   const handleIntroComplete = useCallback(() => {
     setShowHeroIntro(false)
@@ -43,21 +49,64 @@ export default function HomePage() {
     const video = loopHeroVideoRef.current
     if (!video || !loopHeroVideoAvailable) return
 
+    if (shouldPlayEntrySequence && !loopEntrySeekedRef.current) {
+      loopStartPendingRef.current = true
+      return
+    }
+
+    loopStartPendingRef.current = false
     video.play().catch(() => {
       // Keep the previous video's last frame visible until playback can start.
     })
-  }, [loopHeroVideoAvailable])
+  }, [loopHeroVideoAvailable, shouldPlayEntrySequence])
 
-  const handleBeforeHeroVideoEnded = useCallback(() => {
+  const handleLoopHeroVideoLoadedMetadata = useCallback(() => {
+    const video = loopHeroVideoRef.current
+    if (!video || !shouldPlayEntrySequence) return
+
+    loopEntrySeekedRef.current = false
+    video.currentTime = Math.min(LOOP_ENTRY_TIME, Math.max(0, video.duration - 0.001))
+  }, [shouldPlayEntrySequence])
+
+  const handleLoopHeroVideoSeeked = useCallback(() => {
+    if (!shouldPlayEntrySequence) return
+
+    loopEntrySeekedRef.current = true
+    if (loopStartPendingRef.current || beforeHeroVideoEnded) {
+      startLoopHeroVideo()
+    }
+  }, [beforeHeroVideoEnded, shouldPlayEntrySequence, startLoopHeroVideo])
+
+  const finishBeforeHeroVideo = useCallback(() => {
+    if (beforeTransitionStartedRef.current) return
+    beforeTransitionStartedRef.current = true
+
     setBeforeHeroVideoEnded(true)
     startLoopHeroVideo()
   }, [startLoopHeroVideo])
+
+  const handleBeforeHeroVideoPlaying = useCallback(() => {
+    const video = beforeHeroVideoRef.current
+    if (!video || !('requestVideoFrameCallback' in video) || beforeFrameCallbackRef.current !== null) return
+
+    const watchFrame = (_now: DOMHighResTimeStamp, metadata: VideoFrameCallbackMetadata) => {
+      if (metadata.mediaTime >= BEFORE_HERO_EXIT_TIME) {
+        beforeFrameCallbackRef.current = null
+        video.pause()
+        finishBeforeHeroVideo()
+        return
+      }
+
+      beforeFrameCallbackRef.current = video.requestVideoFrameCallback(watchFrame)
+    }
+
+    beforeFrameCallbackRef.current = video.requestVideoFrameCallback(watchFrame)
+  }, [finishBeforeHeroVideo])
 
   const handleBeforeHeroVideoError = useCallback(() => {
     setBeforeHeroVideoAvailable(false)
-    setBeforeHeroVideoEnded(true)
-    startLoopHeroVideo()
-  }, [startLoopHeroVideo])
+    finishBeforeHeroVideo()
+  }, [finishBeforeHeroVideo])
 
   const handleLoopHeroVideoPlaying = useCallback(() => {
     if (loopFrameReadyRef.current) return
@@ -81,8 +130,19 @@ export default function HomePage() {
   // 홈페이지에서만 섹션 스크롤 스냅을 활성화 (다른 페이지에는 영향 없음)
   useEffect(() => {
     const root = document.documentElement
+    const beforeVideo = beforeHeroVideoRef.current
     root.classList.add('home-snap')
-    return () => root.classList.remove('home-snap')
+    return () => {
+      root.classList.remove('home-snap')
+
+      if (
+        beforeVideo &&
+        beforeFrameCallbackRef.current !== null &&
+        'cancelVideoFrameCallback' in beforeVideo
+      ) {
+        beforeVideo.cancelVideoFrameCallback(beforeFrameCallbackRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -127,12 +187,15 @@ export default function HomePage() {
             <video
               ref={beforeHeroVideoRef}
               className={`hero-video__media hero-video__media--before ${
-                heroVideoPhase === 'before' ? 'hero-video__media--active' : ''
+                heroVideoPhase === 'before'
+                  ? 'hero-video__media--active'
+                  : 'hero-video__media--before-exit'
               }`}
               muted
               playsInline
               preload="auto"
-              onEnded={handleBeforeHeroVideoEnded}
+              onPlaying={handleBeforeHeroVideoPlaying}
+              onEnded={finishBeforeHeroVideo}
               onError={handleBeforeHeroVideoError}
             >
               <source src={beforeHeroVideoMp4} type="video/mp4" />
@@ -147,6 +210,8 @@ export default function HomePage() {
               loop
               playsInline
               preload="auto"
+              onLoadedMetadata={handleLoopHeroVideoLoadedMetadata}
+              onSeeked={handleLoopHeroVideoSeeked}
               onCanPlay={() => {
                 if (beforeHeroVideoEnded) startLoopHeroVideo()
               }}
