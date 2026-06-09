@@ -141,9 +141,9 @@ export default function Header({
         ) : null}
       </div>
 
-      <a href="/support" className={navLinkClass}>
+      <Link to="/support" className={navLinkClass}>
         고객센터
-      </a>
+      </Link>
     </nav>
   )
 
