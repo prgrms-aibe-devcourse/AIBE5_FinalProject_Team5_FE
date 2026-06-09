@@ -1,12 +1,18 @@
-import { useMemo, useState } from 'react'
-import { scheduleEvents, type ScheduleEvent, weekdayLabels } from '../dashboardData'
+import { useMemo, useState, type ReactNode } from 'react'
+import { scheduleEvents, type ScheduleEvent, weekdayLabels } from '../data/schedule'
+import DashboardCard from './DashboardCard'
 
 type ScheduleCalendarPanelProps = {
   events?: ScheduleEvent[]
   title?: string
   showAddButton?: boolean
   onAddSchedule?: () => void
+  onEventClick?: (event: ScheduleEvent) => void
+  selectedEventId?: number | null
+  selectedDate?: string
+  onSelectedDateChange?: (dateKey: string) => void
   className?: string
+  withCard?: boolean
 }
 
 function pad(number: number) {
@@ -39,16 +45,56 @@ function getInitialSelectedDate(currentMonth: Date, events: ScheduleEvent[]) {
   return monthEvents[0]?.date ?? toDateKey(currentMonth)
 }
 
+const CALENDAR_GRID_CLASS = 'grid w-full grid-cols-[repeat(7,minmax(0,1fr))]'
+
+function MonthNavButton({
+  onClick,
+  label,
+  children,
+}: {
+  onClick: () => void
+  label: string
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex h-8 w-8 items-center justify-center rounded-full font-pretendard text-secondary transition-colors hover:bg-foamWhite hover:text-deepOceanNavy"
+    >
+      {children}
+    </button>
+  )
+}
+
 export default function ScheduleCalendarPanel({
   events = scheduleEvents,
-  title = '일정',
+  title,
   showAddButton = false,
   onAddSchedule,
+  onEventClick,
+  selectedEventId = null,
+  selectedDate: controlledSelectedDate,
+  onSelectedDateChange,
   className = '',
+  withCard = true,
 }: ScheduleCalendarPanelProps) {
   const today = new Date()
   const [currentMonth, setCurrentMonth] = useState(() => new Date())
-  const [selectedDate, setSelectedDate] = useState(() => getInitialSelectedDate(today, events))
+  const [internalSelectedDate, setInternalSelectedDate] = useState(() => getInitialSelectedDate(today, events))
+
+  const isDateControlled = controlledSelectedDate !== undefined && onSelectedDateChange !== undefined
+  const selectedDate = isDateControlled ? controlledSelectedDate : internalSelectedDate
+
+  const updateSelectedDate = (dateKey: string) => {
+    if (isDateControlled) {
+      onSelectedDateChange(dateKey)
+      return
+    }
+
+    setInternalSelectedDate(dateKey)
+  }
 
   const currentMonthEvents = useMemo(() => {
     return events.filter((event) => isSameMonth(fromDateKey(event.date), currentMonth))
@@ -77,7 +123,6 @@ export default function ScheduleCalendarPanel({
         dateKey,
         inMonth: cellDate.getMonth() === currentMonth.getMonth(),
         isSelected: dateKey === selectedDate,
-        isToday: dateKey === toDateKey(new Date()),
         eventsForDay,
       }
     })
@@ -96,66 +141,61 @@ export default function ScheduleCalendarPanel({
   const goToMonth = (amount: number) => {
     const nextMonth = addMonths(currentMonth, amount)
     setCurrentMonth(nextMonth)
-    setSelectedDate(getInitialSelectedDate(nextMonth, events))
+    updateSelectedDate(getInitialSelectedDate(nextMonth, events))
   }
 
   const goToToday = () => {
     setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1))
-    setSelectedDate(toDateKey(today))
+    updateSelectedDate(toDateKey(today))
   }
 
   const getDotClassName = (eventCount: number, isSelected: boolean) => {
     if (isSelected) return 'bg-white'
-    if (eventCount === 1) return 'bg-[#8ea4ba]'
-    if (eventCount === 2) return 'bg-[#6b8bc6]'
-    return 'bg-[#344A64]'
+    if (eventCount === 1) return 'bg-softAquaBlue'
+    if (eventCount === 2) return 'bg-waterlineBlue'
+    return 'bg-deepOceanNavy'
   }
 
-  return (
-    <section className={`rounded-2xl border border-[#eef2f6] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] ${className}`}>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-[#151b24]">{title}</h2>
-
-        <div className="flex items-center gap-2">
-          <div className="flex overflow-hidden rounded-md border border-[#dfe6ee]">
-            <button type="button" onClick={() => goToMonth(-1)} className="grid h-8 w-8 place-items-center bg-[#f3f6f9] text-[#758195]" aria-label="이전 달">
-              ‹
-            </button>
-            <button type="button" onClick={() => goToMonth(1)} className="grid h-8 w-8 place-items-center border-l border-[#dfe6ee] bg-[#344A64] text-white" aria-label="다음 달">
-              ›
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={goToToday}
-            className="rounded-lg border border-[#dfe6ee] px-3 py-2 text-sm font-semibold text-[#344A64] transition-colors hover:bg-[#f6f8fa]"
-          >
-            오늘
-          </button>
-
-          {showAddButton ? (
-            <button
-              type="button"
-              onClick={onAddSchedule}
-              className="rounded-lg bg-[#3e4f6d] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#344A64]"
-            >
-              + 일정 추가
-            </button>
-          ) : null}
-        </div>
+  const calendarToolbar = (
+    <div className={`mb-4 ${CALENDAR_GRID_CLASS} items-center`}>
+      <p className="col-span-4 min-w-0 truncate pr-2 text-left font-pretendard text-base font-semibold text-deepOceanNavy">
+        {monthLabel}
+      </p>
+      <div className="col-span-3 col-start-5 flex min-w-0 items-center justify-end gap-1">
+        <MonthNavButton onClick={() => goToMonth(-1)} label="이전 달">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </MonthNavButton>
+        <MonthNavButton onClick={() => goToMonth(1)} label="다음 달">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </MonthNavButton>
+        <button
+          type="button"
+          onClick={goToToday}
+          className="rounded-full px-3 py-1.5 font-pretendard text-xs font-semibold text-waterlineBlue transition-colors hover:bg-foamWhite hover:text-deepOceanNavy"
+        >
+          오늘
+        </button>
       </div>
+    </div>
+  )
 
-      <div className="mb-4 flex items-center justify-between">
-        <div className="text-base font-medium text-[#9aa3af]">{monthLabel}</div>
-        <div className="text-sm text-[#6b7280]">{selectedLabel}</div>
-      </div>
+  const panelContent = (
+    <>
+      {!withCard && title ? (
+        <h2 className="mb-5 font-pretendard text-lg font-bold text-deepOceanNavy">{title}</h2>
+      ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
-        <div>
-          <div className="grid grid-cols-7 gap-y-4 text-center text-sm">
+      <div className="grid gap-6 xl:grid-cols-2 xl:items-stretch">
+        <div className="min-w-0">
+          {calendarToolbar}
+
+          <div className={`${CALENDAR_GRID_CLASS} gap-y-4 text-center text-sm`}>
             {weekdayLabels.map((day) => (
-              <div key={day} className="text-xs font-medium text-[#9aa3af]">
+              <div key={day} className="min-w-0 px-0.5 font-pretendard text-xs font-medium text-secondary">
                 {day}
               </div>
             ))}
@@ -164,67 +204,134 @@ export default function ScheduleCalendarPanel({
               const dotCount = Math.min(cell.eventsForDay.length, 4)
 
               return (
-                <button
-                  type="button"
-                  key={cell.dateKey}
-                  onClick={() => setSelectedDate(cell.dateKey)}
-                  className={`relative mx-auto flex h-10 w-10 flex-col items-center justify-center rounded-full text-sm transition-colors ${
-                    cell.isSelected ? 'bg-[#344A64] text-white' : cell.inMonth ? 'text-[#1f2937] hover:bg-[#edf3f7]' : 'text-[#c4cbd4] hover:bg-[#f6f8fa]'
-                  }`}
-                >
-                  {cell.date.getDate()}
-                  {dotCount > 0 ? (
-                    <span className="absolute -bottom-1 flex items-center justify-center gap-0.5">
-                      {Array.from({ length: dotCount }, (_, index) => (
-                        <span
-                          key={index}
-                          className={`h-1.5 w-1.5 rounded-full ${getDotClassName(cell.eventsForDay.length, cell.isSelected)}`}
-                        />
-                      ))}
-                      {cell.eventsForDay.length > 4 ? (
-                        <span className={`ml-0.5 text-[10px] font-semibold ${cell.isSelected ? 'text-white' : 'text-[#344A64]'}`}>
-                          +{cell.eventsForDay.length - 4}
-                        </span>
-                      ) : null}
-                    </span>
-                  ) : null}
-                </button>
+                <div key={cell.dateKey} className="flex min-w-0 items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => updateSelectedDate(cell.dateKey)}
+                    className={`flex aspect-square w-full max-w-11 flex-col items-center justify-center gap-0.5 rounded-full font-pretendard text-sm transition-colors ${
+                      cell.isSelected
+                        ? 'bg-deepOceanNavy text-white'
+                        : cell.inMonth
+                          ? 'text-deepOceanNavy hover:bg-foamWhite'
+                          : 'text-mistSkyBlue hover:bg-foamWhite/60'
+                    }`}
+                  >
+                    <span className="leading-none">{cell.date.getDate()}</span>
+                    {dotCount > 0 ? (
+                      <span className="flex items-center justify-center gap-0.5">
+                        {Array.from({ length: dotCount }, (_, index) => (
+                          <span
+                            key={index}
+                            className={`h-1 w-1 rounded-full ${getDotClassName(cell.eventsForDay.length, cell.isSelected)}`}
+                          />
+                        ))}
+                        {cell.eventsForDay.length > 4 ? (
+                          <span
+                            className={`ml-0.5 text-[9px] font-semibold leading-none ${cell.isSelected ? 'text-white' : 'text-deepOceanNavy'}`}
+                          >
+                            +{cell.eventsForDay.length - 4}
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : null}
+                  </button>
+                </div>
               )
             })}
           </div>
         </div>
 
-        <div>
-          <h3 className="mb-3 text-sm font-bold text-[#151b24]">리마인더</h3>
-          <p className="mb-4 text-xs text-[#9aa3af]">{selectedLabel}</p>
+        <div className="flex min-h-full min-w-0 flex-col">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h3 className="font-pretendard text-base font-semibold text-deepOceanNavy">리마인더</h3>
+              <p className="mt-0.5 font-pretendard text-xs text-secondary">{selectedLabel}</p>
+            </div>
+            {showAddButton ? (
+              <button
+                type="button"
+                onClick={onAddSchedule}
+                className="shrink-0 rounded-full bg-deepOceanNavy px-4 py-2 font-pretendard text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue"
+              >
+                + 일정 추가
+              </button>
+            ) : null}
+          </div>
 
-          <div className="space-y-3">
+          <div className="flex-1">
             {selectedEvents.length > 0 ? (
-              selectedEvents.map((event) => (
-                <article key={event.id} className="flex items-center gap-3 rounded-xl border border-[#e7edf3] px-4 py-3">
-                  <div className="flex w-14 flex-col items-center justify-center rounded-xl border-r border-[#e8edf2] pr-3 text-center">
-                    <div className="text-sm font-bold text-[#111827]">{event.startTime}</div>
-                    <div className="text-xs font-medium text-[#6b7280]">{event.endTime}</div>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#1f2937]">{event.title}</p>
-                    <p className="mt-1 text-xs text-[#9aa3af]">{event.description}</p>
-                  </div>
-                </article>
-              ))
+              <ul className="divide-y divide-mistSkyBlue/25">
+                {selectedEvents.map((event) => {
+                  const isActive = selectedEventId === event.id
+
+                  const content = (
+                    <>
+                      <div className="w-12 shrink-0 text-center">
+                        <p className="font-pretendard text-sm font-bold text-waterlineBlue">{event.startTime}</p>
+                        <p className="font-pretendard text-[10px] text-secondary">{event.endTime}</p>
+                      </div>
+                      <div className="min-w-0 border-l border-mistSkyBlue/30 pl-3 text-left">
+                        <p className="font-pretendard text-sm font-semibold text-deepOceanNavy">{event.title}</p>
+                        <p className="mt-0.5 line-clamp-2 font-pretendard text-xs leading-relaxed text-secondary">
+                          {event.description}
+                        </p>
+                      </div>
+                    </>
+                  )
+
+                  return (
+                    <li key={event.id} className="py-3 first:pt-0">
+                      {onEventClick ? (
+                        <button
+                          type="button"
+                          onClick={() => onEventClick(event)}
+                          aria-pressed={isActive}
+                          className={`flex w-full gap-3 rounded-xl px-2 py-1.5 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-waterlineBlue/50 ${
+                            isActive
+                              ? 'bg-foamWhite ring-1 ring-waterlineBlue/35'
+                              : 'hover:bg-foamWhite/80'
+                          }`}
+                        >
+                          {content}
+                        </button>
+                      ) : (
+                        <article className="flex gap-3">{content}</article>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
             ) : (
-              <div className="rounded-xl border border-dashed border-[#d8dee8] px-4 py-5 text-center text-sm text-[#8f98a6]">
+              <p className="py-6 text-center font-pretendard text-sm text-secondary">
                 선택한 날짜의 일정이 없습니다.
-              </div>
+              </p>
             )}
           </div>
 
-          <div className="mt-5 rounded-2xl border border-[#e7edf3] bg-[#f8fafc] px-4 py-4">
-            <p className="text-sm font-semibold text-[#1f2937]">전체 일정 수</p>
-            <p className="mt-2 text-2xl font-bold text-[#344A64]">{currentMonthEvents.length}</p>
+          <div className="mt-auto w-full pt-5">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-mistSkyBlue/45 bg-foamWhite/50 px-5 py-3.5">
+              <div className="min-w-0">
+                <p className="font-pretendard text-sm font-semibold text-deepOceanNavy">이번 달 일정</p>
+                <p className="mt-0.5 truncate font-pretendard text-xs text-secondary">{monthLabel}</p>
+              </div>
+              <p className="shrink-0 font-pretendard text-2xl font-bold leading-none text-waterlineBlue tabular-nums">
+                {currentMonthEvents.length}
+                <span className="ml-0.5 text-sm font-semibold text-secondary">건</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+    </>
   )
+
+  if (withCard) {
+    return (
+      <DashboardCard title={title} className={className}>
+        {panelContent}
+      </DashboardCard>
+    )
+  }
+
+  return <section className={className}>{panelContent}</section>
 }
