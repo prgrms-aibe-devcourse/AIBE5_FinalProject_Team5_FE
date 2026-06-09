@@ -1,8 +1,23 @@
-﻿import favicon from '../../assets/bootsignal_fabicon.png'
+﻿import { Link } from 'react-router-dom'
+import favicon from '../../assets/bootsignal_fabicon.png'
 
-const serviceLinks = ['과정 탐색', '게시판', 'Q&A', '모집', '아티클']
-const infoLinks = ['이용약관', '개인정보처리방침']
-const supportLinks = ['고객센터', '문의하기']
+const serviceLinks = [
+  { label: '과정 탐색', to: '/courses' },
+  { label: '게시판', to: '/community/posts' },
+  { label: 'Q&A', to: '/community/qna' },
+  { label: '모집', to: '/community/recruit' },
+  { label: '아티클', to: '/community/article' },
+]
+
+const infoLinks = [
+  { label: '이용약관', to: '/support' },
+  { label: '개인정보처리방침', to: '/support' },
+]
+
+const supportLinks = [
+  { label: '고객센터', to: '/support' },
+  { label: '문의하기', to: '/dashboard/inquiries' },
+]
 
 const linkColumns = [
   { title: '서비스', links: serviceLinks },
@@ -32,11 +47,11 @@ export default function Footer() {
               <div key={title} className="space-y-3">
                 <p className="text-base font-semibold">{title}</p>
                 <ul className="space-y-2">
-                  {links.map((label) => (
-                    <li key={label}>
-                      <a href="/" className="text-sm transition-colors hover:text-waterlineBlue">
-                        {label}
-                      </a>
+                  {links.map((link) => (
+                    <li key={link.label}>
+                      <Link to={link.to} className="text-sm transition-colors hover:text-waterlineBlue">
+                        {link.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>
