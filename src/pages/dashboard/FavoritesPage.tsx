@@ -120,7 +120,7 @@ export default function FavoritesPage() {
           ) : null}
 
           {sortedCourses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-mistSkyBlue/45 bg-white px-6 py-20 text-center shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-mistSkyBlue/35 bg-white/60 px-6 py-20 text-center shadow-[0_8px_32px_rgba(30,58,95,0.12)] backdrop-blur-md">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-foamWhite text-waterlineBlue ring-1 ring-mistSkyBlue/50">
                 <svg width={24} height={24} viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path

@@ -103,7 +103,7 @@ export default function CourseVerifiedReviewStep4ProjectModal({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className="flex max-h-[90dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">

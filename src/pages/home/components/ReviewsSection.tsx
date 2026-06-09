@@ -26,7 +26,7 @@ export default function ReviewsSection() {
             return (
               <li
                 key={review.id}
-                className={`relative flex flex-col items-center rounded-2xl border bg-white px-5 pb-6 pt-12 text-center transition-transform ${
+                className={`relative flex flex-col items-center rounded-2xl border bg-white/85 backdrop-blur-sm px-5 pb-6 pt-12 text-center transition-transform ${
                   featured
                     ? 'border-waterlineBlue shadow-[0_12px_28px_rgba(52,74,100,0.14)] lg:-translate-y-4'
                     : 'border-[#e7edf3] shadow-[0_2px_10px_rgba(52,74,100,0.05)]'

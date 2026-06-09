@@ -100,9 +100,9 @@ export default function AdminReviewsPage() {
         </button>
       </div>
 
-      <div className="rounded-xl border border-[#eef2f6] bg-white overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-mistSkyBlue/35 bg-white/60 shadow-[0_8px_32px_rgba(30,58,95,0.12),0_2px_8px_rgba(30,58,95,0.07)] backdrop-blur-md">
         {/* Table header */}
-        <div className="border-b border-[#eef2f6] px-6 py-4">
+        <div className="border-b border-mistSkyBlue/30 px-6 py-4">
           <div className="flex items-center gap-4 text-xs font-semibold text-[#536173]">
             <div className="w-12">No</div>
             <div className="flex-1">Ref</div>
@@ -114,11 +114,11 @@ export default function AdminReviewsPage() {
         </div>
 
         {/* Table rows */}
-        <div className="divide-y divide-[#eef2f6]">
+        <div className="divide-y divide-mistSkyBlue/20">
           {mockReviewers.map((reviewer) => (
             <div
               key={reviewer.no}
-              className="flex items-center gap-4 px-6 py-4 bg-white hover:bg-[#f8fafc] transition-colors"
+              className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-foamWhite/40"
             >
               <div className="w-12 text-sm font-medium text-[#151b24]">{reviewer.no}</div>
 

@@ -135,7 +135,7 @@ export default function CourseReviewListPanel({ onClickWriteReview }: CourseRevi
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-mistSkyBlue/45 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+    <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
       {/* 리뷰 내역 헤더 영역 */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/45 to-waterlineBlue/30 px-5 py-4 md:px-6">
         <div className="flex items-center gap-3">

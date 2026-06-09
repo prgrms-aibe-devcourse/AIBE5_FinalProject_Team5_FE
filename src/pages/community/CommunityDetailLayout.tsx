@@ -66,7 +66,7 @@ export default function CommunityDetailLayout() {
   if (!section) { return null } // 현재 섹션이 없으면 렌더링 안함
 
   return (
-    <div className="flex min-h-screen flex-col bg-white font-pretendard">
+    <div className="flex min-h-screen flex-col font-pretendard">
       {/* 헤더 */}
       <Header fixed={false} />
 

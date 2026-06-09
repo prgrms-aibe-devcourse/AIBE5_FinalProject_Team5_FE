@@ -266,7 +266,7 @@ export default function AiPortfolioModal({ onClose }: Props) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="ai-portfolio-modal-title"
@@ -304,7 +304,7 @@ export default function AiPortfolioModal({ onClose }: Props) {
         </div>
 
         {step > 1 ? (
-          <div className="shrink-0 flex justify-end border-t border-mistSkyBlue/45 bg-white px-6 py-4">
+          <div className="shrink-0 flex justify-end border-t border-mistSkyBlue/45 bg-transparent px-6 py-4">
             <DashboardActionButton label="다음" onClick={handleNext} />
           </div>
         ) : null}

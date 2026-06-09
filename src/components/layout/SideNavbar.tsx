@@ -148,9 +148,16 @@ export default function SideNavbar({ variant }: SideNavbarProps) {
   const currentPath = pathname.replace(/\/+$/, '') || '/' // 현재 경로 가져오기
 
   return (
-    <aside className="flex min-h-screen w-[250px] shrink-0 flex-col border-r border-[#edf1f5] bg-white px-4 py-6">
+    <aside className="glass-sidebar flex min-h-screen w-[250px] shrink-0 flex-col px-4 py-6">
       {/* 로고 영역 */}
-      <Link to="/" className="mb-10 flex items-center px-1" aria-label="BootSignal 홈">
+      <Link
+        to="/"
+        className="mb-10 flex items-center px-1"
+        aria-label="BootSignal 홈"
+        onClick={() => {
+          try { sessionStorage.setItem('bootsignal-home-entry-played', 'true') } catch {}
+        }}
+      >
         <img src={logo} alt="BootSignal" className="h-10 w-auto" />
       </Link>
 

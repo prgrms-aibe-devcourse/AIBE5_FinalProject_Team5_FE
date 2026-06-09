@@ -14,7 +14,7 @@ export default function WeeklyVisitorsChartSection({
   weeklyVisitorAverage, // 7일 평균 방문자 수
 }: WeeklyVisitorsChartSectionProps) {
   return (
-    <section className="rounded-2xl border border-[#eef2f6] bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <section className="glass-panel rounded-2xl p-6">
       {/* 관리자 대시보드 주별 방문자 수 차트 헤더 */}
       <h2 className="font-pretendard text-lg font-bold text-[#151b24]">주간 방문자</h2>
       <p className="mt-1 font-pretendard text-sm text-[#64748b]">

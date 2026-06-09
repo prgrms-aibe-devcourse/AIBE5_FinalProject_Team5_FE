@@ -30,7 +30,7 @@ export default function PopularCoursesSection() {
   }
 
   return (
-    <section id="popular-courses" className="w-full bg-white px-6 py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
+    <section id="popular-courses" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
       <div className="mx-auto w-full max-w-desktop-content">
         <h2 className="text-center text-2xl font-bold text-deepOceanNavy font-pretendard md:text-[28px]">이번 주 인기 과정</h2>
         <p className="mt-2 text-center text-sm text-[#7b8795] font-pretendard">
@@ -42,7 +42,7 @@ export default function PopularCoursesSection() {
             type="button"
             onClick={() => scrollByCard(-1)}
             aria-label="이전 과정"
-            className="absolute -left-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-[#e1e5ea] bg-white text-[#7c8796] shadow-[0_4px_12px_rgba(52,74,100,0.1)] transition-colors hover:border-waterlineBlue hover:text-deepOceanNavy md:-left-5"
+            className="absolute -left-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-[#e1e5ea] bg-white/85 backdrop-blur-sm text-[#7c8796] shadow-[0_4px_12px_rgba(52,74,100,0.1)] transition-colors hover:border-waterlineBlue hover:text-deepOceanNavy md:-left-5"
           >
             ←
           </button>
@@ -56,7 +56,7 @@ export default function PopularCoursesSection() {
               <article
                 key={course.id}
                 data-course-card
-                className="w-[260px] shrink-0 snap-start rounded-2xl border border-[#e4e8ee] bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.05)] transition-transform hover:-translate-y-1"
+                className="w-[260px] shrink-0 snap-start rounded-2xl border border-[#e4e8ee] bg-white/85 backdrop-blur-sm p-4 shadow-[0_2px_8px_rgba(15,23,42,0.05)] transition-transform hover:-translate-y-1"
               >
                 <CourseLogo />
 
@@ -84,7 +84,7 @@ export default function PopularCoursesSection() {
             type="button"
             onClick={() => scrollByCard(1)}
             aria-label="다음 과정"
-            className="absolute -right-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-[#e1e5ea] bg-white text-[#7c8796] shadow-[0_4px_12px_rgba(52,74,100,0.1)] transition-colors hover:border-waterlineBlue hover:text-deepOceanNavy md:-right-5"
+            className="absolute -right-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-[#e1e5ea] bg-white/85 backdrop-blur-sm text-[#7c8796] shadow-[0_4px_12px_rgba(52,74,100,0.1)] transition-colors hover:border-waterlineBlue hover:text-deepOceanNavy md:-right-5"
           >
             →
           </button>

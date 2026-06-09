@@ -18,7 +18,7 @@ export default function MonthlySignupChartSection({
   sixMonthHigh, // 6개월 최고 가입자 수
 }: MonthlySignupChartSectionProps) {
   return (
-    <section className="rounded-2xl border border-[#eef2f6] bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <section className="glass-panel rounded-2xl p-6">
       {/* 관리자 대시보드 월별 가입자 수 차트 헤더 */}
       <div className="flex items-start justify-between gap-4">
         <div>

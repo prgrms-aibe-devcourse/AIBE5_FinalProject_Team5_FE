@@ -106,7 +106,7 @@ export default function CourseCard({
       tabIndex={onOpenDetail ? 0 : undefined}
       onClick={onOpenDetail ? handleCardClick : undefined}
       onKeyDown={onOpenDetail ? handleCardKeyDown : undefined}
-      className={`@container flex w-full origin-center flex-col overflow-hidden border border-mistSkyBlue/50 bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out font-pretendard ${
+      className={`@container flex w-full origin-center flex-col overflow-hidden glass-panel transition-[transform,box-shadow] duration-200 ease-out font-pretendard ${
         isCompact
           ? 'w-full rounded-xl hover:scale-[1.02] hover:shadow-md'
           : 'aspect-[340/450] max-w-full rounded-2xl hover:scale-[1.03] hover:shadow-md'

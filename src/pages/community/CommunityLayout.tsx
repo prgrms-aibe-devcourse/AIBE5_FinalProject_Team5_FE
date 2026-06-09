@@ -9,7 +9,7 @@ import CommunityRecentVisitsSidebar from './components/CommunityRecentVisitsSide
 // 커뮤니티 목록 레이아웃
 export default function CommunityLayout() {
   return (
-    <div className="flex min-h-screen flex-col bg-white font-pretendard">
+    <div className="flex min-h-screen flex-col font-pretendard">
       {/* 헤더 */}
       <Header fixed={false} />
 

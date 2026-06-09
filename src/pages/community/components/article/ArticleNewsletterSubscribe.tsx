@@ -30,7 +30,7 @@ export default function ArticleNewsletterSubscribe({ compact = false }: ArticleN
 
   if (compact) {
     return (
-      <div className="rounded-2xl border border-mistSkyBlue/50 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl glass-panel p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-deepOceanNavy">뉴스레터 구독</h2>
         <p className="mt-1.5 text-xs leading-relaxed text-secondary">새 아티클이 올라오면 메일로 받아보세요.</p>
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-2">
@@ -56,7 +56,7 @@ export default function ArticleNewsletterSubscribe({ compact = false }: ArticleN
   return (
     <section
       aria-label="뉴스레터 구독"
-      className="rounded-2xl border border-mistSkyBlue/40 bg-white px-5 py-5 shadow-[0_2px_12px_rgba(52,74,100,0.04)] md:flex md:items-center md:justify-between md:gap-6 md:px-6"
+      className="rounded-2xl glass-panel px-5 py-5 shadow-[0_2px_12px_rgba(52,74,100,0.04)] md:flex md:items-center md:justify-between md:gap-6 md:px-6"
     >
       <div className="md:min-w-0 md:flex-1">
         <h2 className="text-sm font-semibold text-deepOceanNavy">매주 인사이트를 메일로 받아보세요</h2>

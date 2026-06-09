@@ -15,7 +15,7 @@ export default function CommunityDetailCard({
   children,
 }: CommunityDetailCardProps) {
   return (
-    <article className="rounded-xl border border-mistSkyBlue/50 bg-white p-6 shadow-sm md:p-8">
+    <article className="rounded-xl glass-panel p-6 shadow-sm md:p-8">
       
       {/* 리드링크 */}
       {leading ? <div className="mb-3">{leading}</div> : null}

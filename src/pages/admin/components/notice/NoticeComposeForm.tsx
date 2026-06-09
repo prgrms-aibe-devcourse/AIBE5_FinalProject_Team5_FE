@@ -38,7 +38,7 @@ export default function NoticeComposeForm({ onSend }: NoticeComposeFormProps) {
   const canSubmit = title.trim().length > 0 && content.trim().length > 0
 
   return (
-    <section className="mb-8 overflow-hidden rounded-2xl border border-mistSkyBlue/45 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+    <section className="mb-8 overflow-hidden rounded-2xl border border-white/75 bg-white/52 shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)]">
       {/* 공지 발송 폼 헤더 */}
       <div className="border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
         <h2 className="font-pretendard text-base font-bold text-deepOceanNavy">공지 발송</h2>

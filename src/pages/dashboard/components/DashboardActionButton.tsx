@@ -10,7 +10,7 @@ type DashboardActionButtonProps = {
 
 const variantClass: Record<NonNullable<DashboardActionButtonProps['variant']>, string> = {
   primary:
-    'border-deepOceanNavy bg-deepOceanNavy text-white shadow-sm hover:border-waterlineBlue hover:bg-waterlineBlue',
+    'border-deepOceanNavy bg-deepOceanNavy text-white shadow-[0_8px_24px_rgba(30,58,95,0.35),0_2px_6px_rgba(30,58,95,0.18)] hover:border-waterlineBlue hover:bg-waterlineBlue hover:shadow-[0_12px_32px_rgba(84,132,183,0.40),0_4px_10px_rgba(84,132,183,0.22)] hover:-translate-y-px transition-all',
   secondary:
     'border-mistSkyBlue/60 bg-white text-secondary hover:border-waterlineBlue hover:bg-foamWhite/60 hover:text-deepOceanNavy',
   ghost:

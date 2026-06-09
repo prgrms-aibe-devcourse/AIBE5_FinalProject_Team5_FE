@@ -53,7 +53,7 @@ function SectionCard({ sectionKey }: { sectionKey: CommunitySectionKey }) {
     <NavLink
       to={listPath}
       className={({ isActive }) =>
-        `group relative flex flex-col overflow-hidden rounded-2xl border bg-white/90 p-4 backdrop-blur-md transition-all duration-300 sm:p-5 ${
+        `group relative flex flex-col overflow-hidden rounded-2xl glass-panel p-4 transition-all duration-300 sm:p-5 ${
           isActive
             ? 'border-waterlineBlue/45 shadow-[0_8px_24px_rgba(0,94,184,0.12)] ring-1 ring-waterlineBlue/15'
             : 'border-mistSkyBlue/40 shadow-[0_4px_16px_rgba(52,74,100,0.05)] hover:-translate-y-0.5 hover:border-waterlineBlue/35 hover:shadow-[0_12px_32px_rgba(52,74,100,0.1)]'

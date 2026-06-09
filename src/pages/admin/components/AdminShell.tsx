@@ -5,7 +5,7 @@ import SideNavbar from '../../../components/layout/SideNavbar'
 // (사이드바 + 헤더 + 메인 컨텐츠 영역) 레이아웃
 export default function AdminShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-[#111827]">
+    <div className="min-h-screen text-[#111827]">
       <div className="flex min-h-screen">
         {/* 관리자 사이드바 */}
         <SideNavbar variant="admin" />

@@ -206,14 +206,14 @@ export default function Header({
 
   if (isShell) {
     return (
-      <header className={`flex h-20 items-center justify-end bg-[#fbfbfb] px-10 ${headerPositionClass}`}>
+      <header className={`glass-topbar z-10 flex h-20 items-center justify-end px-10 ${headerPositionClass}`}>
         {navAndActions}
       </header>
     )
   }
 
   return (
-    <header className={`site-header z-50 w-full min-w-desktop bg-[#fbfbfb] px-6 md:px-12 ${headerPositionClass}`}>
+    <header className={`site-header glass-topbar z-50 w-full min-w-desktop px-6 md:px-12 ${headerPositionClass}`}>
       <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
         <Link to="/" aria-label="BootSignal 홈">
           <img src={logo} alt="BootSignal" className="h-11 w-auto" />

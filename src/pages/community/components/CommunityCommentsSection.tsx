@@ -83,11 +83,11 @@ export default function CommunityCommentsSection({ resourceKey }: CommunityComme
 
       {/* 댓글 목록 */}
       {comments.length === 0 ? ( // 댓글 목록이 없으면
-        <p className="rounded-xl border border-mistSkyBlue/35 bg-white px-4 py-6 text-center text-sm text-secondary">
+        <p className="rounded-xl border border-mistSkyBlue/35 bg-white/20 px-4 py-6 text-center text-sm text-secondary">
           아직 댓글이 없습니다.
         </p>
       ) : ( // 댓글 목록이 있으면
-        <ul className="divide-y divide-mistSkyBlue/35 rounded-xl border border-mistSkyBlue/35 bg-white">
+        <ul className="divide-y divide-mistSkyBlue/35 rounded-xl border border-mistSkyBlue/35 bg-white/20">
           {comments.map((comment) => ( // 댓글 목록 아이템
             <li key={comment.id} className="px-4 py-4 md:px-5">
               <div className="flex items-center justify-between gap-3">

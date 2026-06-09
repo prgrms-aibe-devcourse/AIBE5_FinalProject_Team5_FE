@@ -108,7 +108,7 @@ export default function SignupPage() {
       <LoginVisualPanel overlayText="SIGN UP" />
 
       {/* 우측 폼 영역 */}
-      <div className="relative flex h-full w-1/2 flex-col overflow-y-auto bg-white px-8 py-6">
+      <div className="relative flex h-full w-1/2 flex-col overflow-y-auto glass-panel px-8 py-6">
         {/* 뒤로가기 */}
         <div className="absolute left-8 top-6 z-10">
           <AuthExitButton />
@@ -207,7 +207,7 @@ export default function SignupPage() {
                 <div className="w-full border-t border-mistSkyBlue" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-sm text-softAquaBlue font-pretendard">Or</span>
+                <span className="bg-transparent px-3 text-sm text-softAquaBlue font-pretendard">Or</span>
               </div>
             </div>
 

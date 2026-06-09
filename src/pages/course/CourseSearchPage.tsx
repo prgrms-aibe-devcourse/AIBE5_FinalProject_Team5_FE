@@ -97,7 +97,7 @@ export default function CourseSearchPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white font-pretendard">
+    <div className="flex min-h-screen flex-col font-pretendard">
       <Header fixed={false} />
 
       {/* 상단: 키워드 검색 + 필터 4종 (상태값 CourseSearchHero로 전달 )*/}

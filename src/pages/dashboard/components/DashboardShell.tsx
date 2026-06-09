@@ -13,7 +13,7 @@ type DashboardShellProps = {
 // 대시보드 공통 레이아웃 (사이드바·헤더·페이지 헤더)
 export default function DashboardShell({ title, description, action, children }: DashboardShellProps) {
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-primary">
+    <div className="min-h-screen text-primary">
       <div className="flex min-h-screen">
         {/* 사이드 네비 */}
         <SideNavbar variant="dashboard" />

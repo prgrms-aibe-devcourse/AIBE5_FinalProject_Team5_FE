@@ -48,7 +48,7 @@ export default function CertificationDocumentsModal({ request, onClose }: Certif
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="certification-documents-modal-title"
@@ -141,7 +141,7 @@ export default function CertificationDocumentsModal({ request, onClose }: Certif
             )}
           </aside>
 
-          <div className="min-w-0 flex-1 overflow-hidden bg-white">
+          <div className="min-w-0 flex-1 overflow-hidden bg-transparent">
             {selectedDocument ? (
               <DocumentPreview document={selectedDocument} />
             ) : (
@@ -165,7 +165,7 @@ export default function CertificationDocumentsModal({ request, onClose }: Certif
           </div>
         ) : null}
 
-        <div className="shrink-0 border-t border-mistSkyBlue/45 bg-white px-6 py-4 md:px-7">
+        <div className="shrink-0 border-t border-mistSkyBlue/45 bg-transparent px-6 py-4 md:px-7">
           <button
             type="button"
             onClick={onClose}

@@ -21,7 +21,7 @@ export default function CourseReviewStatsPanel() {
   const priorKnowledgeGradient = buildPriorKnowledgeConicGradient(priorKnowledgeDistribution)
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-mistSkyBlue/45 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+    <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
       <div className="flex items-center gap-3 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/45 to-waterlineBlue/30 px-5 py-4 md:px-6">
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-waterlineBlue shadow-sm ring-1 ring-mistSkyBlue/60">
           <StatsIcon />

@@ -48,7 +48,7 @@ export default function CourseComparePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white font-pretendard">
+    <div className="flex min-h-screen flex-col font-pretendard">
       {/* 헤더 */}
       <div className="no-print">
         <Header fixed={false} />
@@ -71,7 +71,7 @@ export default function CourseComparePage() {
             </div>
             {/* PDF 출력 버튼 */}
             <button type="button" onClick={handleExportPdf} disabled={isPdfExporting}
-              className="no-print inline-flex items-center gap-2 rounded-lg border border-mistSkyBlue/50 bg-white px-4 py-2 text-sm font-semibold text-deepOceanNavy shadow-sm transition-colors hover:border-waterlineBlue hover:text-waterlineBlue disabled:cursor-not-allowed disabled:opacity-60"
+              className="no-print inline-flex items-center gap-2 rounded-lg border border-mistSkyBlue/50 glass-panel px-4 py-2 text-sm font-semibold text-deepOceanNavy shadow-sm transition-colors hover:border-waterlineBlue hover:text-waterlineBlue disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M8 3h8a2 2 0 012 2v2H6V5a2 2 0 012-2zm-4 7h16v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8zm4 10h8v2H8v-2z"

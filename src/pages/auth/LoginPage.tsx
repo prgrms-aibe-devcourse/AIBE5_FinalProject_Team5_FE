@@ -44,7 +44,7 @@ export default function LoginPage() {
   return (
     <div className="flex h-dvh w-full overflow-hidden font-pretendard">
       {/* 좌측 사이드 영역 */}
-      <div className="relative flex h-full w-1/2 flex-col overflow-y-auto bg-white px-8 py-6">
+      <div className="relative flex h-full w-1/2 flex-col overflow-y-auto glass-panel px-8 py-6">
           {/* 뒤로가기 */}
           <div className="absolute left-8 top-6 z-10">
             <AuthExitButton />
@@ -122,7 +122,7 @@ export default function LoginPage() {
                   <div className="w-full border-t border-mistSkyBlue" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-white px-3 text-sm text-softAquaBlue font-pretendard">Or</span>
+                  <span className="bg-transparent px-3 text-sm text-softAquaBlue font-pretendard">Or</span>
                 </div>
               </div>
               {/* 소셜 로그인 */}
