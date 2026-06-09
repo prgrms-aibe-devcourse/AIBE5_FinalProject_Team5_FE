@@ -41,7 +41,10 @@ export default function WeeklyVisitorsChartSection({
             <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
             <Tooltip
               contentStyle={ {border: '1px solid #eef2f6',borderRadius: 12, fontSize: 13, fontFamily: 'Pretendard',} }
-              formatter={(value: number) => [`${value}명`, '방문자']}
+              formatter={(value: string | number | readonly (string | number)[] | undefined) => [
+                `${Array.isArray(value) ? Number(value[0] ?? 0) : Number(value ?? 0)}명`,
+                '방문자',
+              ]}
             />
             <Area type="monotone" dataKey="v" stroke="#344A64" strokeWidth={2} fill="url(#adminAreaGrad)" dot={false} />
           </AreaChart>

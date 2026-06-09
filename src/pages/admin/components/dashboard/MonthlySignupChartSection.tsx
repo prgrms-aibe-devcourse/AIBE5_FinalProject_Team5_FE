@@ -50,7 +50,10 @@ export default function MonthlySignupChartSection({
                 fontFamily: 'Pretendard',
                 boxShadow: '0 4px 12px rgba(52,74,100,0.08)',
               }}
-              formatter={(value: number) => [`${value.toLocaleString()}명`, '가입자']}
+              formatter={(value: string | number | readonly (string | number)[] | undefined) => [
+                `${Array.isArray(value) ? Number(value[0] ?? 0).toLocaleString() : Number(value ?? 0).toLocaleString()}명`,
+                '가입자',
+              ]}
             />
             <Bar dataKey="value" fill="#5484B7" radius={[6, 6, 0, 0]} />
           </BarChart>

@@ -36,6 +36,13 @@ body {
   opacity: 1;
   transform: translateY(0);
   animation: none;
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+
+.home-page--intro-active .site-header {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
 }
 
 /* 과정 상세 — 모집 현황 셰브론 세그먼트 */
@@ -69,6 +76,138 @@ body {
   min-height: calc(100vh - 5rem);
   overflow: hidden;
   background: #ffffff;
+}
+
+.hero-video--intro-active .hero-scroll-indicator {
+  opacity: 0;
+}
+
+.hero-video--intro-active .hero-video__media {
+  opacity: 0 !important;
+}
+
+.hero-video__media {
+  opacity: 0;
+}
+
+.hero-video__media--active {
+  opacity: 1;
+}
+
+.hero-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #fbfbfb;
+  opacity: 1;
+  transition: opacity 650ms ease;
+  pointer-events: none;
+}
+
+.hero-intro--exit {
+  opacity: 0;
+}
+
+.hero-intro__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-intro__wash {
+  fill: #fbfbfb;
+}
+
+.hero-intro__message {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  word-spacing: normal;
+  dominant-baseline: middle;
+}
+
+.hero-intro__message--dark {
+  fill: #111111;
+}
+
+.hero-intro__message--light {
+  fill: #ffffff;
+}
+
+.hero-intro__text-water-clip {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: hero-intro-wave-rise 3s cubic-bezier(0.1, 0.62, 0.24, 1) forwards;
+}
+
+.hero-intro__wave-rise {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: hero-intro-wave-rise 3s cubic-bezier(0.1, 0.62, 0.24, 1) forwards;
+  will-change: transform;
+}
+
+.hero-intro__wave-drift {
+  transform-box: view-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.hero-intro__wave-drift--back {
+  animation: hero-intro-wave-drift-back 3s ease-in-out infinite alternate;
+}
+
+.hero-intro__wave-drift--middle {
+  animation: hero-intro-wave-drift-middle 2.5s ease-in-out infinite alternate;
+}
+
+.hero-intro__wave-drift--front {
+  animation: hero-intro-wave-drift-front 2.75s ease-in-out infinite alternate;
+}
+
+@keyframes hero-intro-wave-rise {
+  0% {
+    transform: translateY(18%);
+  }
+
+  100% {
+    transform: translateY(-96%);
+  }
+}
+
+@keyframes hero-intro-wave-drift-back {
+  from {
+    transform: translateX(-3%);
+  }
+
+  to {
+    transform: translateX(2%);
+  }
+}
+
+@keyframes hero-intro-wave-drift-middle {
+  from {
+    transform: translateX(2%);
+  }
+
+  to {
+    transform: translateX(-2%);
+  }
+}
+
+@keyframes hero-intro-wave-drift-front {
+  from {
+    transform: translateX(-1%);
+  }
+
+  to {
+    transform: translateX(1.5%);
+  }
 }
 
 .hero-scroll-indicator {
@@ -159,7 +298,6 @@ html.home-snap {
 }
 
 .hero-video__media {
-  z-index: 2;
   display: block;
   min-width: 100%;
   min-height: 100%;
@@ -168,8 +306,18 @@ html.home-snap {
   transform: none;
 }
 
+.hero-video__media--before {
+  z-index: 3;
+  transition: none;
+}
+
+.hero-video__media--loop {
+  z-index: 2;
+  opacity: 1;
+}
+
 .hero-video__fallback {
-  z-index: 1;
+  z-index: 4;
   background:
     linear-gradient(180deg, #ffffff 0 31%, rgba(255, 255, 255, 0) 49%),
     radial-gradient(circle at 6% 30%, rgba(52, 74, 100, 0.18) 0 2%, transparent 8%),
@@ -292,5 +440,17 @@ html.home-snap {
   #course-compare-print article {
     break-inside: avoid;
     box-shadow: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-intro {
+    display: none;
+  }
+
+  .hero-intro__wave-rise,
+  .hero-intro__wave-drift,
+  .hero-intro__text-water-clip {
+    animation: none !important;
   }
 }

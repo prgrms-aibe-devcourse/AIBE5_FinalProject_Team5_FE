@@ -1,14 +1,82 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import CourseSearchSection from './home/components/CourseSearchSection'
 import PopularCoursesSection from './home/components/PopularCoursesSection'
 import ReviewsSection from './home/components/ReviewsSection'
 import { useSmoothSectionScroll } from './home/useSmoothSectionScroll'
-import heroVideoMp4 from '../assets/smoother_watercolour_main.mp4'
+import beforeHeroVideoMp4 from '../assets/b4main1.mp4'
+import heroVideoMp4 from '../assets/watercolour_main.mp4'
+import HeroWaveIntro from './home/components/HeroWaveIntro'
+
+type HeroVideoPhase = 'before' | 'loop'
+
+const HOME_ENTRY_PLAYED_KEY = 'bootsignal-home-entry-played'
 
 export default function HomePage() {
-  const [heroVideoAvailable, setHeroVideoAvailable] = useState(true)
+  const [shouldPlayEntrySequence] = useState(() => {
+    try {
+      const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+      const isPageReload = navigationEntry?.type === 'reload'
+
+      return isPageReload || sessionStorage.getItem(HOME_ENTRY_PLAYED_KEY) !== 'true'
+    } catch {
+      return true
+    }
+  })
+  const beforeHeroVideoRef = useRef<HTMLVideoElement>(null)
+  const loopHeroVideoRef = useRef<HTMLVideoElement>(null)
+  const [beforeHeroVideoAvailable, setBeforeHeroVideoAvailable] = useState(shouldPlayEntrySequence)
+  const [loopHeroVideoAvailable, setLoopHeroVideoAvailable] = useState(true)
+  const [heroVideoPhase, setHeroVideoPhase] = useState<HeroVideoPhase>(
+    shouldPlayEntrySequence ? 'before' : 'loop',
+  )
+  const [beforeHeroVideoEnded, setBeforeHeroVideoEnded] = useState(!shouldPlayEntrySequence)
+  const [showHeroIntro, setShowHeroIntro] = useState(shouldPlayEntrySequence)
+  const loopFrameReadyRef = useRef(false)
+
+  const handleIntroComplete = useCallback(() => {
+    setShowHeroIntro(false)
+  }, [])
+
+  const startLoopHeroVideo = useCallback(() => {
+    const video = loopHeroVideoRef.current
+    if (!video || !loopHeroVideoAvailable) return
+
+    video.play().catch(() => {
+      // Keep the previous video's last frame visible until playback can start.
+    })
+  }, [loopHeroVideoAvailable])
+
+  const handleBeforeHeroVideoEnded = useCallback(() => {
+    setBeforeHeroVideoEnded(true)
+    startLoopHeroVideo()
+  }, [startLoopHeroVideo])
+
+  const handleBeforeHeroVideoError = useCallback(() => {
+    setBeforeHeroVideoAvailable(false)
+    setBeforeHeroVideoEnded(true)
+    startLoopHeroVideo()
+  }, [startLoopHeroVideo])
+
+  const handleLoopHeroVideoPlaying = useCallback(() => {
+    if (loopFrameReadyRef.current) return
+    loopFrameReadyRef.current = true
+
+    const video = loopHeroVideoRef.current
+    if (!video) return
+
+    if ('requestVideoFrameCallback' in video) {
+      video.requestVideoFrameCallback(() => {
+        window.requestAnimationFrame(() => setHeroVideoPhase('loop'))
+      })
+      return
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => setHeroVideoPhase('loop'))
+    })
+  }, [])
 
   // 홈페이지에서만 섹션 스크롤 스냅을 활성화 (다른 페이지에는 영향 없음)
   useEffect(() => {
@@ -17,28 +85,79 @@ export default function HomePage() {
     return () => root.classList.remove('home-snap')
   }, [])
 
+  useEffect(() => {
+    if (!shouldPlayEntrySequence) return
+
+    try {
+      sessionStorage.setItem(HOME_ENTRY_PLAYED_KEY, 'true')
+    } catch {
+      // The sequence can still play when storage is unavailable.
+    }
+  }, [shouldPlayEntrySequence])
+
+  useEffect(() => {
+    if (showHeroIntro) return
+
+    if (beforeHeroVideoAvailable && !beforeHeroVideoEnded) {
+      beforeHeroVideoRef.current?.play().catch(() => {
+        // Autoplay may be delayed by the browser even though the video is muted.
+      })
+      return
+    }
+
+    startLoopHeroVideo()
+  }, [beforeHeroVideoAvailable, beforeHeroVideoEnded, showHeroIntro, startLoopHeroVideo])
+
   // 휠 스크롤 시 인접 섹션으로 부드럽게(easing) 이동
   useSmoothSectionScroll()
 
   return (
-    <div className="home-page min-h-screen bg-white flex flex-col">
+    <div className={`home-page min-h-screen bg-white flex flex-col ${showHeroIntro ? 'home-page--intro-active' : ''}`}>
+      {showHeroIntro && <HeroWaveIntro onComplete={handleIntroComplete} />}
+
       <Header />
       <main className="flex-1 w-full overflow-x-clip pt-20">
-        <section id="hero" className="hero-video" aria-label="BootSignal main visual" data-home-section>
-          {heroVideoAvailable && (
+        <section
+          id="hero"
+          className={`hero-video ${showHeroIntro ? 'hero-video--intro-active' : ''}`}
+          aria-label="BootSignal main visual"
+          data-home-section
+        >
+          {beforeHeroVideoAvailable && (
             <video
-              className="hero-video__media"
-              autoPlay
+              ref={beforeHeroVideoRef}
+              className={`hero-video__media hero-video__media--before ${
+                heroVideoPhase === 'before' ? 'hero-video__media--active' : ''
+              }`}
+              muted
+              playsInline
+              preload="auto"
+              onEnded={handleBeforeHeroVideoEnded}
+              onError={handleBeforeHeroVideoError}
+            >
+              <source src={beforeHeroVideoMp4} type="video/mp4" />
+            </video>
+          )}
+
+          {loopHeroVideoAvailable && (
+            <video
+              ref={loopHeroVideoRef}
+              className="hero-video__media hero-video__media--loop"
               muted
               loop
               playsInline
-              onError={() => setHeroVideoAvailable(false)}
+              preload="auto"
+              onCanPlay={() => {
+                if (beforeHeroVideoEnded) startLoopHeroVideo()
+              }}
+              onPlaying={handleLoopHeroVideoPlaying}
+              onError={() => setLoopHeroVideoAvailable(false)}
             >
               <source src={heroVideoMp4} type="video/mp4" />
             </video>
           )}
 
-          {!heroVideoAvailable && (
+          {!loopHeroVideoAvailable && beforeHeroVideoEnded && !showHeroIntro && (
             <div className="hero-video__fallback" aria-hidden="true">
               <div className="hero-video__horizon" />
               <div className="hero-video__water" />
