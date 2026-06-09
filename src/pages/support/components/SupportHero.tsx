@@ -30,7 +30,7 @@ export default function SupportHero({ contact }: SupportHeroProps) {
         />
 
         {/* 콘텐츠 영역 */}
-        <div className="relative z-10 grid items-start gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+        <div className="relative z-10 grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           
           {/* 콘텐츠 영역 왼쪽 (타이틀·설명) */}
           <div className="relative pl-5 md:pl-6">
