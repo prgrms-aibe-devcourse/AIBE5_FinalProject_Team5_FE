@@ -4,6 +4,7 @@ type CommunityDetailCardProps = {
   title: string
   meta: ReactNode[]
   leading?: ReactNode
+  actions?: ReactNode
   children: ReactNode
 }
 
@@ -12,6 +13,7 @@ export default function CommunityDetailCard({
   title,
   meta,
   leading,
+  actions,
   children,
 }: CommunityDetailCardProps) {
   return (
@@ -30,6 +32,13 @@ export default function CommunityDetailCard({
       <div className="mt-8 border-t border-mistSkyBlue/35 pt-8 text-[15px] leading-relaxed text-deepOceanNavy/90 md:text-base">
         {children}
       </div>
+
+      {/* 액션 버튼 영역 (신고하기 등) */}
+      {actions ? (
+        <div className="mt-6 flex justify-end border-t border-mistSkyBlue/25 pt-4">
+          {actions}
+        </div>
+      ) : null}
     </article>
   )
 }
