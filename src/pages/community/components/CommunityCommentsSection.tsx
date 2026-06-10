@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { getMockComments } from '../data/mockComments'
+import ReportModal from '../../../components/common/ReportModal'
 
 // ISO 형식의 현재 날짜를 반환하는 유틸
 function isoNow() { 
@@ -32,6 +33,7 @@ export default function CommunityCommentsSection({ resourceKey }: CommunityComme
 
   const [comments, setComments] = useState(seeded)
   const [value, setValue] = useState('')
+  const [reportTargetId, setReportTargetId] = useState<number | null>(null)
 
   const handleSubmit = () => { // 댓글 등록 핸들러
     const content = value.trim()
@@ -88,19 +90,37 @@ export default function CommunityCommentsSection({ resourceKey }: CommunityComme
         </p>
       ) : ( // 댓글 목록이 있으면
         <ul className="divide-y divide-mistSkyBlue/35 rounded-xl border border-mistSkyBlue/35 bg-white/20">
-          {comments.map((comment) => ( // 댓글 목록 아이템
+          {comments.map((comment, index) => (
             <li key={comment.id} className="px-4 py-4 md:px-5">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-deepOceanNavy/85">{comment.author}</span> {/* 댓글 작성자 */}
-                <time dateTime={comment.createdAt} className="text-xs text-softAquaBlue"> {/* 댓글 작성일 */} 
-                  {formatRelative(comment.createdAt)}
-                </time>
+                <span className="text-sm font-semibold text-deepOceanNavy/85">{comment.author}</span>
+                <div className="flex items-center gap-2">
+                  <time dateTime={comment.createdAt} className="text-xs text-softAquaBlue">
+                    {formatRelative(comment.createdAt)}
+                  </time>
+                  <button
+                    type="button"
+                    onClick={() => setReportTargetId(index + 1)}
+                    className="rounded px-1.5 py-0.5 font-pretendard text-xs text-secondary/60 transition-colors hover:bg-[#fef2f2] hover:text-[#dc2626]"
+                    aria-label="댓글 신고"
+                  >
+                    신고
+                  </button>
+                </div>
               </div>
-              <p className="mt-2 text-[15px] leading-relaxed text-deepOceanNavy/90">{comment.content}</p> {/* 댓글 내용 */}
+              <p className="mt-2 text-[15px] leading-relaxed text-deepOceanNavy/90">{comment.content}</p>
             </li>
           ))}
         </ul>
       )}
+      {/* 댓글 신고 모달 */}
+      {reportTargetId !== null ? (
+        <ReportModal
+          targetType="COMMENT"
+          targetId={reportTargetId}
+          onClose={() => setReportTargetId(null)}
+        />
+      ) : null}
     </section>
   )
 }
