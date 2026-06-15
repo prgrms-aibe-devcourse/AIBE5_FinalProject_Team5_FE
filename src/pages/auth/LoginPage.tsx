@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import AuthInput from './components/AuthInput.tsx'
 import AuthPasswordInput from './components/AuthPasswordInput.tsx'
 import AuthButton from './components/AuthButton.tsx'
@@ -10,6 +11,9 @@ import { DUMMY_ADMIN_LOGIN, DUMMY_LOGIN, login, USE_AUTH_DUMMY } from '../../ser
 
 /** 데스크톱 로그인 페이지 (50:50 — 폼 | 사이드 배경) */
 export default function LoginPage() {
+  const [searchParams] = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/'
+
   // 더미 끄기: USE_AUTH_DUMMY = false 후 아래를 useState('') 두 줄로 교체
   const [email, setEmail] = useState(USE_AUTH_DUMMY ? DUMMY_LOGIN.request.email : '')
   const [password, setPassword] = useState(USE_AUTH_DUMMY ? DUMMY_LOGIN.request.password : '')
@@ -33,7 +37,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password })
-      window.location.href = '/'
+      window.location.href = redirectTo
     } catch (error) {
       setLoginError(error instanceof Error ? error.message : '로그인에 실패했습니다.')
     } finally {
@@ -137,7 +141,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={async () => {
                         await login(DUMMY_LOGIN.request)
-                        window.location.href = '/'
+                        window.location.href = redirectTo
                       }}
                       className="flex-1 rounded-lg border border-waterlineBlue/60 bg-white/70 py-2 text-xs font-semibold text-deepOceanNavy transition-colors hover:bg-waterlineBlue hover:text-white"
                     >

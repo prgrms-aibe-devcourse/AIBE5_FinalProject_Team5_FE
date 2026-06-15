@@ -13,52 +13,61 @@ const TABS: { id: CourseDetailTab; label: string; disabled?: boolean }[] = [
 ]
 
 export default function CourseDetailTabs({ activeTab, onTabChange }: CourseDetailTabsProps) {
-  const infoButtonRef = useRef<HTMLButtonElement | null>(null)
-  const [tabMinWidth, setTabMinWidth] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const activeRef = useRef<HTMLButtonElement>(null)
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 })
 
-  // "과정 정보" 버튼 실제 너비를 기준으로 다른 탭 버튼도 동일 너비로 맞춤
   useLayoutEffect(() => {
-    const el = infoButtonRef.current
-    if (!el) return
-
-    const update = () => setTabMinWidth(el.getBoundingClientRect().width)
-    update()
-
-    const ro = new ResizeObserver(update)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
+    const el = activeRef.current
+    const container = containerRef.current
+    if (!el || !container) return
+    const containerRect = container.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    setIndicatorStyle({
+      left: elRect.left - containerRect.left,
+      width: elRect.width,
+    })
+  }, [activeTab])
 
   return (
-    <div className="flex border-b border-mistSkyBlue/50" role="tablist" aria-label="과정 상세 탭">
-      {TABS.map(({ id, label, disabled }) => { // 탭 목록 반복 처리
-        const isActive = activeTab === id
-        
-        return ( // 탭 버튼 반환
-          <button
-            key={id}
-            ref={id === 'info' ? infoButtonRef : null}
-            type="button"
-            role="tab"
-            aria-selected={isActive} // 활성화 상태 표시
-            aria-disabled={disabled} disabled={disabled} // 비활성화 상태 표시
-            onClick={() => !disabled && onTabChange(id)} // 탭 변경 감지 
-            style={tabMinWidth ? { minWidth: tabMinWidth } : undefined}
-            className={`whitespace-nowrap rounded-t-lg px-5 py-3 text-base font-semibold transition-colors md:px-6 md:text-lg ${
-              isActive // 활성화 상태 여부 
-                ? 'bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-mistSkyBlue/45 text-deepOceanNavy'
-                : disabled // 비활성화 상태 여부 
-                  ? 'cursor-not-allowed text-softAquaBlue/80'
-                  : 'text-secondary hover:bg-foamWhite/80 hover:text-deepOceanNavy'
-            }`}
-          >
-            {label} {/* 탭 라벨 */}
-            {disabled ? ( // 비활성화 상태 여부 표시
-              <span className="ml-1.5 text-sm font-normal text-softAquaBlue">(준비 중)</span>
-            ) : null}
-          </button>
-        )
-      })}
+    <div className="flex items-center" role="tablist" aria-label="과정 상세 탭">
+      <div
+        ref={containerRef}
+        className="relative flex items-center gap-1 rounded-2xl border border-mistSkyBlue/40 bg-white/40 p-1.5 shadow-[0_4px_20px_rgba(52,74,100,0.10)] backdrop-blur-md"
+      >
+        {/* 슬라이딩 인디케이터 */}
+        <span
+          className="pointer-events-none absolute top-1.5 h-[calc(100%-0.75rem)] rounded-xl bg-deepOceanNavy shadow-[0_2px_8px_rgba(52,74,100,0.22)] transition-all duration-200 ease-out"
+          style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+          aria-hidden="true"
+        />
+
+        {TABS.map(({ id, label, disabled }) => {
+          const isActive = activeTab === id
+          return (
+            <button
+              key={id}
+              ref={isActive ? activeRef : null}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-disabled={disabled}
+              disabled={disabled}
+              onClick={() => !disabled && onTabChange(id)}
+              className={`relative z-10 whitespace-nowrap rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors duration-150 md:px-8 md:text-base ${
+                isActive
+                  ? 'text-white'
+                  : disabled
+                    ? 'cursor-not-allowed text-mistSkyBlue/50'
+                    : 'text-deepOceanNavy/60 hover:text-deepOceanNavy'
+              }`}
+            >
+              {label}
+              {disabled ? <span className="ml-1.5 text-xs font-normal opacity-60">(준비 중)</span> : null}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

@@ -34,8 +34,8 @@ export default function CourseSearchSection() {
 
   return (
     <section id="courses" className="w-full px-4 py-8 md:px-8 md:py-12" aria-label="과정 탐색" data-home-section>
-      <div className="mx-auto max-w-[1280px] px-6 pb-16 pt-14 md:px-10 md:pb-20 md:pt-16">
-        <div className="mx-auto max-w-[660px] text-center">
+      <div className="mx-auto max-w-7xl px-6 pb-16 pt-14 md:px-10 md:pb-20 md:pt-16">
+        <div className="mx-auto max-w-165 text-center">
           <h2 className="text-2xl font-bold tracking-tight text-deepOceanNavy font-pretendard md:text-[34px]">
             나에게 맞는 과정을 탐색해보세요!
           </h2>
@@ -48,7 +48,7 @@ export default function CourseSearchSection() {
                 onChange={(event) => setKeyword(event.target.value)}
                 placeholder="키워드, 과정명 등 입력"
                 aria-label="과정 검색"
-                className="h-[70px] w-full rounded-full border border-[#b9bec6] bg-white pl-6 pr-16 text-[15px] text-deepOceanNavy placeholder:text-[#8b94a3] shadow-[0_1px_3px_rgba(15,23,42,0.04)] outline-none transition-colors focus:border-waterlineBlue font-pretendard"
+                className="h-17.5 w-full rounded-full border border-[#b9bec6] bg-white pl-6 pr-16 text-[15px] text-deepOceanNavy placeholder:text-[#8b94a3] shadow-[0_1px_3px_rgba(15,23,42,0.04)] outline-none transition-colors focus:border-waterlineBlue font-pretendard"
               />
               <button
                 type="submit"
@@ -64,14 +64,14 @@ export default function CourseSearchSection() {
           </form>
         </div>
 
-        <ul className="mx-auto mt-14 grid max-w-[1240px] grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+        <ul className="mx-auto mt-10 grid max-w-310 grid-cols-2 gap-x-3 gap-y-5 sm:mt-14 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-6 md:grid-cols-4 lg:grid-cols-7">
           {categories.map((category) => (
             <li key={category.key} className="flex justify-center">
               <a href={`/courses?category=${category.key}`} className="group flex flex-col items-center">
-                <span className="grid h-[150px] w-[150px] place-items-center rounded-[18px] glass-panel shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_18px_rgba(52,74,100,0.08)]">
-                  <img src={category.icon} alt="" aria-hidden="true" className="h-[90px] w-[90px] object-contain" />
+                <span className="grid h-28 w-28 place-items-center rounded-[14px] glass-panel shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_18px_rgba(52,74,100,0.08)] sm:h-32 sm:w-32 sm:rounded-2xl lg:h-37.5 lg:w-37.5 lg:rounded-[18px]">
+                  <img src={category.icon} alt="" aria-hidden="true" className="h-16 w-16 object-contain sm:h-20 sm:w-20 lg:h-22.5 lg:w-22.5" />
                 </span>
-                <span className="mt-3 text-[15px] font-semibold tracking-[-0.01em] text-[#344A64] font-pretendard">
+                <span className="mt-2.5 text-sm font-semibold tracking-[-0.01em] text-[#344A64] font-pretendard sm:mt-3 sm:text-[15px]">
                   {category.label}
                 </span>
               </a>

@@ -21,13 +21,14 @@ export default function CourseReviewStatsPanel() {
   const priorKnowledgeGradient = buildPriorKnowledgeConicGradient(priorKnowledgeDistribution)
 
   return (
-    <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
-      <div className="flex items-center gap-3 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/45 to-waterlineBlue/30 px-5 py-4 md:px-6">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-waterlineBlue shadow-sm ring-1 ring-mistSkyBlue/60">
-          <StatsIcon />
-        </span>
-        <h3 className="text-base font-bold tracking-tight text-deepOceanNavy md:text-lg">리뷰 통계</h3>
+    <div>
+      <div className="mb-2 px-1">
+        <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
+          <span className="flex h-6 w-6 items-center justify-center text-waterlineBlue"><StatsIcon /></span>
+          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">리뷰 통계</h3>
+        </div>
       </div>
+      <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
 
       <div className="p-4 md:p-5">
         <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
@@ -101,6 +102,7 @@ export default function CourseReviewStatsPanel() {
             ))}
           </ul>
         </div>
+      </div>
       </div>
     </div>
   )

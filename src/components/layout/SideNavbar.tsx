@@ -140,50 +140,82 @@ const navConfig: Record<SideNavbarVariant, { items: SideNavbarItem[]; navAriaLab
 
 export type SideNavbarProps = {
   variant: SideNavbarVariant
+  isOpen?: boolean
+  onClose?: () => void
 }
 
-export default function SideNavbar({ variant }: SideNavbarProps) {
+export default function SideNavbar({ variant, isOpen = false, onClose }: SideNavbarProps) {
   const { items, navAriaLabel } = navConfig[variant]
   const { pathname } = useLocation()
-  const currentPath = pathname.replace(/\/+$/, '') || '/' // 현재 경로 가져오기
+  const currentPath = pathname.replace(/\/+$/, '') || '/'
 
   return (
-    <aside className="glass-sidebar flex min-h-screen w-[250px] shrink-0 flex-col px-4 py-6">
-      {/* 로고 영역 */}
-      <Link
-        to="/"
-        className="mb-10 flex items-center px-1"
-        aria-label="BootSignal 홈"
-        onClick={() => {
-          try { sessionStorage.setItem('bootsignal-home-entry-played', 'true') } catch {}
-        }}
+    <>
+      {/* 모바일 오버레이 배경 */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`glass-sidebar fixed inset-y-0 left-0 z-50 flex w-62.5 flex-col px-4 py-6 transition-transform duration-300 ease-in-out lg:relative lg:min-h-screen lg:shrink-0 lg:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
       >
-        <img src={logo} alt="BootSignal" className="h-10 w-auto" />
-      </Link>
+        {/* 로고 + 닫기 버튼 (모바일) */}
+        <div className="mb-10 flex items-center justify-between px-1">
+          <Link
+            to="/"
+            className="flex items-center"
+            aria-label="BootSignal 홈"
+            onClick={() => {
+              try { sessionStorage.setItem('bootsignal-home-entry-played', 'true') } catch {}
+              onClose?.()
+            }}
+          >
+            <img src={logo} alt="BootSignal" className="h-10 w-auto" />
+          </Link>
+          {onClose && (
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[#536173] hover:bg-[#f5f8fb] lg:hidden"
+              onClick={onClose}
+              aria-label="메뉴 닫기"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
 
-      {/* 네비게이션 영역 */}
-      <nav aria-label={navAriaLabel}>
-        <ul className="space-y-2">
-          {/* 메뉴 목록 */}
-          {items.map((item) => {
-            const isActive = currentPath === item.href
+        {/* 네비게이션 영역 */}
+        <nav aria-label={navAriaLabel}>
+          <ul className="space-y-2">
+            {items.map((item) => {
+              const isActive = currentPath === item.href
 
-            return (
-              <li key={item.label}>
-                <Link
-                  to={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                    isActive ? 'bg-[#eaf0f6] text-[#1f2f45]' : 'text-[#536173] hover:bg-[#f5f8fb] hover:text-[#1f2f45]'
-                  }`}
-                >
-                  <SidebarIcon icon={item.icon} />
-                  <span>{item.label}</span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </nav>
-    </aside>
+              return (
+                <li key={item.label}>
+                  <Link
+                    to={item.href}
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                      isActive ? 'bg-[#eaf0f6] text-[#1f2f45]' : 'text-[#536173] hover:bg-[#f5f8fb] hover:text-[#1f2f45]'
+                    }`}
+                    onClick={onClose}
+                  >
+                    <SidebarIcon icon={item.icon} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+      </aside>
+    </>
   )
 }

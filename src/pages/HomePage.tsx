@@ -6,7 +6,7 @@ import PopularCoursesSection from './home/components/PopularCoursesSection'
 import ReviewsSection from './home/components/ReviewsSection'
 import { useSmoothSectionScroll } from './home/useSmoothSectionScroll'
 import beforeHeroVideoMp4 from '../assets/b4main1.mp4'
-import heroVideoMp4 from '../assets/watercolour_main.mp4'
+import heroVideoMp4 from '../assets/main main final.mp4'
 import HeroWaveIntro from './home/components/HeroWaveIntro'
 
 type HeroVideoPhase = 'before' | 'loop'

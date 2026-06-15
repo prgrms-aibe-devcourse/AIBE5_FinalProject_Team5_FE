@@ -10,9 +10,14 @@ import CourseVerifiedReviewStep3QualityModal from './modal/CourseVerifiedReviewS
 import CourseVerifiedReviewStep4ProjectModal from './modal/CourseVerifiedReviewStep4ProjectModal.tsx'
 import CourseVerifiedReviewStep5DetailModal from './modal/CourseVerifiedReviewStep5DetailModal.tsx'
 
-// 과정  후기 탭 섹션
-export default function CourseDetailReviewsSection() {
-  const isVerifiedReviewUser = true // TODO: 인증 사용자 여부(auth API)로 교체
+type ReviewSource = 'site' | 'goyo24'
+
+interface CourseDetailReviewsSectionProps {
+  courseId: number
+}
+
+export default function CourseDetailReviewsSection({ courseId }: CourseDetailReviewsSectionProps) {
+  const isVerifiedReviewUser = true
   const [isReviewTypeModalOpen, setIsReviewTypeModalOpen] = useState(false)
   const [isGeneralReviewModalOpen, setIsGeneralReviewModalOpen] = useState(false)
   const [isVerifiedReviewStep1ModalOpen, setIsVerifiedReviewStep1ModalOpen] = useState(false)
@@ -25,10 +30,8 @@ export default function CourseDetailReviewsSection() {
 
   return (
     <section className="space-y-6 rounded-2xl">
-      {/* 리뷰 통계 영역 */}
       <CourseReviewStatsPanel />
-      {/* 리뷰 내역 영역 */}
-      <CourseReviewListPanel onClickWriteReview={() => setIsReviewTypeModalOpen(true)} />
+      <CourseReviewListPanel courseId={courseId} onClickWriteReview={() => setIsReviewTypeModalOpen(true)} />
 
       {/* 리뷰 유형 선택 모달 */}
       <CourseReviewTypeSelectModal
@@ -49,7 +52,6 @@ export default function CourseDetailReviewsSection() {
             setIsVerifiedReviewStep1ModalOpen(true)
             return
           }
-
           if (type === 'general') {
             setIsReviewTypeModalOpen(false)
             setReviewTypeWarningMessage(null)
@@ -57,8 +59,7 @@ export default function CourseDetailReviewsSection() {
           }
         }}
       />
-      
-      {/* 일반 리뷰 모달 */}
+
       <CourseGeneralReviewModal
         isOpen={isGeneralReviewModalOpen}
         onClose={() => setIsGeneralReviewModalOpen(false)}
@@ -72,7 +73,6 @@ export default function CourseDetailReviewsSection() {
         }}
       />
 
-      {/* 인증 리뷰 정보 모달 */}
       <CourseVerifiedReviewStep1InfoModal
         isOpen={isVerifiedReviewStep1ModalOpen}
         onClose={() => setIsVerifiedReviewStep1ModalOpen(false)}

@@ -20,7 +20,7 @@ export default function ReviewsSection() {
           실제 수강생들이 남긴 솔직한 후기를 확인해보세요
         </p>
 
-        <ul className="mt-10 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+        <ul className="mt-10 grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-5">
           {reviews.map((review, index) => {
             const featured = index === Math.floor(reviews.length / 2)
             return (

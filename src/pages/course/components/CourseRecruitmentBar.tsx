@@ -36,7 +36,7 @@ const STEPS: {
 // 모집 현황 바 (모집 인원, 선발 인원, 수강 확정 인원)
 export default function CourseRecruitmentBar({ recruitment }: CourseRecruitmentBarProps) {
   return (
-    <div className="flex h-full flex-col rounded-xl border border-mistSkyBlue/50 bg-white p-4 md:p-5">
+    <div className="flex h-full flex-col rounded-xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)] p-4 md:p-5">
       <h3 className="mb-3 text-sm font-semibold text-deepOceanNavy md:text-base">모집 현황</h3>
       
       {/* 모집 현황 세그먼트 (모집 인원, 선발 인원, 수강 확정 인원) 반복 처리 */}

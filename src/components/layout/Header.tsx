@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+
+const AI_PORTFOLIO_PATH = '/dashboard/portfolio'
 import logo from '../../assets/bootsignal_transparent.png'
 import { clearAuthSession, getAuthSession, isAdminRole } from '../../services/auth'
 
@@ -37,6 +39,8 @@ interface HeaderProps {
   /** shell: 대시보드·관리자 레이아웃(로고 없음) */
   variant?: HeaderVariant
   fixed?: boolean
+  /** shell 모드에서 모바일 사이드바 열기 버튼 핸들러 */
+  onMenuClick?: () => void
 }
 
 const navLinkClass =
@@ -96,6 +100,7 @@ export default function Header({
   nickname: nicknameProp,
   variant = 'site',
   fixed = true,
+  onMenuClick,
 }: HeaderProps) {
   const navigate = useNavigate()
   const session = getAuthSession()
@@ -103,6 +108,13 @@ export default function Header({
   const nickname = nicknameProp ?? session?.user?.nickname ?? '닉네임'
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileCommunityOpen, setMobileCommunityOpen] = useState(false)
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false)
+    setMobileCommunityOpen(false)
+  }
   const profileMenuLinks = isAdminRole(session?.user?.role) ? adminMenuLinks : userMenuLinks
   const isShell = variant === 'shell'
 
@@ -112,6 +124,14 @@ export default function Header({
   }
 
   const headerPositionClass = fixed ? 'fixed left-0 right-0 top-0' : 'relative'
+
+  const handleAiPortfolio = () => {
+    if (isLoggedIn) {
+      navigate(AI_PORTFOLIO_PATH)
+    } else {
+      navigate(`/login?redirect=${encodeURIComponent(AI_PORTFOLIO_PATH)}`)
+    }
+  }
 
   const mainNav = (
     <nav className="flex items-center justify-end gap-10" aria-label={isShell ? '상단 메뉴' : '주요 메뉴'}>
@@ -144,6 +164,20 @@ export default function Header({
       <Link to="/support" className={navLinkClass}>
         고객센터
       </Link>
+
+      {/* AI 포트폴리오 — 로그인 시 대시보드로, 비로그인 시 로그인 유도 */}
+      <button
+        type="button"
+        onClick={handleAiPortfolio}
+        className="font-pretendard relative flex items-center gap-1.5 text-base font-semibold transition-colors hover:text-waterlineBlue"
+      >
+        <span className="bg-linear-to-r from-waterlineBlue to-softAquaBlue bg-clip-text text-transparent">
+          AI 포트폴리오
+        </span>
+        <span className="inline-flex items-center rounded-full bg-waterlineBlue/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-waterlineBlue">
+          NEW
+        </span>
+      </button>
     </nav>
   )
 
@@ -206,21 +240,184 @@ export default function Header({
 
   if (isShell) {
     return (
-      <header className={`glass-topbar z-10 flex h-20 items-center justify-end px-10 ${headerPositionClass}`}>
-        {navAndActions}
+      <header className={`glass-topbar z-10 flex h-14 items-center justify-between px-4 sm:px-6 lg:h-20 lg:justify-end lg:px-10 ${headerPositionClass}`}>
+        {/* 햄버거 버튼 — 모바일 전용 */}
+        <button
+          type="button"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-deepOceanNavy transition-colors hover:bg-mistSkyBlue/20 lg:hidden"
+          onClick={onMenuClick}
+          aria-label="메뉴 열기"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        {/* 데스크탑: 네비 + 유저 액션 */}
+        <div className="hidden items-center gap-8 lg:flex">
+          {mainNav}
+          {userActions}
+        </div>
+
+        {/* 모바일: 유저 액션만 */}
+        <div className="flex items-center gap-3 lg:hidden">
+          {userActions}
+        </div>
       </header>
     )
   }
 
   return (
-    <header className={`site-header z-50 w-full min-w-desktop px-6 md:px-12 ${headerPositionClass}`}>
-      <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
-        <Link to="/" aria-label="BootSignal 홈">
-          <img src={logo} alt="BootSignal" className="h-11 w-auto" />
-        </Link>
+    <>
+      <header className={`site-header z-50 w-full min-w-desktop px-6 md:px-12 ${headerPositionClass}`}>
+        <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
+          <Link to="/" aria-label="BootSignal 홈">
+            <img src={logo} alt="BootSignal" className="h-11 w-auto" />
+          </Link>
 
-        {navAndActions}
-      </div>
-    </header>
+          {navAndActions}
+
+          {/* 햄버거 버튼 — 모바일 전용 */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-deepOceanNavy transition-colors hover:bg-foamWhite md:hidden"
+            aria-label="메뉴 열기"
+            aria-expanded={mobileMenuOpen}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* 모바일 메뉴 오버레이 */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-60 md:hidden" role="dialog" aria-modal="true" aria-label="모바일 메뉴">
+          {/* 배경 */}
+          <div
+            className="absolute inset-0 bg-deepOceanNavy/40 backdrop-blur-sm"
+            onClick={closeMobileMenu}
+            aria-hidden="true"
+          />
+
+          {/* 패널 */}
+          <div className="relative glass-panel rounded-b-3xl px-5 pb-8 pt-5 shadow-[0_8px_32px_rgba(28,46,92,0.25)]">
+            {/* 상단 로고 + 닫기 */}
+            <div className="mb-5 flex items-center justify-between">
+              <Link to="/" onClick={closeMobileMenu} aria-label="BootSignal 홈">
+                <img src={logo} alt="BootSignal" className="h-9 w-auto" />
+              </Link>
+              <button
+                type="button"
+                onClick={closeMobileMenu}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-deepOceanNavy transition-colors hover:bg-foamWhite"
+                aria-label="메뉴 닫기"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* 네비게이션 */}
+            <nav aria-label="모바일 메뉴">
+              <ul className="divide-y divide-mistSkyBlue/30">
+                <li>
+                  <Link
+                    to="/courses"
+                    onClick={closeMobileMenu}
+                    className="flex items-center py-3.5 font-pretendard text-base font-semibold text-deepOceanNavy"
+                  >
+                    과정 조회
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setMobileCommunityOpen((o) => !o)}
+                    className="flex w-full items-center justify-between py-3.5 font-pretendard text-base font-semibold text-deepOceanNavy"
+                  >
+                    커뮤니티
+                    <ChevronDownIcon open={mobileCommunityOpen} />
+                  </button>
+                  {mobileCommunityOpen && (
+                    <ul className="mb-2 space-y-1 pl-4">
+                      {communityLinks.map((item) => (
+                        <li key={item.to}>
+                          <Link
+                            to={item.to}
+                            onClick={closeMobileMenu}
+                            className="block py-2 font-pretendard text-sm font-medium text-deepOceanNavy/75 hover:text-waterlineBlue"
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+                <li>
+                  <Link
+                    to="/support"
+                    onClick={closeMobileMenu}
+                    className="flex items-center py-3.5 font-pretendard text-base font-semibold text-deepOceanNavy"
+                  >
+                    고객센터
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => { handleAiPortfolio(); closeMobileMenu() }}
+                    className="flex w-full items-center justify-between py-3.5 font-pretendard text-base font-semibold"
+                  >
+                    <span className="bg-linear-to-r from-waterlineBlue to-softAquaBlue bg-clip-text text-transparent">
+                      AI 포트폴리오
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-waterlineBlue/15 px-1.5 py-0.5 text-[10px] font-bold text-waterlineBlue">
+                      NEW
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+
+            {/* 인증 영역 */}
+            <div className="mt-4 border-t border-mistSkyBlue/30 pt-5">
+              {isLoggedIn ? (
+                <div className="space-y-3">
+                  <Link
+                    to="/dashboard"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 font-pretendard font-semibold text-deepOceanNavy"
+                  >
+                    <UserIcon />
+                    <span>{nickname}</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { handleLogout(); closeMobileMenu() }}
+                    className={logoutButtonClass}
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <Link to="/login" onClick={closeMobileMenu} className={`${loginLinkClass} flex-1 justify-center`}>
+                    로그인
+                  </Link>
+                  <Link to="/signup" onClick={closeMobileMenu} className={`${signupLinkClass} flex-1 justify-center`}>
+                    회원가입
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

@@ -348,7 +348,7 @@ html.home-snap {
   min-width: 100%;
   min-height: 100%;
   object-fit: cover;
-  object-position: 50% -80px;
+  object-position: center 25%;
   transform: none;
 }
 
@@ -432,8 +432,12 @@ html.home-snap {
 
 @media (max-width: 768px) {
   .hero-video {
-    height: calc(100dvh - 5rem);
-    min-height: calc(100vh - 5rem);
+    height: 100dvh;
+    min-height: 100vh;
+  }
+
+  .hero-video__media {
+    object-position: 85% top;
   }
 
   .hero-scroll-indicator {
