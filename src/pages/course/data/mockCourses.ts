@@ -1,16 +1,12 @@
-/** 
-  과정 조회 API 연동 전 임시 데이터
-  사용처: CourseSearchPage, CourseSearchHero 
+/**
+  과정 조회 페이지 필터 UI 설정 (API와 무관한 화면 전용 설정)
+  사용처: CourseSearchPage, CourseSearchHero
 **/
 
-import type { Course, CourseFilterConfig } from '../../../services/course.ts'
-
-/** CourseResultsToolbar — "총 N개의 결과" 표시용 (mock) */
-export const TOTAL_MOCK_RESULTS = 28
+import type { CourseFilterConfig } from '../../../services/course.ts'
 
 /** CourseSearchHero 필터 4종 **/
 export const COURSE_FILTERS: CourseFilterConfig[] = [
-  // 분야
   {
     id: 'category',
     label: '분야',
@@ -26,7 +22,6 @@ export const COURSE_FILTERS: CourseFilterConfig[] = [
       { value: 'vr', label: 'VR' },
     ],
   },
-  // 가격
   {
     id: 'price',
     label: '가격',
@@ -36,23 +31,30 @@ export const COURSE_FILTERS: CourseFilterConfig[] = [
       { value: 'free', label: '무료' },
     ],
   },
-  // 지역
   {
     id: 'region',
     label: '지역',
     expandList: true,
     options: [
       { value: 'all', label: '전체 지역' },
-      { value: 'seoul', label: '서울' },
-      { value: 'gyeonggi', label: '경기도' },
-      { value: 'gangwon', label: '강원도' },
-      { value: 'chungcheong', label: '충청도' },
-      { value: 'jeolla', label: '전라도' },
-      { value: 'gyeongsang', label: '경상도' },
-      { value: 'jeju', label: '제주도' },
+      { value: '11', label: '서울' },
+      { value: '41', label: '경기' },
+      { value: '42', label: '강원' },
+      { value: '43', label: '충북' },
+      { value: '44', label: '충남' },
+      { value: '45', label: '전북' },
+      { value: '46', label: '전남' },
+      { value: '47', label: '경북' },
+      { value: '48', label: '경남' },
+      { value: '26', label: '부산' },
+      { value: '27', label: '대구' },
+      { value: '28', label: '인천' },
+      { value: '29', label: '광주' },
+      { value: '30', label: '대전' },
+      { value: '31', label: '울산' },
+      { value: '50', label: '제주' },
     ],
   },
-  // 교육 기간
   {
     id: 'duration',
     label: '기간',
@@ -64,31 +66,3 @@ export const COURSE_FILTERS: CourseFilterConfig[] = [
     ],
   },
 ]
-
-/** 카드 공통 필드 — MOCK_COURSES 에 spread */
-const baseCourse = {
-  title: 'K-Digital Training: 생성형 AI 활용 백엔드',
-  company: '(주)그렙',
-  location: '서울',
-  price: '500,000',
-  dateRange: '2026.03.01 - 2027.02.28',
-  satisfaction: '4.3/5',
-  employmentRate: '45%',
-  rating: '4/5',
-} as const
-
-/** 1페이지 9장 과정 카드 (3×3) */
-export const MOCK_COURSES: Course[] = [
-  { id: '1', ...baseCourse },
-  { id: '2', ...baseCourse },
-  { id: '3', ...baseCourse },
-  { id: '4', ...baseCourse },
-  { id: '5', ...baseCourse },
-  { id: '6', ...baseCourse },
-  { id: '7', ...baseCourse },
-  { id: '8', ...baseCourse },
-  { id: '9', ...baseCourse },
-]
-
-/** 과정 비교 상한 */
-export const MAX_COMPARE_COURSES = 3

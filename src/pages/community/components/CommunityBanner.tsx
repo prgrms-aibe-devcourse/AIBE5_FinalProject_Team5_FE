@@ -61,11 +61,11 @@ function SectionCard({ sectionKey }: { sectionKey: CommunitySectionKey }) {
       }
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-mistSkyBlue/0 via-mistSkyBlue/0 to-softAquaBlue/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 bg-linear-to-br from-mistSkyBlue/0 via-mistSkyBlue/0 to-softAquaBlue/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         aria-hidden="true"
       />
 
-      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-mistSkyBlue/45 to-softAquaBlue/25 text-deepOceanNavy ring-1 ring-white/80">
+      <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-mistSkyBlue/45 to-softAquaBlue/25 text-deepOceanNavy ring-1 ring-white/80">
         {icon}
       </div>
 
@@ -78,7 +78,7 @@ function SectionCard({ sectionKey }: { sectionKey: CommunitySectionKey }) {
 // 커뮤니티 목록 배너
 export default function CommunityBanner() {
   return (
-    <section className="relative w-full overflow-hidden" aria-label="커뮤니티 소개">
+    <section className="relative w-full overflow-hidden rounded-3xl" aria-label="커뮤니티 소개">
       <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-8 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] md:p-10 lg:p-12">
         {/* 배너 내부 배경 그라데이션 */}
         <div
@@ -109,7 +109,7 @@ export default function CommunityBanner() {
             
             {/* 배너 내부 선 */}
             <div
-              className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-gradient-to-b from-[#005EB8] via-waterlineBlue to-softAquaBlue/30"
+              className="absolute left-0 top-1 bottom-1 w-0.75 rounded-full bg-linear-to-b from-[#005EB8] via-waterlineBlue to-softAquaBlue/30"
               aria-hidden="true"
             />
 
@@ -117,7 +117,7 @@ export default function CommunityBanner() {
             <h1 className="text-3xl font-bold leading-[1.2] tracking-tight text-deepOceanNavy md:text-4xl lg:text-[2.65rem]">
               함께 나누고,
               <br />
-              <span className="bg-gradient-to-r from-[#005EB8] via-waterlineBlue to-softAquaBlue bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-[#005EB8] via-waterlineBlue to-softAquaBlue bg-clip-text text-transparent">
                 함께 성장하는 커뮤니티
               </span>
             </h1>

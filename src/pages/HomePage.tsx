@@ -6,14 +6,15 @@ import PopularCoursesSection from './home/components/PopularCoursesSection'
 import ReviewsSection from './home/components/ReviewsSection'
 import { useSmoothSectionScroll } from './home/useSmoothSectionScroll'
 import beforeHeroVideoMp4 from '../assets/b4main1.mp4'
-import heroVideoMp4 from '../assets/watercolour_main.mp4'
+import heroVideoMp4 from '../assets/main main final.mp4'
 import HeroWaveIntro from './home/components/HeroWaveIntro'
 
 type HeroVideoPhase = 'before' | 'loop'
 
 const HOME_ENTRY_PLAYED_KEY = 'bootsignal-home-entry-played'
 const BEFORE_HERO_EXIT_TIME = 96 / 24
-const LOOP_ENTRY_TIME = BEFORE_HERO_EXIT_TIME
+// 메인 루프 영상은 첫 프레임(0초)부터 재생 — b4 영상의 끝 프레임과 이어지도록 정렬
+const LOOP_ENTRY_TIME = 0
 
 export default function HomePage() {
   const [shouldPlayEntrySequence] = useState(() => {
@@ -64,9 +65,21 @@ export default function HomePage() {
     const video = loopHeroVideoRef.current
     if (!video || !shouldPlayEntrySequence) return
 
+    const entryTime = Math.min(LOOP_ENTRY_TIME, Math.max(0, video.duration - 0.001))
+
+    // 첫 프레임(0초)부터 시작하면 seek가 필요 없고 onSeeked도 발생하지 않으므로
+    // 재생 게이트를 즉시 해제한다.
+    if (entryTime <= 0) {
+      loopEntrySeekedRef.current = true
+      if (loopStartPendingRef.current || beforeHeroVideoEnded) {
+        startLoopHeroVideo()
+      }
+      return
+    }
+
     loopEntrySeekedRef.current = false
-    video.currentTime = Math.min(LOOP_ENTRY_TIME, Math.max(0, video.duration - 0.001))
-  }, [shouldPlayEntrySequence])
+    video.currentTime = entryTime
+  }, [shouldPlayEntrySequence, beforeHeroVideoEnded, startLoopHeroVideo])
 
   const handleLoopHeroVideoSeeked = useCallback(() => {
     if (!shouldPlayEntrySequence) return

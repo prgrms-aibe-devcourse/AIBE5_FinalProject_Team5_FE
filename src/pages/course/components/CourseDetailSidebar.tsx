@@ -127,17 +127,16 @@ function ContactRow({ icon, label, value, href }: ContactRowProps) {
 export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps) {
   return (
     <aside className="flex flex-col gap-5 lg:sticky lg:top-28 lg:w-72 xl:w-80">
-      <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
-        {/* 헤더 — CourseDetailInfoSections와 동일 톤 */}
-        <div className="flex items-center gap-3 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/45 to-waterlineBlue/30 px-5 py-4">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-waterlineBlue shadow-sm ring-1 ring-mistSkyBlue/60">
-            <SummaryIcon />
-          </span>
-          <h3 className="text-base font-bold tracking-tight text-deepOceanNavy md:text-lg">
-            과정 주요 정보
-          </h3>
+      <div>
+        <div className="mb-2 px-1">
+          <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center text-waterlineBlue">
+              <SummaryIcon />
+            </span>
+            <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">과정 주요 정보</h3>
+          </div>
         </div>
-
+        <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
         <div className="space-y-5 px-5 py-5 md:px-6">
           <div className="space-y-2.5">
             <PipeRow label="과정명" value={course.title} multiline />
@@ -164,6 +163,7 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
               />
             </div>
           </div>
+        </div>
         </div>
       </div>
 

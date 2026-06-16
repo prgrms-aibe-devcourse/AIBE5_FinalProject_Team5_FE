@@ -182,13 +182,13 @@ body::before {
 .hero-intro__text-water-clip {
   transform-box: view-box;
   transform-origin: center;
-  animation: hero-intro-wave-rise 3s cubic-bezier(0.1, 0.62, 0.24, 1) forwards;
+  animation: hero-intro-wave-rise 4.5s cubic-bezier(0.1, 0.62, 0.24, 1) forwards;
 }
 
 .hero-intro__wave-rise {
   transform-box: view-box;
   transform-origin: center;
-  animation: hero-intro-wave-rise 3s cubic-bezier(0.1, 0.62, 0.24, 1) forwards;
+  animation: hero-intro-wave-rise 4.5s cubic-bezier(0.1, 0.62, 0.24, 1) forwards;
   will-change: transform;
 }
 
@@ -199,15 +199,15 @@ body::before {
 }
 
 .hero-intro__wave-drift--back {
-  animation: hero-intro-wave-drift-back 3s ease-in-out infinite alternate;
+  animation: hero-intro-wave-drift-back 1.2s ease-in-out infinite alternate;
 }
 
 .hero-intro__wave-drift--middle {
-  animation: hero-intro-wave-drift-middle 2.5s ease-in-out infinite alternate;
+  animation: hero-intro-wave-drift-middle 0.9s ease-in-out infinite alternate;
 }
 
 .hero-intro__wave-drift--front {
-  animation: hero-intro-wave-drift-front 2.75s ease-in-out infinite alternate;
+  animation: hero-intro-wave-drift-front 1.05s ease-in-out infinite alternate;
 }
 
 @keyframes hero-intro-wave-rise {
@@ -219,6 +219,7 @@ body::before {
     transform: translateY(-96%);
   }
 }
+
 
 @keyframes hero-intro-wave-drift-back {
   from {
@@ -347,7 +348,7 @@ html.home-snap {
   min-width: 100%;
   min-height: 100%;
   object-fit: cover;
-  object-position: 50% -80px;
+  object-position: center 25%;
   transform: none;
 }
 
@@ -431,8 +432,12 @@ html.home-snap {
 
 @media (max-width: 768px) {
   .hero-video {
-    height: calc(100dvh - 5rem);
-    min-height: calc(100vh - 5rem);
+    height: 100dvh;
+    min-height: 100vh;
+  }
+
+  .hero-video__media {
+    object-position: 85% top;
   }
 
   .hero-scroll-indicator {

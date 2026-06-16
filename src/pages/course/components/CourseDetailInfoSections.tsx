@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+// ReactNode은 SectionConfig icon 필드에서 계속 사용됨
 import type { CourseDetail } from '../../../services/course.ts'
 
 interface CourseDetailInfoSectionsProps {
@@ -19,13 +20,6 @@ function parseLines(content: string): string[] {
     .filter(Boolean)
 }
 
-function SectionIcon({ children }: { children: ReactNode }) {
-  return (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-waterlineBlue shadow-sm ring-1 ring-mistSkyBlue/60">
-      {children}
-    </span>
-  )
-}
 
 function EligibilityIcon() {
   return (
@@ -80,12 +74,14 @@ function DetailSection({ title, content, icon, variant = 'list' }: DetailSection
   const lines = parseLines(content)
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-mistSkyBlue/50 bg-white shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
-      <div className="flex items-center gap-3 border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/45 to-waterlineBlue/30 px-5 py-4 md:px-6">
-        <SectionIcon>{icon}</SectionIcon>
-        <h3 className="text-base font-bold tracking-tight text-deepOceanNavy md:text-lg">{title}</h3>
+    <section>
+      <div className="mb-2 px-1">
+        <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
+          <span className="flex h-6 w-6 items-center justify-center text-waterlineBlue">{icon}</span>
+          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">{title}</h3>
+        </div>
       </div>
-
+      <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_4px_20px_rgba(52,74,100,0.10)]">
       <div className="px-5 py-4 md:px-6 md:py-5">
         {variant === 'prose' ? (
           <p className="text-sm leading-[1.75] text-deepOceanNavy/85 md:text-[0.9375rem]">{content}</p>
@@ -97,7 +93,7 @@ function DetailSection({ title, content, icon, variant = 'list' }: DetailSection
                 className="flex gap-3 text-sm leading-relaxed text-deepOceanNavy/90 md:text-[0.9375rem]"
               >
                 <span
-                  className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-waterlineBlue to-softAquaBlue"
+                  className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 rounded-full bg-linear-to-br from-waterlineBlue to-softAquaBlue"
                   aria-hidden="true"
                 />
                 <span>{line}</span>
@@ -105,6 +101,7 @@ function DetailSection({ title, content, icon, variant = 'list' }: DetailSection
             ))}
           </ul>
         )}
+      </div>
       </div>
     </section>
   )

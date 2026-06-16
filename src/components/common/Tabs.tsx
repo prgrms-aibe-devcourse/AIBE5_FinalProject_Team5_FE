@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef, useState } from 'react'
+
 export type TabItem<T extends string> = {
   key: T
   label: string
@@ -13,24 +15,42 @@ type TabsProps<T extends string> = {
   className?: string
 }
 
-// 탭 컴포넌트
 export default function Tabs<T extends string>({
-  tabs, // 탭 목록
-  activeTab, // 활성화 탭
-  onTabChange, // 탭 변경
-  ariaLabel, // 탭 라벨
-  tabCounts, // 탭 카운트
-  className = '', // 탭 컨테이너 클래스
+  tabs,
+  activeTab,
+  onTabChange,
+  ariaLabel,
+  tabCounts,
+  className = '',
 }: TabsProps<T>) {
   const showCounts = tabCounts != null
+  const containerRef = useRef<HTMLDivElement>(null)
+  const activeButtonRef = useRef<HTMLButtonElement>(null)
+  const [indicator, setIndicator] = useState<{ left: number; width: number }>({ left: 0, width: 0 })
+
+  useLayoutEffect(() => {
+    const el = activeButtonRef.current
+    const container = containerRef.current
+    if (!el || !container) return
+    const cr = container.getBoundingClientRect()
+    const er = el.getBoundingClientRect()
+    setIndicator({ left: er.left - cr.left, width: er.width })
+  }, [activeTab])
 
   return (
     <div
-      className={`inline-flex flex-wrap gap-1 rounded-2xl border border-mistSkyBlue/45 bg-white p-1.5 shadow-[0_1px_2px_rgba(52,74,100,0.04)] ${className}`.trim()}
+      ref={containerRef}
+      className={`relative inline-flex flex-wrap gap-1 rounded-2xl border border-mistSkyBlue/40 bg-white/40 p-1.5 shadow-[0_4px_20px_rgba(52,74,100,0.10)] backdrop-blur-md ${className}`.trim()}
       role="tablist"
       aria-label={ariaLabel}
     >
-      {/* 탭 목록 반복 처리 */}
+      {/* 슬라이딩 인디케이터 */}
+      <span
+        className="pointer-events-none absolute top-1.5 h-[calc(100%-0.75rem)] rounded-xl bg-deepOceanNavy shadow-[0_2px_8px_rgba(52,74,100,0.22)] transition-all duration-200 ease-out"
+        style={{ left: indicator.left, width: indicator.width }}
+        aria-hidden="true"
+      />
+
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key
         const count = tabCounts?.[tab.key]
@@ -41,16 +61,17 @@ export default function Tabs<T extends string>({
             type="button"
             role="tab"
             aria-selected={isActive}
+            ref={isActive ? activeButtonRef : null}
             onClick={() => onTabChange(tab.key)}
-            className={`rounded-xl px-4 py-2.5 font-pretendard text-sm font-semibold transition-all ${
+            className={`relative z-10 whitespace-nowrap rounded-xl px-4 py-2.5 font-pretendard text-sm font-semibold transition-colors duration-150 ${
               isActive
-                ? 'bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-mistSkyBlue/45 text-deepOceanNavy shadow-[0_1px_3px_rgba(52,74,100,0.06)]'
-                : 'text-secondary hover:bg-foamWhite/80 hover:text-deepOceanNavy'
+                ? 'text-white'
+                : 'text-deepOceanNavy/60 hover:text-deepOceanNavy'
             }`}
           >
             {tab.label}
             {showCounts ? (
-              <span className={`ml-1.5 tabular-nums ${isActive ? 'text-waterlineBlue' : 'text-softAquaBlue'}`}>
+              <span className={`ml-1.5 tabular-nums ${isActive ? 'text-white/80' : 'text-softAquaBlue'}`}>
                 {count}
               </span>
             ) : null}

@@ -23,6 +23,7 @@ const DROPOUT_MAJOR_REASON_FILTER: CourseFilterConfig = {
     { value: 'difficulty', label: '난이도' },
     { value: 'schedule', label: '시간/일정' },
     { value: 'career', label: '진로 변경' },
+    { value: 'etc', label: '기타' },
   ],
 }
 
@@ -38,6 +39,9 @@ const DROPOUT_SUB_REASON_OPTIONS: Record<string, { value: string; label: string 
   career: [
     { value: 'change_goal', label: '진로 목표 변경' },
     { value: 'other_program', label: '타 교육 선택' },
+  ],
+  etc: [
+    { value: 'etc_other', label: '기타' },
   ],
 }
 
