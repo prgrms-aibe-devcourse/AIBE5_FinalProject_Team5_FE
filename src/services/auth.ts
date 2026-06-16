@@ -1,3 +1,5 @@
+import { http } from './http'
+
 /** 더미 로그인 끄기: false 로 변경 후 아래 DUMMY_LOGIN 사용부 주석 처리 */
 export const USE_AUTH_DUMMY = true
 
@@ -27,6 +29,12 @@ export interface SignupRequest {
   password: string
   name: string
   nickname: string
+}
+
+/** 이메일 중복 확인 응답 - GET /api/auth/check-email Response 200 */
+export interface CheckEmailResponse {
+  email: string
+  available: boolean
 }
 
 /** 회원가입 응답 - POST /api/auth/signup Response 201 */
@@ -194,10 +202,12 @@ export async function login(body: LoginRequest): Promise<LoginResponse> {
   throw new Error('로그인 API가 연결되지 않았습니다.')
 }
 
-/** POST /api/auth/signup */
-export async function signup(body: SignupRequest): Promise<SignupResponse> {
-  // TODO: 실제 API
-  // const res = await fetch('/api/auth/signup', { method: 'POST', ... })
-  void body
-  throw new Error('회원가입 API가 연결되지 않았습니다.')
+/** [이메일 중복 체크] GET /api/auth/check-email **/
+export async function checkEmail(email: string): Promise<CheckEmailResponse> {
+  return http.get<CheckEmailResponse>('/api/auth/check-email', { query: { email } })
+}
+
+/** [회원가입] POST /api/auth/signup **/
+export async function signup(body: SignupRequest): Promise<AuthUser> {
+  return http.post<AuthUser>('/api/auth/signup', body)
 }
