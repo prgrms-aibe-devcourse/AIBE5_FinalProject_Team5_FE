@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 const AI_PORTFOLIO_PATH = '/dashboard/portfolio'
 import logo from '../../assets/bootsignal_transparent.png'
-import { clearAuthSession, getAuthSession, isAdminRole } from '../../services/auth'
+import { clearAuthSession, getStoredUser, isAdminRole, isAuthenticated } from '../../services/auth'
 
 const communityLinks = [
   { label: '게시판', to: '/community/posts' },
@@ -103,9 +103,9 @@ export default function Header({
   onMenuClick,
 }: HeaderProps) {
   const navigate = useNavigate()
-  const session = getAuthSession()
-  const isLoggedIn = isLoggedInProp ?? Boolean(session?.accessToken)
-  const nickname = nicknameProp ?? session?.user?.nickname ?? '닉네임'
+  const storedUser = getStoredUser()
+  const isLoggedIn = isLoggedInProp ?? isAuthenticated()
+  const nickname = nicknameProp ?? storedUser?.nickname ?? '닉네임'
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -115,7 +115,7 @@ export default function Header({
     setMobileMenuOpen(false)
     setMobileCommunityOpen(false)
   }
-  const profileMenuLinks = isAdminRole(session?.user?.role) ? adminMenuLinks : userMenuLinks
+  const profileMenuLinks = isAdminRole(storedUser?.role) ? adminMenuLinks : userMenuLinks
   const isShell = variant === 'shell'
 
   const handleLogout = () => {

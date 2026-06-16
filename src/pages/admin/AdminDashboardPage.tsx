@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { getAuthSession } from '../../services/auth'
+import { getStoredUser } from '../../services/auth'
 import AdminShell from './components/AdminShell'
 import AdminPageHeader from './components/AdminPageHeader'
 import AdminDashboardStatCards from './components/dashboard/AdminDashboardStatCards'
@@ -13,7 +13,7 @@ import {
 
 // 관리자 대시보드 페이지
 export default function AdminDashboardPage() {
-  const nickname = getAuthSession()?.user?.nickname ?? '관리자'
+  const nickname = getStoredUser()?.nickname ?? '관리자'
 
   const monthlySignupData = useMemo(() => buildMonthlySignupData(), [])
   const thisMonthSignups = monthlySignupData[monthlySignupData.length - 1]?.value ?? 0

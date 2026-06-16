@@ -35,7 +35,7 @@ export type ReportReason = (typeof REPORT_REASON_OPTIONS)[number]
 /** POST /api/reports */
 export async function createReport(body: ReportCreateRequest): Promise<ReportCreateResponse> {
   // TODO: 실제 API 연동
-  // const token = localStorage.getItem('accessToken')
+  // const token = getAuthSession()
   // const res = await fetch('/api/reports', {
   //   method: 'POST',
   //   headers: {
