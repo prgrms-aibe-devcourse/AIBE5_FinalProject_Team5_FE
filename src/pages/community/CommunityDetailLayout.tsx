@@ -74,7 +74,7 @@ export default function CommunityDetailLayout() {
       <main className="flex-1 px-8 pb-16 pt-8 md:px-16 lg:px-20">
         
         {/* 컨텐츠 컨테이너 */}
-        <div className="mx-auto flex w-full max-w-course-main flex-col gap-6 md:gap-8">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 md:gap-8">
           {/* 커뮤니티 상세 브레드크럼 */}
           <CommunityDetailBreadcrumb section={section} />
           {/* 커뮤니티 상세 컨텐츠 */}

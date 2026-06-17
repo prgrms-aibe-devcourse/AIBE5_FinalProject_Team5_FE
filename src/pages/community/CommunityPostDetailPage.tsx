@@ -7,38 +7,57 @@ import { formatCommunityDate } from '../../utils/formatRequestedDate'
 import ReportModal from '../../components/common/ReportModal'
 import { usePostDetail } from './hooks/usePostDetail'
 
-// 게시글 상세 페이지
-// API: services/post.getPost — GET /api/posts/{postId}
+// 게시판 상세 페이지
+// API: services/post.getPost ??GET /api/posts/{postId}
 export default function CommunityPostDetailPage() {
   const { postId } = useParams<{ postId: string }>()
   const location = useLocation()
   const fallbackTitle = (location.state as { title?: string } | null)?.title?.trim()
-  const { post, isLoading, fetchError } = usePostDetail(postId)
+  const { post, isLoading, fetchError } = usePostDetail(postId, 'BOARD')
 
   const [reportOpen, setReportOpen] = useState(false)
   const postNumericId = parseInt(postId ?? '0', 10) || 0
 
   if (isLoading) {
-    return <p className="py-10 text-center text-sm text-secondary">불러오는 중...</p>
+    return <p className="flex min-h-[60vh] items-center justify-center text-center text-sm text-secondary">????? ??..</p>
   }
 
   if (fetchError || !post) {
-    return <p className="py-10 text-center text-sm text-red-500">{fetchError ?? '게시글을 찾을 수 없습니다.'}</p>
+    return <p className="flex min-h-[60vh] items-center justify-center text-center text-sm text-red-500">{fetchError ?? '??????? ????????.'}</p>
   }
 
-  const title = post.title || fallbackTitle || '게시글 제목'
+  const title = post.title || fallbackTitle || '??? ???'
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
       <CommunityDetailCard
         title={title}
+        type="board"
         meta={[
-          <span key="author" className="font-medium text-deepOceanNavy/80">
+          <span key="author" className="inline-flex items-center gap-1.5 font-medium">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
             {post.author}
           </span>,
-          <time key="date" dateTime={post.createdAt}>
-            {formatCommunityDate(post.createdAt)}
-          </time>,
+          <span key="date" className="inline-flex items-center gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <time dateTime={post.createdAt}>{formatCommunityDate(post.createdAt)}</time>
+          </span>,
         ]}
         actions={
           <button
@@ -59,9 +78,8 @@ export default function CommunityPostDetailPage() {
           </button>
         }
       >
-        <section aria-label="상세 내역">
-          <h3 className="text-base font-semibold text-deepOceanNavy">상세 내역</h3>
-          <p className="mt-4 whitespace-pre-wrap">{post.content}</p>
+        <section aria-label="신고">
+          <p className="whitespace-pre-wrap">{post.content}</p>
         </section>
       </CommunityDetailCard>
 
