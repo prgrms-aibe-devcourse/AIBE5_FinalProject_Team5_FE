@@ -9,4 +9,8 @@ export function formatCommunityDate(date: string) {
   return date.replaceAll('-', '.')
 }
 
+/** ISO 날짜/시간에서 YYYY-MM-DD만 추출 */
+export function toDateOnly(iso: string): string {
+  return iso.split('T')[0]
+}
 

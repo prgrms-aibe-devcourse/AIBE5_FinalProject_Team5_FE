@@ -32,7 +32,7 @@ const sectionMeta: Record<
     ),
   },
   article: {
-    description: '인사이트 아티클 읽기',
+    description: '주간 tech 인사이트 읽기',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />

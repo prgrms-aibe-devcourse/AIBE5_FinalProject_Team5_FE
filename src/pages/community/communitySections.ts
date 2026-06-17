@@ -1,6 +1,9 @@
 // 커뮤니티 목록 최대 항목 수 (페이지네이션)
 export const COMMUNITY_LIST_MAX_ITEMS = 10
 
+// 아티클 목록 페이지당 항목 수 (getArticles size 파라미터)
+export const ARTICLE_LIST_PAGE_SIZE = 5
+
 // 커뮤니티 목록 경로 설정
 export const communitySections = {
   posts: {
