@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AuthInput from './components/AuthInput.tsx'
 import AuthInputWithButton from './components/AuthInputWithButton.tsx'
 import AuthPasswordInput from './components/AuthPasswordInput.tsx'
@@ -7,7 +8,10 @@ import AuthSocial from './components/AuthSocial.tsx'
 import LoginVisualPanel from './components/LoginVisualPanel.tsx'
 import AuthExitButton from './components/AuthExitButton.tsx'
 import {
+  EMAIL_AVAILABLE_MESSAGE,
+  EMAIL_CHECK_REQUIRED_MESSAGE,
   EMAIL_INVALID_MESSAGE,
+  EMAIL_UNAVAILABLE_MESSAGE,
   isSignupFormValid,
   isValidEmail,
   isNicknameTooLong,
@@ -17,10 +21,12 @@ import {
   PASSWORD_MISMATCH_MESSAGE,
   passwordsMatch,
 } from '../../utils/validation.ts'
-import type { SignupRequest } from '../../services/auth.ts'
+import { checkEmail, signup } from '../../services/auth.ts'
+import { ApiError } from '../../services/ApiError.ts'
 
 /** 데스크톱 회원가입 페이지 (50:50 — 사이드 배경 | 폼) */
 export default function SignupPage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
@@ -29,7 +35,11 @@ export default function SignupPage() {
   const [emailError, setEmailError] = useState<string | null>(null)
   const [nicknameError, setNicknameError] = useState<string | null>(null)
   const [passwordConfirmError, setPasswordConfirmError] = useState<string | null>(null)
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const [isEmailChecking, setIsEmailChecking] = useState(false)
   const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false)
+  const [signupError, setSignupError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const canSubmit = isSignupFormValid(
     email,
@@ -37,6 +47,7 @@ export default function SignupPage() {
     nickname,
     password,
     confirmPassword,
+    isEmailVerified,
     isPasswordConfirmed,
   )
 
@@ -45,16 +56,39 @@ export default function SignupPage() {
     setIsPasswordConfirmed(false)
   }
 
-  const handleEmailDuplicateCheck = () => {
+  /* 이메일 중복 확인 */
+  const handleEmailDuplicateCheck = async () => {
+    // 에러 체크
     if (!isValidEmail(email)) {
       setEmailError(EMAIL_INVALID_MESSAGE)
+      setIsEmailVerified(false)
       return
     }
 
     setEmailError(null)
-    // TODO: 백엔드 이메일 중복 확인 API 연동
+    setIsEmailVerified(false)
+    setIsEmailChecking(true)
+
+    // 이메일 중복 확인 요청 
+    try {
+      const result = await checkEmail(email.trim())
+
+      if (result.available) {
+        setIsEmailVerified(true)
+        return
+      }
+
+      setEmailError(EMAIL_UNAVAILABLE_MESSAGE)
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : '이메일 확인 중 오류가 발생했습니다.'
+      setEmailError(message)
+    } finally {
+      setIsEmailChecking(false)
+    }
   }
 
+  // 비밀번호 확인
   const handlePasswordConfirm = () => {
     if (!confirmPassword.trim()) {
       setPasswordConfirmError('비밀번호 확인을 입력해 주세요.')
@@ -72,11 +106,18 @@ export default function SignupPage() {
     setIsPasswordConfirmed(false)
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  /* 회원가입 처리리 */
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    // 에러 체크
     if (!isValidEmail(email)) {
       setEmailError(EMAIL_INVALID_MESSAGE)
+      return
+    }
+
+    if (!isEmailVerified) {
+      setEmailError(EMAIL_CHECK_REQUIRED_MESSAGE)
       return
     }
 
@@ -96,10 +137,34 @@ export default function SignupPage() {
     setEmailError(null)
     setNicknameError(null)
     setPasswordConfirmError(null)
+    setSignupError(null)
+    setIsSubmitting(true)
 
-    const body: SignupRequest = { email, password, name, nickname }
-    // TODO: await signup(body) — POST /api/auth/signup
-    void body
+    // 회원가입 요청 전송
+    try {
+      await signup({
+        email: email.trim(),
+        password,
+        name: name.trim(),
+        nickname: nickname.trim(),
+      })
+      navigate('/login')
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.code === 'DUPLICATE_EMAIL') {
+          setEmailError(err.message)
+          setIsEmailVerified(false)
+        } else if (err.code === 'DUPLICATE_NICKNAME') {
+          setNicknameError(err.message)
+        } else {
+          setSignupError(err.message)
+        }
+      } else {
+        setSignupError('회원가입 중 오류가 발생했습니다.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -128,14 +193,16 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
-                  if (emailError) setEmailError(null)
+                  setEmailError(null)
+                  setIsEmailVerified(false)
                 }}
                 placeholder="example@email.com"
                 autoComplete="email"
-                buttonLabel="중복 확인"
+                buttonLabel={isEmailChecking ? '확인 중...' : '중복 확인'}
                 onButtonClick={handleEmailDuplicateCheck}
-                buttonDisabled={!email.trim()}
+                buttonDisabled={!email.trim() || isEmailChecking}
                 error={emailError ?? undefined}
+                success={isEmailVerified ? EMAIL_AVAILABLE_MESSAGE : undefined}
               />
 
               <AuthInput
@@ -192,12 +259,18 @@ export default function SignupPage() {
                 success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
               />
 
+              {signupError && (
+                <p className="text-sm text-red-500 font-pretendard" role="alert">
+                  {signupError}
+                </p>
+              )}
+
               <AuthButton
                 type="submit"
-                disabled={!canSubmit}
+                disabled={!canSubmit || isSubmitting}
                 className="mt-2 rounded-full py-3.5 text-base"
               >
-                회원가입
+                {isSubmitting ? '가입 중...' : '회원가입'}
               </AuthButton>
             </form>
 

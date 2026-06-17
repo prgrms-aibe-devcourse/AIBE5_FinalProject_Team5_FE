@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { AUTH_STORAGE_KEYS } from '../../services/auth'
+import { getStoredUser } from '../../services/auth'
 import { favoriteCourses, recentCourses, recentPosts } from './data'
 import DashboardCalendarCard from './components/DashboardCalendarCard'
 import DashboardCourseListCard from './components/DashboardCourseListCard'
@@ -11,10 +11,7 @@ import DashboardShell from './components/DashboardShell'
 const DASHBOARD_PREVIEW_LIMIT = 5
 
 export default function DashboardPage() {
-  const nickname = useMemo(
-    () => localStorage.getItem(AUTH_STORAGE_KEYS.nickname) ?? '회원',
-    [],
-  )
+  const nickname = useMemo(() => getStoredUser()?.nickname ?? '회원', [])
 
   const previewFavoriteCourses = useMemo(
     () => favoriteCourses.slice(0, DASHBOARD_PREVIEW_LIMIT),

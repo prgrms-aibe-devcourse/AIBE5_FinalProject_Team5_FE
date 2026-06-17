@@ -5,6 +5,9 @@ export function isValidEmail(email: string): boolean {
 }
 
 export const EMAIL_INVALID_MESSAGE = '올바른 이메일 형식을 입력해 주세요.'
+export const EMAIL_AVAILABLE_MESSAGE = '사용 가능한 이메일입니다.'
+export const EMAIL_UNAVAILABLE_MESSAGE = '이미 사용 중인 이메일입니다.'
+export const EMAIL_CHECK_REQUIRED_MESSAGE = '이메일 중복 확인을 해 주세요.'
 
 /** 비밀번호와 확인 값 일치 여부 */
 export function passwordsMatch(password: string, confirmPassword: string): boolean {
@@ -35,6 +38,7 @@ export function isSignupFormValid(
   nickname: string,
   password: string,
   confirmPassword: string,
+  isEmailVerified: boolean,
   isPasswordConfirmed: boolean,
 ): boolean {
   return Boolean(
@@ -45,6 +49,7 @@ export function isSignupFormValid(
       confirmPassword.trim() &&
       isValidEmail(email) &&
       !isNicknameTooLong(nickname) &&
+      isEmailVerified &&
       isPasswordConfirmed &&
       passwordsMatch(password, confirmPassword),
   )

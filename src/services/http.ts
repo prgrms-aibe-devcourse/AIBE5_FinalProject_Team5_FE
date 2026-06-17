@@ -1,8 +1,9 @@
 import { ApiError } from './ApiError'
+import { getAccessToken, getTokenType } from './authToken'
 import type { ApiResponse } from './apiTypes'
-
 const BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
+// 쿼리 파라미터 빌드
 function buildQuery(params: Record<string, unknown>): string {
   const entries = Object.entries(params).filter(
     ([, v]) => v !== undefined && v !== null && v !== '',
@@ -16,13 +17,23 @@ interface RequestOptions {
   auth?: boolean
 }
 
+// HTTP 요청 함수
 async function request<T>(path: string, init: RequestInit & RequestOptions = {}): Promise<T> {
-  const { query, auth: _auth, ...fetchInit } = init
+  const { query, auth, ...fetchInit } = init
   const url = BASE + path + (query ? buildQuery(query) : '')
-
+  
+  // 헤더 초기화
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(fetchInit.headers as Record<string, string> | undefined),
+  }
+
+  // 인증 헤더 추가
+  if (auth) {
+    const token = getAccessToken()
+    if (token) {
+      headers.Authorization = `${getTokenType()} ${token}`
+    }
   }
 
   const res = await fetch(url, { ...fetchInit, headers })
@@ -41,6 +52,7 @@ async function request<T>(path: string, init: RequestInit & RequestOptions = {})
   )
 }
 
+// HTTP 요청 메소드 모음
 export const http = {
   get: <T>(path: string, opts: RequestOptions = {}) =>
     request<T>(path, { method: 'GET', ...opts }),

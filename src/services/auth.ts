@@ -1,45 +1,158 @@
-/** 더미 로그인 끄기: false 로 변경 후 아래 DUMMY_LOGIN 사용부 주석 처리 */
-export const USE_AUTH_DUMMY = true
+import { http } from './http'
+import {
+  clearTokens,
+  getRefreshToken,
+  getTokenBundle,
+  saveTokens,
+  type TokenBundle,
+} from './authToken'
 
-
-/** 로그인 요청 - POST /api/auth/login Request */
-export interface LoginRequest {
+/** [이메일 중복 체크_요청] 
+ * GET /api/auth/check-email **/
+export interface CheckEmailResponse { // 응답 body(200)
   email: string
-  password: string
+  available: boolean
 }
 
-/** 로그인 응답 - POST /api/auth/login Response 200 */
-export interface LoginResponse {
-  success: boolean
-  code: string
-  message: string
-  data: {
-    accessToken: string
-    tokenType: string
-    expiresIn: number
-    user: AuthUser
-  }
+export async function checkEmail(email: string): Promise<CheckEmailResponse> {
+  return http.get<CheckEmailResponse>('/api/auth/check-email', { query: { email } })
 }
 
-/** 회원가입 요청 - POST /api/auth/signup Request */
-export interface SignupRequest {
+
+/** [회원가입_요청] 
+ * POST /api/auth/signup **/
+export interface SignupRequest { // 요청 body
   email: string
   password: string
   name: string
   nickname: string
 }
 
-/** 회원가입 응답 - POST /api/auth/signup Response 201 */
-export interface SignupResponse {
+export interface SignupResponse { // 응답 body(201)
   success: boolean
   code: string
   message: string
   data: AuthUser
 }
 
-// 사용자 정보
+export async function signup(body: SignupRequest): Promise<AuthUser> {
+  return http.post<AuthUser>('/api/auth/signup', body)
+}
+
+
+/** [로그인_요청] 
+ * POST /api/auth/login */
+export interface LoginRequest {  // 요청 body
+  email: string
+  password: string
+}
+
+export interface LoginResponse { // 응답 body(200)
+  accessToken: string
+  tokenType: string
+  expiresIn: number
+  refreshToken: string
+  refreshTokenExpiresIn: number
+  user: AuthUser
+}
+
+export async function login(body: LoginRequest): Promise<LoginResponse> {
+  const response = await http.post<LoginResponse>('/api/auth/login', body)
+  saveAuthSession(response, body.email) // 토큰 
+  return response
+}
+
+
+/** [구글 로그인_요청]
+ * POST /api/auth/google/login */
+export interface GoogleLoginRequest { // 요청 body
+  idToken: string
+}
+
+export async function googleLogin(body: GoogleLoginRequest): Promise<LoginResponse> {
+  const response = await http.post<LoginResponse>('/api/auth/google/login', body)
+  saveAuthSession(response)
+  return response
+}
+
+
+/** [로그아웃_요청]
+ * POST /api/auth/logout */
+export interface LogoutRequest {
+  refreshToken: string
+}
+
+export async function logout(): Promise<void> {
+  const refreshToken = getRefreshToken()
+
+  try {
+    if (refreshToken) {
+      await http.post<void>('/api/auth/logout', { refreshToken } satisfies LogoutRequest)
+    }
+  } finally {
+    clearAuthSession()
+  }
+}
+
+// 로그아웃 시 토큰 + localStorage 프로필 전부 삭제 
+export function clearAuthSession(): void {
+  clearTokens()
+  clearStoredUser()
+}
+
+// 인증 세션 저장 (토큰 + 사용자 프로필) // 토큰 저장 방식 변경 시 수정 필요
+export function saveAuthSession(response: LoginResponse, fallbackEmail?: string): void {
+  saveTokens(toTokenBundle(response)) // 토큰 저장
+  saveStoredUser(response.user, fallbackEmail)
+}
+
+// 인증 세션 조회 (토큰 + 사용자 프로필) // 토큰 저장 방식 변경 시 수정 필요
+export function getAuthSession(): AuthSession | null {
+  const tokens = getTokenBundle()
+  const user = getStoredUser()
+  if (!tokens || !user) return null
+
+  return {
+    ...tokens,
+    user,
+  }
+}
+
+// 사용자 프로필 로컬 스토리지 저장 
+function saveStoredUser(user: AuthUser, fallbackEmail?: string): void {
+  const email = user.email?.trim() || fallbackEmail?.trim()
+  if (!email) return
+
+  localStorage.setItem(AUTH_STORAGE_KEYS.email, email)
+  localStorage.setItem(AUTH_STORAGE_KEYS.nickname, user.nickname)
+  localStorage.setItem(AUTH_STORAGE_KEYS.role, user.role)
+  localStorage.setItem(AUTH_STORAGE_KEYS.provider, user.provider)
+}
+
+// 사용자 프로필 로컬 스토리지 조회 
+export function getStoredUser(): StoredUser | null {
+  const email = localStorage.getItem(AUTH_STORAGE_KEYS.email)
+  const nickname = localStorage.getItem(AUTH_STORAGE_KEYS.nickname)
+  if (!email || !nickname) return null
+
+  return {
+    email,
+    nickname,
+    role: (localStorage.getItem(AUTH_STORAGE_KEYS.role) ?? 'USER') as UserRole,
+    provider: localStorage.getItem(AUTH_STORAGE_KEYS.provider) ?? 'LOCAL',
+  }
+}
+
+// 사용자 프로필 로컬 스토리지 삭제 
+function clearStoredUser(): void {
+  ALL_AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key))
+}
+
+// 사용자 역할 
 export type UserRole = 'USER' | 'ADMIN'
 
+
+// 사용자 프로필 (백엔드 응답용)
 export interface AuthUser {
   userId: number
   email: string
@@ -49,155 +162,56 @@ export interface AuthUser {
   provider: string
 }
 
-export function isAdminRole(role: string | undefined | null): boolean {
-  return role?.toUpperCase() === 'ADMIN'
+// 사용자 프로필 (로컬 스토리지 저장용)
+export interface StoredUser {
+  email: string
+  nickname: string
+  role: UserRole
+  provider: string
 }
 
-type DummyAccount = { request: LoginRequest; response: LoginResponse }
-
-/** 테스트용 일반 사용자 — role: USER */
-export const DUMMY_LOGIN: DummyAccount = {
-  request: {
-    email: 'test@email.com',
-    password: '0000',
-  },
-  response: {
-    success: true,
-    code: 'AUTH_LOGIN_SUCCESS',
-    message: '로그인에 성공했습니다.',
-    data: {
-      accessToken: 'jwt-access-token-dummy-user',
-      tokenType: 'Bearer',
-      expiresIn: 3600,
-      user: {
-        userId: 1,
-        email: 'test@email.com',
-        name: '테스트',
-        nickname: '테스터닉네임',
-        role: 'USER',
-        provider: 'LOCAL',
-      },
-    },
-  },
+// 인증 세션 (토큰 + 사용자 프로필) // 토큰 저장 방식 변경 시 수정 필요
+export type AuthSession = {
+  accessToken: string
+  tokenType: string
+  expiresIn: number
+  refreshToken: string
+  refreshTokenExpiresIn: number
+  user: StoredUser
 }
 
-/** 테스트용 관리자 — role: ADMIN */
-export const DUMMY_ADMIN_LOGIN: DummyAccount = {
-  request: {
-    email: 'admin@email.com',
-    password: '0000',
-  },
-  response: {
-    success: true,
-    code: 'AUTH_LOGIN_SUCCESS',
-    message: '로그인에 성공했습니다.',
-    data: {
-      accessToken: 'jwt-access-token-dummy-admin',
-      tokenType: 'Bearer',
-      expiresIn: 3600,
-      user: {
-        userId: 2,
-        email: 'admin@email.com',
-        name: '관리자',
-        nickname: '관리자닉네임',
-        role: 'ADMIN',
-        provider: 'LOCAL',
-      },
-    },
-  },
-}
-
-const DUMMY_ACCOUNTS: DummyAccount[] = [DUMMY_LOGIN, DUMMY_ADMIN_LOGIN]
-
-const LOGIN_ERROR_MESSAGE = '이메일 또는 비밀번호를 확인해 주세요.'
-
-/** localStorage — 필드마다 키·값 분리 저장 (DevTools에서 항목별 확인 가능) */
+// 사용자 프로필 키 (로컬 스토리지)
 export const AUTH_STORAGE_KEYS = {
-  accessToken: 'accessToken',
-  tokenType: 'tokenType',
-  expiresIn: 'expiresIn',
-  userId: 'userId',
   email: 'email',
-  name: 'name',
   nickname: 'nickname',
   role: 'role',
   provider: 'provider',
 } as const
 
+// 사용자 프로필 관련 함수
 const ALL_AUTH_STORAGE_KEYS = Object.values(AUTH_STORAGE_KEYS)
 
-export type AuthSession = LoginResponse['data']
+// 토큰 관련 함수
+export {
+  getAccessToken,
+  getRefreshToken,
+  getTokenType,
+  isAuthenticated,
+} from './authToken'
 
-export function saveAuthSession(response: LoginResponse): void {
-  const { accessToken, tokenType, expiresIn, user } = response.data
-
-  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken)
-  localStorage.setItem(AUTH_STORAGE_KEYS.tokenType, tokenType)
-  localStorage.setItem(AUTH_STORAGE_KEYS.expiresIn, String(expiresIn))
-  localStorage.setItem(AUTH_STORAGE_KEYS.userId, String(user.userId))
-  localStorage.setItem(AUTH_STORAGE_KEYS.email, user.email)
-  localStorage.setItem(AUTH_STORAGE_KEYS.name, user.name)
-  localStorage.setItem(AUTH_STORAGE_KEYS.nickname, user.nickname)
-  localStorage.setItem(AUTH_STORAGE_KEYS.role, user.role)
-  localStorage.setItem(AUTH_STORAGE_KEYS.provider, user.provider)
+// 사용자 역할 체크 (헤더 권한 체크용)
+export function isAdminRole(role: string | undefined | null): boolean {
+  return role?.toUpperCase() === 'ADMIN'
 }
 
-export function getAuthSession(): AuthSession | null {
-  const accessToken = localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)
-  if (!accessToken) return null
-
-  const userId = localStorage.getItem(AUTH_STORAGE_KEYS.userId)
-  const email = localStorage.getItem(AUTH_STORAGE_KEYS.email)
-  if (!userId || !email) return null
-
+// 토큰 번들 변환
+function toTokenBundle(response: LoginResponse): TokenBundle {
   return {
-    accessToken,
-    tokenType: localStorage.getItem(AUTH_STORAGE_KEYS.tokenType) ?? 'Bearer',
-    expiresIn: Number(localStorage.getItem(AUTH_STORAGE_KEYS.expiresIn) ?? 0),
-    user: {
-      userId: Number(userId),
-      email,
-      name: localStorage.getItem(AUTH_STORAGE_KEYS.name) ?? '',
-      nickname: localStorage.getItem(AUTH_STORAGE_KEYS.nickname) ?? '',
-      role: (localStorage.getItem(AUTH_STORAGE_KEYS.role) ?? 'USER') as UserRole,
-      provider: localStorage.getItem(AUTH_STORAGE_KEYS.provider) ?? 'LOCAL',
-    },
+    accessToken: response.accessToken,
+    tokenType: response.tokenType,
+    expiresIn: response.expiresIn,
+    refreshToken: response.refreshToken,
+    refreshTokenExpiresIn: response.refreshTokenExpiresIn,
   }
 }
 
-/** 로그아웃 시 AUTH_STORAGE_KEYS 항목 전부 삭제 */
-export function clearAuthSession(): void {
-  ALL_AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key))
-}
-
-/** POST /api/auth/login */
-export async function login(body: LoginRequest): Promise<LoginResponse> {
-  // 더미: USE_AUTH_DUMMY === false 로 바꾸면 이 블록 스킵
-  if (USE_AUTH_DUMMY) {
-    const matched = DUMMY_ACCOUNTS.find(
-      (account) =>
-        account.request.email === body.email && account.request.password === body.password,
-    )
-    if (matched) {
-      saveAuthSession(matched.response)
-      return matched.response
-    }
-    throw new Error(LOGIN_ERROR_MESSAGE)
-  }
-
-  // TODO: 실제 API
-  // const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-  // const response = (await res.json()) as LoginResponse
-  // if (!res.ok) throw new Error(response.message)
-  // saveAuthSession(response)
-  // return response
-  throw new Error('로그인 API가 연결되지 않았습니다.')
-}
-
-/** POST /api/auth/signup */
-export async function signup(body: SignupRequest): Promise<SignupResponse> {
-  // TODO: 실제 API
-  // const res = await fetch('/api/auth/signup', { method: 'POST', ... })
-  void body
-  throw new Error('회원가입 API가 연결되지 않았습니다.')
-}

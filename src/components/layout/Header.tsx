@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 const AI_PORTFOLIO_PATH = '/dashboard/portfolio'
 import logo from '../../assets/bootsignal_transparent.png'
-import { clearAuthSession, getAuthSession, isAdminRole } from '../../services/auth'
+import { getStoredUser, isAdminRole, isAuthenticated, logout } from '../../services/auth'
 
 const communityLinks = [
   { label: '게시판', to: '/community/posts' },
@@ -103,9 +103,9 @@ export default function Header({
   onMenuClick,
 }: HeaderProps) {
   const navigate = useNavigate()
-  const session = getAuthSession()
-  const isLoggedIn = isLoggedInProp ?? Boolean(session?.accessToken)
-  const nickname = nicknameProp ?? session?.user?.nickname ?? '닉네임'
+  const storedUser = getStoredUser()
+  const isLoggedIn = isLoggedInProp ?? isAuthenticated()
+  const nickname = nicknameProp ?? storedUser?.nickname ?? '닉네임'
   const [communityOpen, setCommunityOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -115,12 +115,14 @@ export default function Header({
     setMobileMenuOpen(false)
     setMobileCommunityOpen(false)
   }
-  const profileMenuLinks = isAdminRole(session?.user?.role) ? adminMenuLinks : userMenuLinks
+  const profileMenuLinks = isAdminRole(storedUser?.role) ? adminMenuLinks : userMenuLinks
   const isShell = variant === 'shell'
 
-  const handleLogout = () => {
-    clearAuthSession()
+  /* 로그아웃 처리 (로그아웃 후 메인 페이지 상단 이동) */
+  const handleLogout = async () => {
+    await logout()
     navigate('/', { replace: true })
+    window.scrollTo({ top: 0, left: 0 })
   }
 
   const headerPositionClass = fixed ? 'fixed left-0 right-0 top-0' : 'relative'
@@ -151,7 +153,10 @@ export default function Header({
         </button>
 
         {communityOpen ? (
-          <div className="absolute left-1/2 top-full z-50 mt-2 w-28 -translate-x-1/2 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
+          <div
+            className="absolute left-1/2 top-full z-50 mt-2 w-28 -translate-x-1/2 rounded-lg border border-gray-100 bg-white py-1 shadow-lg"
+            onMouseDown={(e) => e.preventDefault()}
+          >
             {communityLinks.map((item) => (
               <Link key={item.to} to={item.to} className={dropdownItemClass}>
                 {item.label}
@@ -205,7 +210,10 @@ export default function Header({
         </button>
 
         {userMenuOpen ? (
-          <div className="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
+          <div
+            className="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-gray-100 bg-white py-1 shadow-lg"
+            onMouseDown={(e) => e.preventDefault()}
+          >
             {profileMenuLinks.map((item) => (
               <Link key={item.label} to={item.to} className={dropdownItemClass} onClick={() => setUserMenuOpen(false)}>
                 {item.label}
