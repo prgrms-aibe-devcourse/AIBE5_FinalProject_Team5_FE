@@ -29,6 +29,13 @@ export const communitySections = {
 
 export type CommunitySectionKey = keyof typeof communitySections
 
+/** 커뮤니티 섹션 → BE postType 매핑 */
+export const COMMUNITY_POST_TYPE_BY_SECTION = {
+  posts: 'BOARD',
+  qna: 'QNA',
+  recruit: 'PROJECT_RECRUIT',
+} as const satisfies Record<Exclude<CommunitySectionKey, 'article'>, string>
+
 // 커뮤니티 경로에서 섹션 조회
 export function getCommunitySectionFromPath(pathname: string): CommunitySectionKey | null {
   if (pathname.startsWith('/community/posts')) return 'posts'

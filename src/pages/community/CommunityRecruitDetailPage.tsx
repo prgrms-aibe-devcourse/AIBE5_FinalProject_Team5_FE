@@ -1,48 +1,48 @@
 import { useLocation, useParams } from 'react-router-dom'
-import { getMockRecruitDetail } from './data/mockRecruitDetail'
 import CommunityDetailCard from './components/CommunityDetailCard'
 import CommunityCommentsCard from './components/CommunityCommentsCard'
 import CommunityCommentsSection from './components/CommunityCommentsSection'
 import { formatCommunityDate } from '../../utils/formatRequestedDate'
+import { usePostDetail } from './hooks/usePostDetail'
 
-// 모집 상세 페이지 컴포넌트
+// 모집 상세 페이지
+// API: services/post.getPost — GET /api/posts/{postId}
 export default function CommunityRecruitDetailPage() {
-  // 모집 데이터
   const { recruitId } = useParams<{ recruitId: string }>()
   const location = useLocation()
-  const title = (location.state as { title?: string } | null)?.title?.trim() || '모집 제목'
-  const detail = getMockRecruitDetail(recruitId)
+  const fallbackTitle = (location.state as { title?: string } | null)?.title?.trim()
+  const { post, isLoading, fetchError } = usePostDetail(recruitId)
+
+  if (isLoading) {
+    return <p className="py-10 text-center text-sm text-secondary">불러오는 중...</p>
+  }
+
+  if (fetchError || !post) {
+    return <p className="py-10 text-center text-sm text-red-500">{fetchError ?? '모집 글을 찾을 수 없습니다.'}</p>
+  }
+
+  const title = post.title || fallbackTitle || '모집 제목'
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      {/* 모집 상세 카드 */}
       <CommunityDetailCard
         title={title}
         meta={[
-          <span key="company" className="font-medium text-deepOceanNavy/80">
-            {detail.company}
+          <span key="author" className="font-medium text-deepOceanNavy/80">
+            {post.author}
           </span>,
-          <time key="date" dateTime={detail.createdAt}>
-            {formatCommunityDate(detail.createdAt)}
+          <time key="date" dateTime={post.createdAt}>
+            {formatCommunityDate(post.createdAt)}
           </time>,
-          <span key="views" className="tabular-nums">
-            조회 {detail.views.toLocaleString()}
-          </span>,
         ]}
       >
-        {/* 모집 상세 내역 */}
         <section aria-label="상세 내역">
           <h3 className="text-base font-semibold text-deepOceanNavy">상세 내역</h3>
-          <p className="mt-4">{detail.body}</p>
-          <p className="mt-4 text-secondary">
-            API 연동 후 실제 모집 상세 내용이 이 영역에 표시됩니다.
-          </p>
+          <p className="mt-4 whitespace-pre-wrap">{post.content}</p>
         </section>
       </CommunityDetailCard>
 
-      {/* 모집 댓글 카드 */}
       <CommunityCommentsCard>
-        {/* 모집 댓글 섹션 */}
         <CommunityCommentsSection resourceKey={`recruit:${recruitId ?? 'unknown'}`} />
       </CommunityCommentsCard>
     </div>

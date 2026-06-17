@@ -1,42 +1,44 @@
-import Pagination, { usePaginatedList } from '../../components/common/Pagination'
-import { mockPosts } from './data/mockPosts'
-import { COMMUNITY_LIST_MAX_ITEMS } from './communitySections'
+import Pagination from '../../components/common/Pagination'
 import CommunityListItem from './components/CommunityListItem'
+import { useCommunityPostList } from './hooks/useCommunityPostList'
 
 // 게시판 목록 페이지
+// API: services/post.getPosts — GET /api/posts?postType=BOARD
 export default function CommunityPostsPage() {
-  // 게시판 목록 데이터 + 페이지네이션 처리
-  const { currentPage, totalPages, displayedItems, onPageChange } = usePaginatedList(
-    mockPosts,
-    COMMUNITY_LIST_MAX_ITEMS,
-  )
+  const { posts, currentPage, setCurrentPage, totalPages, isLoading, fetchError } =
+    useCommunityPostList('BOARD')
 
   return (
     <div>
-      {/* 게시판 목록 리스트 */}
-      <ul className="flex flex-col gap-4">
-        {displayedItems.map((post) => (
-          // 게시판 목록 단일 항목
-          <CommunityListItem
-            key={post.id}
-            to={`/community/posts/${post.id}`}
-            state={{ title: post.title }}
-            title={post.title}
-            meta={{
-              author: post.author,
-              createdAt: post.createdAt,
-              views: post.views,
-              comments: post.comments,
-            }}
-          />
-        ))}
-      </ul>
+      {isLoading ? (
+        <p className="py-10 text-center text-sm text-secondary">불러오는 중...</p>
+      ) : fetchError ? (
+        <p className="py-10 text-center text-sm text-red-500">{fetchError}</p>
+      ) : posts.length > 0 ? (
+        <ul className="flex flex-col gap-4">
+          {posts.map((post) => (
+            <CommunityListItem
+              key={post.id}
+              variant="board"
+              to={`/community/posts/${post.id}`}
+              state={{ title: post.title }}
+              title={post.title}
+              meta={{
+                author: post.author,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+              }}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="py-10 text-center text-sm text-secondary">게시글이 없습니다.</p>
+      )}
 
-      {/* 페이지네이션 */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        onPageChange={onPageChange}
+        onPageChange={setCurrentPage}
         className="mt-8"
       />
     </div>

@@ -1,47 +1,48 @@
 import { useLocation, useParams } from 'react-router-dom'
-import { getMockQnaDetail } from './data/mockQnaDetail'
 import CommunityDetailCard from './components/CommunityDetailCard'
 import CommunityCommentsCard from './components/CommunityCommentsCard'
 import CommunityCommentsSection from './components/CommunityCommentsSection'
 import { formatCommunityDate } from '../../utils/formatRequestedDate'
+import { usePostDetail } from './hooks/usePostDetail'
 
+// Q&A 상세 페이지
+// API: services/post.getPost — GET /api/posts/{postId}
 export default function CommunityQnaDetailPage() {
-  // Q&A 데이터
   const { qnaId } = useParams<{ qnaId: string }>()
   const location = useLocation()
-  const title = (location.state as { title?: string } | null)?.title?.trim() || '질문 제목'
-  const detail = getMockQnaDetail(qnaId)
+  const fallbackTitle = (location.state as { title?: string } | null)?.title?.trim()
+  const { post, isLoading, fetchError } = usePostDetail(qnaId)
+
+  if (isLoading) {
+    return <p className="py-10 text-center text-sm text-secondary">불러오는 중...</p>
+  }
+
+  if (fetchError || !post) {
+    return <p className="py-10 text-center text-sm text-red-500">{fetchError ?? '질문을 찾을 수 없습니다.'}</p>
+  }
+
+  const title = post.title || fallbackTitle || '질문 제목'
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      {/* Q&A 상세 카드 */}
       <CommunityDetailCard
         title={title}
         meta={[
           <span key="author" className="font-medium text-deepOceanNavy/80">
-            {detail.author}
+            {post.author}
           </span>,
-          <time key="date" dateTime={detail.createdAt}>
-            {formatCommunityDate(detail.createdAt)}
+          <time key="date" dateTime={post.createdAt}>
+            {formatCommunityDate(post.createdAt)}
           </time>,
-          <span key="views" className="tabular-nums">
-            조회 {detail.views.toLocaleString()}
-          </span>,
         ]}
       >
-        {/* Q&A 상세 내역 */}
         <section aria-label="상세 내역">
           <h3 className="text-base font-semibold text-deepOceanNavy">상세 내역</h3>
-          <p className="mt-4">{detail.body}</p>
-          <p className="mt-4 text-secondary">
-            API 연동 후 실제 질문 내용이 이 영역에 표시됩니다.
-          </p>
+          <p className="mt-4 whitespace-pre-wrap">{post.content}</p>
         </section>
       </CommunityDetailCard>
 
-      {/* Q&A 댓글 카드 */}
       <CommunityCommentsCard>
-        {/* Q&A 댓글 섹션 */}
         <CommunityCommentsSection resourceKey={`qna:${qnaId ?? 'unknown'}`} />
       </CommunityCommentsCard>
     </div>
