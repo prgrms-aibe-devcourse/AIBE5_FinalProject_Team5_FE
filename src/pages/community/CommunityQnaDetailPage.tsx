@@ -43,7 +43,7 @@ export default function CommunityQnaDetailPage() {
       </CommunityDetailCard>
 
       <CommunityCommentsCard>
-        <CommunityCommentsSection resourceKey={`qna:${qnaId ?? 'unknown'}`} />
+        <CommunityCommentsSection postId={post.id} />
       </CommunityCommentsCard>
     </div>
   )

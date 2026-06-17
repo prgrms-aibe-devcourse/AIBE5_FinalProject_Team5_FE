@@ -43,7 +43,7 @@ export default function CommunityRecruitDetailPage() {
       </CommunityDetailCard>
 
       <CommunityCommentsCard>
-        <CommunityCommentsSection resourceKey={`recruit:${recruitId ?? 'unknown'}`} />
+        <CommunityCommentsSection postId={post.id} />
       </CommunityCommentsCard>
     </div>
   )

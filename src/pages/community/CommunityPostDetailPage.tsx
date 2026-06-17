@@ -66,7 +66,7 @@ export default function CommunityPostDetailPage() {
       </CommunityDetailCard>
 
       <CommunityCommentsCard>
-        <CommunityCommentsSection resourceKey={`posts:${postId ?? 'unknown'}`} />
+        <CommunityCommentsSection postId={post.id} />
       </CommunityCommentsCard>
 
       {reportOpen ? (
