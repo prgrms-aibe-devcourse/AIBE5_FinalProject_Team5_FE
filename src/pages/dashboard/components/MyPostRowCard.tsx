@@ -213,8 +213,10 @@ export default function MyPostRowCard({ item, onOpenDetail, onEdit, onDelete }: 
             ) : null}
             {item.kind === 'post' ? (
               <>
-                <PostMetaItem icon={<ViewCountIcon />}>조회 {item.viewCount}</PostMetaItem>
-                <PostMetaItem icon={<CommentIcon />}>댓글 {item.commentCount}</PostMetaItem>
+                {item.viewCount != null ? <PostMetaItem icon={<ViewCountIcon />}>조회 {item.viewCount}</PostMetaItem> : null}
+                {item.commentCount != null ? (
+                  <PostMetaItem icon={<CommentIcon />}>댓글 {item.commentCount}</PostMetaItem>
+                ) : null}
               </>
             ) : null}
           </div>
