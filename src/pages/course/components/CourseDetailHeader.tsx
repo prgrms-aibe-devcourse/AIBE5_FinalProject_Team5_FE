@@ -50,9 +50,9 @@ export default function CourseDetailHeader({
             </div>
             <button type="button" aria-label={isBookmarked ? '찜 해제' : '찜하기'} onClick={onToggleBookmark}
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors md:h-12 md:w-12 ${
-                isBookmarked // 찜 여부에 따라 버튼 상태 변경
-                  ? 'border-waterlineBlue text-waterlineBlue'
-                  : 'border-mistSkyBlue text-softAquaBlue hover:border-waterlineBlue hover:text-waterlineBlue'
+                isBookmarked
+                  ? 'border-bookmarkRose bg-bookmarkRose/10 text-bookmarkRose'
+                  : 'border-mistSkyBlue text-softAquaBlue hover:border-bookmarkRose/50 hover:text-bookmarkRose'
               }`}
             >
               <svg className="h-7 w-7 md:h-8 md:w-8" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} aria-hidden="true">

@@ -2,6 +2,8 @@
 
 import type { KeyboardEvent } from 'react'
 import type { Course } from '../../../services/course.ts'
+import { isCourseStatPlaceholder } from '../../../services/course.ts'
+import CourseThumbnail from './CourseThumbnail.tsx'
 
 interface CourseCardProps {
   course: Course
@@ -72,6 +74,25 @@ function StarIcon({ className = 'h-[18px] w-[18px] text-softAquaBlue' }: { class
   )
 }
 
+function StatValue({ value, isCompact }: { value: string; isCompact: boolean }) {
+  const unavailable = isCourseStatPlaceholder(value)
+  return (
+    <p
+      className={
+        unavailable
+          ? isCompact
+            ? 'text-[0.6875rem] font-normal text-secondary/50'
+            : 'text-[clamp(0.75rem,3.5cqw,0.875rem)] font-normal text-secondary/50'
+          : isCompact
+            ? 'text-[0.6875rem] font-semibold text-deepOceanNavy'
+            : 'text-[clamp(0.75rem,3.5cqw,0.875rem)] font-semibold text-deepOceanNavy'
+      }
+    >
+      {value}
+    </p>
+  )
+}
+
 export default function CourseCard({
   course,
   isSelected,
@@ -114,32 +135,25 @@ export default function CourseCard({
         onOpenDetail ? 'cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-waterlineBlue' : ''
       }`}
     >
-      {/* 상단: 썸네일 영역 */}
-      <div
-        className={`relative w-full shrink-0 bg-foamWhite ${isCompact ? 'h-[88px]' : 'aspect-[16/9]'}`}
-      >
-        {/* 썸네일 이미지 */}
-        {course.logoUrl ? ( <img src={course.logoUrl} alt="" className="h-full w-full object-cover"/>) : null}
-        {/* 버튼 영역 */}
-        <div className="absolute right-[6%] top-[6%] flex gap-1.5">
-          {/* 비교 버튼 */}
+      <div className="relative shrink-0">
+        <CourseThumbnail imageUrl={course.logoUrl} />
+        <div className="absolute right-[6%] top-[6%] z-10 flex gap-1.5">
           <button
             type="button"
             aria-label={isSelected ? '비교 목록에서 제거' : '비교 목록에 추가'}
-            disabled={!isSelected && !canAddToCompare} // 비교 가능 여부에 따라 버튼 비활성화
+            disabled={!isSelected && !canAddToCompare}
             onClick={(e) => {
               e.stopPropagation()
               onToggleCompare(course)
             }}
             className={`${actionButtonClass} ${
-              isSelected // 비교 목록 여부에 따라 버튼 상태 변경
+              isSelected
                 ? 'border-waterlineBlue text-waterlineBlue'
                 : 'border-mistSkyBlue text-deepOceanNavy hover:border-waterlineBlue disabled:cursor-not-allowed disabled:opacity-40'
             }`}
           >
             {isSelected ? '✓' : '+'}
           </button>
-          {/* 찜 버튼 */}
           <button
             type="button"
             aria-label={isBookmarked ? '찜 해제' : '찜하기'}
@@ -148,9 +162,9 @@ export default function CourseCard({
               onToggleBookmark(course.id)
             }}
             className={`${actionButtonClass} ${
-              isBookmarked // 찜 목록 여부에 따라 버튼 상태 변경
-                ? 'border-waterlineBlue text-waterlineBlue'
-                : 'border-mistSkyBlue text-softAquaBlue hover:border-waterlineBlue hover:text-waterlineBlue'
+              isBookmarked
+                ? 'border-bookmarkRose bg-bookmarkRose/10 text-bookmarkRose'
+                : 'border-mistSkyBlue text-softAquaBlue hover:border-bookmarkRose/50 hover:text-bookmarkRose'
             }`}
           >
             <svg className={bookmarkIconClass} viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} aria-hidden="true">
@@ -215,15 +229,7 @@ export default function CourseCard({
           >
             <div className="flex flex-col items-center gap-0.5 px-0.5 text-center">
               <SatisfactionIcon className={statIconClass} />
-              <p
-                className={
-                  isCompact
-                    ? 'text-[0.6875rem] font-semibold text-deepOceanNavy'
-                    : 'text-[clamp(0.75rem,3.5cqw,0.875rem)] font-semibold text-deepOceanNavy'
-                }
-              >
-                {course.satisfaction}
-              </p>
+              <StatValue value={course.satisfaction} isCompact={isCompact} />
               <p
                 className={
                   isCompact ? 'text-[0.625rem] text-secondary' : 'text-[clamp(0.625rem,2.8cqw,0.75rem)] text-secondary'
@@ -234,15 +240,7 @@ export default function CourseCard({
             </div>
             <div className="flex flex-col items-center gap-0.5 px-0.5 text-center">
               <EmploymentIcon className={statIconClass} />
-              <p
-                className={
-                  isCompact
-                    ? 'text-[0.6875rem] font-semibold text-deepOceanNavy'
-                    : 'text-[clamp(0.75rem,3.5cqw,0.875rem)] font-semibold text-deepOceanNavy'
-                }
-              >
-                {course.employmentRate}
-              </p>
+              <StatValue value={course.employmentRate} isCompact={isCompact} />
               <p
                 className={
                   isCompact ? 'text-[0.625rem] text-secondary' : 'text-[clamp(0.625rem,2.8cqw,0.75rem)] text-secondary'
@@ -253,15 +251,7 @@ export default function CourseCard({
             </div>
             <div className="flex flex-col items-center gap-0.5 px-0.5 text-center">
               <StarIcon className={statIconClass} />
-              <p
-                className={
-                  isCompact
-                    ? 'text-[0.6875rem] font-semibold text-deepOceanNavy'
-                    : 'text-[clamp(0.75rem,3.5cqw,0.875rem)] font-semibold text-deepOceanNavy'
-                }
-              >
-                {course.rating}
-              </p>
+              <StatValue value={course.rating} isCompact={isCompact} />
               <p
                 className={
                   isCompact ? 'text-[0.625rem] text-secondary' : 'text-[clamp(0.625rem,2.8cqw,0.75rem)] text-secondary'

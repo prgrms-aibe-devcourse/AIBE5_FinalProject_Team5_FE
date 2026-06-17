@@ -1,4 +1,5 @@
 import type { CompareCourseItem } from '../../../services/courseCompare.ts'
+import CourseThumbnail from './CourseThumbnail.tsx'
 
 interface CourseComparisonSidebarProps {
   selectedCourses: CompareCourseItem[]
@@ -45,8 +46,7 @@ export default function CourseComparisonSidebar({
               </button>
               {/* 과정 정보 */}
               <div className="flex items-center gap-3">
-                {/* 로고 이미지 */}
-                <div className="h-12 w-12 shrink-0 rounded-lg bg-foamWhite" aria-hidden />
+                <CourseThumbnail variant="square" imageUrl={course.logoUrl} alt="" />
                 {/* 과정 제목 + 기관명 */}
                 <div className="min-w-0 flex-1">
                   <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-deepOceanNavy">

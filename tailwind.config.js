@@ -29,6 +29,7 @@ export default {
         softAquaBlue: '#8BB4D2',  // 중간 색상
         mistSkyBlue: '#BBD3E0',   // 하늘색 전경 색상
         foamWhite: '#DAE5EA',    // 화이트 대체 색상
+        bookmarkRose: '#E85D5D', // 찜 활성 강조
           
         // 텍스트
         primary: '#344A64',

@@ -16,6 +16,7 @@ export interface CompareCourseItem {
   id: string
   title: string
   company: string
+  logoUrl?: string
 }
 
 function isCompareCourseItem(value: unknown): value is CompareCourseItem {
@@ -33,6 +34,7 @@ export function toCompareCourseItem(course: Course): CompareCourseItem {
     id: course.id,
     title: course.title,
     company: course.company,
+    logoUrl: course.logoUrl,
   }
 }
 
@@ -40,11 +42,13 @@ export function toCompareCourseItemFromFavorite(course: {
   id: number
   title: string
   academy: string
+  logoUrl?: string
 }): CompareCourseItem {
   return {
     id: String(course.id),
     title: course.title,
     company: course.academy,
+    logoUrl: course.logoUrl,
   }
 }
 
