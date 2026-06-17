@@ -19,12 +19,14 @@ export default function CommunityRecruitPage() {
           {posts.map((item) => (
             <CommunityListItem
               key={item.id}
+              variant="recruit"
               to={`/community/recruit/${item.id}`}
               state={{ title: item.title }}
               title={item.title}
               meta={{
                 author: item.author,
                 createdAt: item.createdAt,
+                updatedAt: item.updatedAt,
               }}
             />
           ))}

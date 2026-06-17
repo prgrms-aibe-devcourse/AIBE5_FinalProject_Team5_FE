@@ -19,12 +19,14 @@ export default function CommunityQnaPage() {
           {posts.map((q) => (
             <CommunityListItem
               key={q.id}
+              variant="qna"
               to={`/community/qna/${q.id}`}
               state={{ title: q.title }}
               title={q.title}
               meta={{
                 author: q.author,
                 createdAt: q.createdAt,
+                updatedAt: q.updatedAt,
               }}
             />
           ))}

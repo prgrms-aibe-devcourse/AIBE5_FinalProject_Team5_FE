@@ -22,9 +22,106 @@ type CommunityListItemProps = {
   }
   state?: { title: string }
   leading?: ReactNode
-  /** default: 기본 카드 · board: 게시판 전용 레이아웃 */
-  variant?: 'default' | 'board'
+  /** default: 기본 카드 · board/qna/recruit: 게시판형 레이아웃 */
+  variant?: 'default' | 'board' | 'qna' | 'recruit'
 }
+
+const BOARD_VARIANT_BADGE = {
+  board: { label: '게시글' },
+  qna: { label: 'Q&A' },
+  recruit: { label: '모집' },
+} as const
+
+const COMMUNITY_BADGE_CLASS =
+  'bg-foamWhite/90 text-waterlineBlue ring-mistSkyBlue/35'
+
+function BadgeIcon({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="inline-flex size-3 shrink-0 items-center justify-center leading-none"
+      aria-hidden="true"
+    >
+      {children}
+    </span>
+  )
+}
+
+function BoardBadgeIcon() {
+  return (
+    <BadgeIcon>
+      <svg className="size-3" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14 2v6h6M8 13h8M8 17h5"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </BadgeIcon>
+  )
+}
+
+function QnaBadgeIcon() {
+  return (
+    <BadgeIcon>
+      <svg className="size-3" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v10z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.7.5-1.2 1.1-1.2 2.2"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="17" r="0.75" fill="currentColor" />
+      </svg>
+    </BadgeIcon>
+  )
+}
+
+function RecruitBadgeIcon() {
+  return (
+    <BadgeIcon>
+      <svg className="size-3" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.75" />
+        <path
+          d="M19 8v6M22 11h-6"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </BadgeIcon>
+  )
+}
+
+const BOARD_VARIANT_ICON = {
+  board: BoardBadgeIcon,
+  qna: QnaBadgeIcon,
+  recruit: RecruitBadgeIcon,
+} as const
 
 function MetaIcon({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
@@ -71,10 +168,14 @@ function BoardListItem({
   title,
   meta,
   state,
-}: Omit<CommunityListItemProps, 'variant' | 'leading'>) {
+  variant,
+}: Omit<CommunityListItemProps, 'leading'> & { variant: 'board' | 'qna' | 'recruit' }) {
+  const badge = BOARD_VARIANT_BADGE[variant]
+  const BadgeIconComponent = BOARD_VARIANT_ICON[variant]
   const createdAtLabel = formatCommunityDate(meta.createdAt)
   const showUpdatedAt = meta.updatedAt !== undefined && meta.updatedAt !== meta.createdAt
-  const updatedAtLabel = showUpdatedAt ? formatCommunityDate(meta.updatedAt) : null
+  const updatedAtLabel =
+    showUpdatedAt && meta.updatedAt ? formatCommunityDate(meta.updatedAt) : null
 
   return (
     <Link
@@ -91,16 +192,11 @@ function BoardListItem({
       <div className="flex min-w-0 flex-1 items-stretch gap-3 px-4 py-4 sm:gap-4 sm:px-5 sm:py-[1.125rem]">
         <div className="min-w-0 flex-1">
           {/* 상단: 유형 뱃지 */}
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-foamWhite/90 px-2.5 py-0.5 text-[11px] font-semibold text-waterlineBlue ring-1 ring-mistSkyBlue/35">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            게시글
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-none ring-1 ${COMMUNITY_BADGE_CLASS}`}
+          >
+            <BadgeIconComponent />
+            {badge.label}
           </span>
 
           {/* 제목 */}
@@ -164,10 +260,16 @@ export default function CommunityListItem({
   leading,
   variant = 'default',
 }: CommunityListItemProps) {
-  if (variant === 'board') {
+  if (variant === 'board' || variant === 'qna' || variant === 'recruit') {
     return (
       <li>
-        <BoardListItem to={to} title={title} meta={meta} state={state} />
+        <BoardListItem
+          to={to}
+          title={title}
+          meta={meta}
+          state={state}
+          variant={variant}
+        />
       </li>
     )
   }

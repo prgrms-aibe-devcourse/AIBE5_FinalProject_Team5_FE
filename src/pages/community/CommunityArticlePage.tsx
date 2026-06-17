@@ -36,13 +36,13 @@ export default function CommunityArticlePage() {
   }, [currentPage])
 
   return (
-    <section aria-label="아티클 목록">
+    <div>
       {isLoading ? (
         <p className="py-10 text-center text-sm text-secondary">불러오는 중...</p>
       ) : fetchError ? (
         <p className="py-10 text-center text-sm text-red-500">{fetchError}</p>
       ) : articles.length > 0 ? (
-        <ul className="mt-5 flex flex-col gap-4">
+        <ul className="flex flex-col gap-4">
           {articles.map((article) => (
             <ArticleNewsletterRow key={article.id} article={article} />
           ))}
@@ -57,7 +57,7 @@ export default function CommunityArticlePage() {
         onPageChange={setCurrentPage}
         className="mt-8"
       />
-    </section>
+    </div>
   )
 }
 

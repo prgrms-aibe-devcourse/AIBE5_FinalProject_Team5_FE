@@ -134,17 +134,17 @@ export default function CommunityWritePage() {
 
         {submitError ? <p className="text-sm text-red-500">{submitError}</p> : null}
 
-        <div className="flex flex-wrap justify-end gap-3 pt-2">
+        <div className="flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:flex-wrap sm:justify-end sm:gap-3">
           <Link
             to={section.listPath}
-            className="inline-flex items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:text-waterlineBlue"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:text-waterlineBlue sm:w-auto"
           >
             취소
           </Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center rounded-lg bg-waterlineBlue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#005EB8] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-waterlineBlue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#005EB8] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {isSubmitting ? '등록 중...' : '등록'}
           </button>

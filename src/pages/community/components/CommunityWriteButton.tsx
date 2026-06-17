@@ -17,7 +17,7 @@ export default function CommunityWriteButton() {
   return (
     <Link
       to={section.writePath}
-      className="inline-flex shrink-0 items-center gap-1.5 self-end rounded-lg bg-waterlineBlue px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#005EB8] sm:mb-3.5"
+      className="inline-flex w-full shrink-0 items-center justify-center gap-1.5 rounded-lg bg-waterlineBlue px-3.5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#005EB8] sm:w-auto sm:justify-start sm:self-end sm:py-2"
     >
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path

@@ -10,7 +10,7 @@ export const communitySections = {
     label: '게시판',
     listPath: '/community/posts',
     writePath: '/community/posts/new',
-    writeLabel: '글쓰기',
+    writeLabel: '작성하기',
   },
   qna: {
     label: 'Q&A',
@@ -22,7 +22,7 @@ export const communitySections = {
     label: '모집',
     listPath: '/community/recruit',
     writePath: '/community/recruit/new',
-    writeLabel: '모집 등록',
+    writeLabel: '모집등록',
   },
   article: { label: '아티클', listPath: '/community/article' },
 } as const
