@@ -18,14 +18,14 @@ export type UserComment = {
   createdAt: string
 }
 
-export type MyPostTab = 'ALL' | 'POST' | 'QNA' | 'RECRUIT' | 'COMMENT'
+export type MyPostTab = 'POST' | 'QNA' | 'RECRUIT' | 'COMMENT' | 'REVIEW'
 
 export const MY_POST_TABS: TabItem<MyPostTab>[] = [
-  { key: 'ALL', label: '전체' },
   { key: 'POST', label: '게시글' },
   { key: 'QNA', label: 'Q&A' },
   { key: 'RECRUIT', label: '모집' },
   { key: 'COMMENT', label: '댓글' },
+  { key: 'REVIEW', label: '리뷰' },
 ]
 
 export type UserActivityItem = {
@@ -55,9 +55,9 @@ export function getUserActivityPath(item: UserActivityItem) {
 
 export function getUserActivityEditPath(item: UserActivityItem) {
   if (item.kind === 'comment') return getUserActivityPath(item)
-  if (item.board === 'Q&A') return '/community/qna/new'
-  if (item.board === '모집') return '/community/recruit/new'
-  return '/community/posts/new'
+  if (item.board === 'Q&A') return `/community/qna/edit/${item.id}`
+  if (item.board === '모집') return `/community/recruit/edit/${item.id}`
+  return `/community/posts/edit/${item.id}`
 }
 
 function postToActivity(post: UserPost): UserActivityItem {
@@ -91,9 +91,9 @@ export function buildMyActivities(posts: UserPost[], comments: UserComment[]) {
 }
 
 export function filterMyActivities(items: UserActivityItem[], tab: MyPostTab) {
-  if (tab === 'ALL') return items
   if (tab === 'COMMENT') return items.filter((item) => item.kind === 'comment')
   if (tab === 'POST') return items.filter((item) => item.kind === 'post' && item.board === '게시판')
+  if (tab === 'REVIEW') return items.filter((item) => item.kind === 'post' && item.board === '리뷰')
   if (tab === 'QNA') return items.filter((item) => item.kind === 'post' && item.board === 'Q&A')
   if (tab === 'RECRUIT') return items.filter((item) => item.kind === 'post' && item.board === '모집')
   return items
@@ -167,7 +167,7 @@ export const myPosts: UserPost[] = [
   {
     id: 2,
     title: '네이버 부트캠프 수료 후 취업 성공기',
-    board: '게시판',
+    board: '리뷰',
     createdAt: '2026.06.05',
     viewCount: 342,
     commentCount: 28,
@@ -215,7 +215,7 @@ export const myPosts: UserPost[] = [
   {
     id: 8,
     title: '백엔드 과정 3개월 차 회고',
-    board: '게시판',
+    board: '리뷰',
     createdAt: '2026.05.18',
     viewCount: 167,
     commentCount: 22,

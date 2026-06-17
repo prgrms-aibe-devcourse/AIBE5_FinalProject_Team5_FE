@@ -7,7 +7,7 @@ export const ARTICLE_LIST_PAGE_SIZE = 5
 // 커뮤니티 목록 경로 설정
 export const communitySections = {
   posts: {
-    label: '게시판',
+    label: '게시글',
     listPath: '/community/posts',
     writePath: '/community/posts/new',
     writeLabel: '작성하기',
@@ -19,7 +19,7 @@ export const communitySections = {
     writeLabel: '질문하기',
   },
   recruit: {
-    label: '모집',
+    label: '모집글',
     listPath: '/community/recruit',
     writePath: '/community/recruit/new',
     writeLabel: '모집등록',

@@ -59,6 +59,11 @@ export interface CreatePostRequest {
   content: string
 }
 
+export interface UpdatePostRequest {
+  title?: string
+  content?: string
+}
+
 // ──────────────────────────────────────────────
 // 매퍼 (BE DTO → FE 뷰모델)
 // ──────────────────────────────────────────────
@@ -99,4 +104,15 @@ export async function getPost(postId: number): Promise<Post> {
 export async function createPost(body: CreatePostRequest): Promise<Post> {
   const item = await http.post<PostListItem>('/api/posts', body, { auth: true })
   return toPostVM(item)
+}
+
+/** 게시글 수정 */
+export async function updatePost(postId: number, body: UpdatePostRequest): Promise<Post> {
+  const item = await http.patch<PostListItem>(`/api/posts/${postId}`, body, { auth: true })
+  return toPostVM(item)
+}
+
+/** 게시글 삭제 */
+export async function deletePost(postId: number): Promise<void> {
+  await http.delete<void>(`/api/posts/${postId}`, { auth: true })
 }

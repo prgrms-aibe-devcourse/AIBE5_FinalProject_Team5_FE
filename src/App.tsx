@@ -25,6 +25,7 @@ import CommunityPostsPage from './pages/community/CommunityPostsPage'
 import CommunityQnaPage from './pages/community/CommunityQnaPage'
 import CommunityRecruitPage from './pages/community/CommunityRecruitPage'
 import CommunityWritePage from './pages/community/CommunityWritePage'
+import CommunityFormLayout from './pages/community/CommunityFormLayout'
 import CommunityDetailLayout from './pages/community/CommunityDetailLayout'
 import CommunityPostDetailPage from './pages/community/CommunityPostDetailPage'
 import CommunityQnaDetailPage from './pages/community/CommunityQnaDetailPage'
@@ -64,17 +65,23 @@ function App() {
         <Route element={<CommunityLayout />}>
           {/*  path="/community" 유입시, path="/community/posts" 로 리다이렉트 */}
           <Route index element={<Navigate to="posts" replace />} />
-          
-          {/* 커뮤니티 작성 페이지 */}
-          <Route path="posts/new" element={<CommunityWritePage />} />
-          <Route path="qna/new" element={<CommunityWritePage />} />
-          <Route path="recruit/new" element={<CommunityWritePage />} />
 
           {/* 커뮤니티 목록 페이지 */}
           <Route path="posts" element={<CommunityPostsPage />} />
           <Route path="qna" element={<CommunityQnaPage />} />
           <Route path="recruit" element={<CommunityRecruitPage />} />
           <Route path="article" element={<CommunityArticlePage />} />
+        </Route>
+
+        {/* 커뮤니티 작성/수정 (목록 레이아웃 분리) */}
+        <Route element={<CommunityFormLayout />}>
+          <Route path="posts/new" element={<CommunityWritePage />} />
+          <Route path="posts/edit/:postId" element={<CommunityWritePage />} />
+          <Route path="qna/new" element={<CommunityWritePage />} />
+          
+          <Route path="qna/edit/:qnaId" element={<CommunityWritePage />} />
+          <Route path="recruit/new" element={<CommunityWritePage />} />
+          <Route path="recruit/edit/:recruitId" element={<CommunityWritePage />} />
         </Route>
 
         {/* 커뮤니티 상세 (아티클 제외) */}
