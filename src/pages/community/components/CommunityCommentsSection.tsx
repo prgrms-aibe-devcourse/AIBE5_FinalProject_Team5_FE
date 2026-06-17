@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
 import ReportModal from '../../../components/common/ReportModal'
 import { isAuthenticated } from '../../../services/authToken'
-import { getPostComments, type PostComment } from '../../../services/comment'
-
-// ISO 형식의 현재 날짜를 반환하는 유틸
-function isoNow() { 
-  return new Date().toISOString()
-}
+import { createPostComment, getPostComments, type PostComment } from '../../../services/comment'
 
 // ISO 형식의 날짜를 `방금`, `분 전`, `시간 전`, `일 전` 형태로 표시하기 위한 유틸
 function formatRelative(iso: string) { 
@@ -37,6 +32,7 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [value, setValue] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [reportTargetId, setReportTargetId] = useState<number | null>(null)
 
   // postId 변경 시 댓글 재조회
@@ -60,22 +56,23 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
       .finally(() => setIsLoading(false))
   }, [postId])
 
-  const handleSubmit = () => { // 댓글 등록 핸들러
+  const handleSubmit = async () => { // 댓글 등록 핸들러
     const content = value.trim()
     if (!content) return
+    if (isSubmitting) return
 
-    const next = {
-      id: Date.now(),
-      postId,
-      userId: 0,
-      author: '나',
-      content,
-      createdAt: isoNow(),
-      updatedAt: isoNow(),
+    setIsSubmitting(true)
+    setFetchError(null)
+
+    try {
+      const created = await createPostComment(postId, { content })
+      setComments((prev) => [created, ...prev])
+      setValue('')
+    } catch (err: unknown) {
+      setFetchError(err instanceof Error ? err.message : '댓글 등록 중 오류가 발생했습니다.')
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setComments((prev) => [next, ...prev])
-    setValue('')
   }
 
   return (
@@ -110,8 +107,8 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!value.trim()}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-waterlineBlue text-white transition-colors hover:bg-[#005EB8] disabled:cursor-not-allowed disabled:bg-mistSkyBlue/70"
+              disabled={!value.trim() || isSubmitting}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-waterlineBlue px-3 text-xs font-semibold text-white transition-colors hover:bg-[#005EB8] disabled:cursor-not-allowed disabled:bg-mistSkyBlue/70"
               aria-label="댓글 전송"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -130,23 +127,30 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
                   strokeLinejoin="round"
                 />
               </svg>
+              등록
             </button>
           </div>
         </div>
       ) : null}
 
       {/* 댓글 목록 */}
-      <div className="overflow-hidden rounded-xl border border-mistSkyBlue/35 bg-white/35 shadow-[0_3px_14px_rgba(52,74,100,0.04)]">
+      <div>
         {isLoading ? (
-          <p className="px-4 py-6 text-center text-sm text-secondary">댓글을 불러오는 중...</p>
+          <p className="rounded-lg border border-mistSkyBlue/30 bg-white/70 px-4 py-6 text-center text-sm text-secondary">
+            댓글을 불러오는 중...
+          </p>
         ) : fetchError ? (
-          <p className="bg-red-50/70 px-4 py-6 text-center text-sm text-red-500">{fetchError}</p>
+          <p className="rounded-lg border border-red-200 bg-red-50/70 px-4 py-6 text-center text-sm text-red-500">
+            {fetchError}
+          </p>
         ) : comments.length === 0 ? ( // 댓글 목록이 없으면
-          <p className="px-4 py-6 text-center text-sm text-secondary">아직 댓글이 없습니다.</p>
+          <p className="rounded-lg border border-mistSkyBlue/30 bg-white/70 px-4 py-6 text-center text-sm text-secondary">
+            아직 댓글이 없습니다.
+          </p>
         ) : (
-          <ul className="divide-y divide-mistSkyBlue/30">
+          <ul className="space-y-2">
             {comments.map((comment) => (
-              <li key={comment.id} className="px-4 py-4 md:px-5">
+              <li key={comment.id} className="rounded-lg border border-mistSkyBlue/30 bg-white/70 px-4 py-4 md:px-5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm font-semibold text-deepOceanNavy/85">{comment.author}</span>
                   <div className="flex items-center gap-2">

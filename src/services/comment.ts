@@ -76,3 +76,27 @@ export async function getPostComments(
     content: page.content.map(toCommentVM),
   }
 }
+
+export interface CreatePostCommentRequest {
+  content: string
+}
+
+interface CreatePostCommentResponseDto {
+  commentId: number
+  postId: number
+  userId: number
+  userNickname: string
+  content: string
+  createdAt: string
+  updatedAt: string
+}
+
+export async function createPostComment(
+  postId: number,
+  body: CreatePostCommentRequest,
+): Promise<PostComment> {
+  const item = await http.post<CreatePostCommentResponseDto>(`/api/posts/${postId}/comments`, body, {
+    auth: true,
+  })
+  return toCommentVM(item)
+}
