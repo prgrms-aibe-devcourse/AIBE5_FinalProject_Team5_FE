@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
+import { isAuthenticated } from '../../../services/auth'
 import { communitySections, getCommunitySectionFromPath } from '../communitySections'
 
 export default function CommunityWriteButton() {
   const { pathname } = useLocation()
 
+  if (!isAuthenticated()) return null
   if (pathname.endsWith('/new')) return null
 
   const sectionKey = getCommunitySectionFromPath(pathname)

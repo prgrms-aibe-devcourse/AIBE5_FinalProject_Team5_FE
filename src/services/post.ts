@@ -1,8 +1,9 @@
 /**
  * 커뮤니티 게시글 API 연동 (게시판 · Q&A · 모집)
  *
- * GET /api/posts       — 목록
- * GET /api/posts/{id}  — 상세
+ * GET  /api/posts       — 목록
+ * GET  /api/posts/{id}  — 상세
+ * POST /api/posts       — 작성 (로그인 필요)
  * 흐름: http.get → PostListItem(BE DTO) → toPostVM → Post(FE 뷰모델) → 커뮤니티 페이지
  */
 import { http } from './http'
@@ -51,6 +52,13 @@ export interface PostListParams {
   sort?: string
 }
 
+export interface CreatePostRequest {
+  courseId?: number
+  postType: PostType
+  title: string
+  content: string
+}
+
 // ──────────────────────────────────────────────
 // 매퍼 (BE DTO → FE 뷰모델)
 // ──────────────────────────────────────────────
@@ -84,5 +92,11 @@ export async function getPosts(params: PostListParams = {}): Promise<PageRespons
 /** 게시글 상세 (뷰모델로 변환해 반환) */
 export async function getPost(postId: number): Promise<Post> {
   const item = await http.get<PostListItem>(`/api/posts/${postId}`, { auth: false })
+  return toPostVM(item)
+}
+
+/** 게시글 작성 (뷰모델로 변환해 반환) */
+export async function createPost(body: CreatePostRequest): Promise<Post> {
+  const item = await http.post<PostListItem>('/api/posts', body, { auth: true })
   return toPostVM(item)
 }

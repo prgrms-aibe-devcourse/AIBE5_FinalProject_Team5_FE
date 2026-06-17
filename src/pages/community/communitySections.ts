@@ -44,3 +44,17 @@ export function getCommunitySectionFromPath(pathname: string): CommunitySectionK
   if (pathname.startsWith('/community/article')) return 'article'
   return null
 }
+
+export type WritableCommunitySectionKey = Exclude<CommunitySectionKey, 'article'>
+
+/** 작성 완료 후 이동할 상세 경로 */
+export function getCommunityDetailPath(sectionKey: WritableCommunitySectionKey, postId: number): string {
+  switch (sectionKey) {
+    case 'posts':
+      return `/community/posts/${postId}`
+    case 'qna':
+      return `/community/qna/${postId}`
+    case 'recruit':
+      return `/community/recruit/${postId}`
+  }
+}
