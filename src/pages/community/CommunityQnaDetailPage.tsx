@@ -1,49 +1,99 @@
+import { useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { getMockQnaDetail } from './data/mockQnaDetail'
 import CommunityDetailCard from './components/CommunityDetailCard'
 import CommunityCommentsCard from './components/CommunityCommentsCard'
 import CommunityCommentsSection from './components/CommunityCommentsSection'
 import { formatCommunityDate } from '../../utils/formatRequestedDate'
+import ReportModal from '../../components/common/ReportModal'
+import { usePostDetail } from './hooks/usePostDetail'
 
+// Q&A ??? ????
+// API: services/post.getPost ??GET /api/posts/{postId}
 export default function CommunityQnaDetailPage() {
-  // Q&A 데이터
   const { qnaId } = useParams<{ qnaId: string }>()
   const location = useLocation()
-  const title = (location.state as { title?: string } | null)?.title?.trim() || '질문 제목'
-  const detail = getMockQnaDetail(qnaId)
+  const fallbackTitle = (location.state as { title?: string } | null)?.title?.trim()
+  const { post, isLoading, fetchError } = usePostDetail(qnaId, 'QNA')
+
+  const [reportOpen, setReportOpen] = useState(false)
+  const postNumericId = parseInt(qnaId ?? '0', 10) || 0
+
+  if (isLoading) {
+    return <p className="flex min-h-[60vh] items-center justify-center text-center text-sm text-secondary">????? ??..</p>
+  }
+
+  if (fetchError || !post) {
+    return <p className="flex min-h-[60vh] items-center justify-center text-center text-sm text-red-500">{fetchError ?? '?????? ????????.'}</p>
+  }
+
+  const title = post.title || fallbackTitle || '?? ???'
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      {/* Q&A 상세 카드 */}
       <CommunityDetailCard
         title={title}
+        type="qna"
         meta={[
-          <span key="author" className="font-medium text-deepOceanNavy/80">
-            {detail.author}
+          <span key="author" className="inline-flex items-center gap-1.5 font-medium">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {post.author}
           </span>,
-          <time key="date" dateTime={detail.createdAt}>
-            {formatCommunityDate(detail.createdAt)}
-          </time>,
-          <span key="views" className="tabular-nums">
-            조회 {detail.views.toLocaleString()}
+          <span key="date" className="inline-flex items-center gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <time dateTime={post.createdAt}>{formatCommunityDate(post.createdAt)}</time>
           </span>,
         ]}
+        actions={
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-mistSkyBlue/50 px-3 py-1.5 font-pretendard text-xs font-medium text-secondary transition-colors hover:border-[#dc2626]/40 hover:bg-[#fef2f2] hover:text-[#dc2626]"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            신고하기 
+          </button>
+        }
       >
-        {/* Q&A 상세 내역 */}
-        <section aria-label="상세 내역">
-          <h3 className="text-base font-semibold text-deepOceanNavy">상세 내역</h3>
-          <p className="mt-4">{detail.body}</p>
-          <p className="mt-4 text-secondary">
-            API 연동 후 실제 질문 내용이 이 영역에 표시됩니다.
-          </p>
+        <section aria-label="신고">
+          <p className="whitespace-pre-wrap">{post.content}</p>
         </section>
       </CommunityDetailCard>
 
-      {/* Q&A 댓글 카드 */}
       <CommunityCommentsCard>
-        {/* Q&A 댓글 섹션 */}
-        <CommunityCommentsSection resourceKey={`qna:${qnaId ?? 'unknown'}`} />
+        <CommunityCommentsSection postId={post.id} />
       </CommunityCommentsCard>
+
+      {reportOpen ? (
+        <ReportModal
+          targetType="POST"
+          targetId={postNumericId}
+          onClose={() => setReportOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }

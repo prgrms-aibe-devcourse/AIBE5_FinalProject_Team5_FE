@@ -34,17 +34,17 @@ export default function CommunityRecentVisitsSidebar() {
   }, [location.pathname])
 
   return (
-    <aside className="sticky top-6 h-fit w-full shrink-0 lg:w-72" aria-label="최근 방문 내역">
+    <aside
+      className="sticky top-6 h-fit w-full shrink-0 lg:mt-[6.75rem] lg:w-72"
+      aria-label="최근 방문 내역"
+    >
       <div className="rounded-2xl glass-panel p-5 shadow-sm">
-        {/* 최근 방문 내역 제목 */}
         <h2 className="text-sm font-semibold text-deepOceanNavy">최근 방문 내역</h2>
 
-        {/* 최근 방문 내역이 없을 경우 */}
         {visits.length === 0 ? (
           <p className="mt-3 text-xs leading-relaxed text-softAquaBlue">최근 방문한 내역이 없습니다.</p>
-        ) : ( // 최근 방문 내역이 있을 경우
+        ) : (
           <ol className="mt-3 space-y-3">
-            {/* 최근 방문 내역 리스트 */}
             {visits.map((visit, index) => (
               <li key={visit.path}>
                 <Link to={visit.path} state={{ title: visit.title }} className="group flex gap-3">

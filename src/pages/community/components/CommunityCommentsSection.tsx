@@ -1,11 +1,7 @@
-import { useMemo, useState } from 'react'
-import { getMockComments } from '../data/mockComments'
+import { useEffect, useState } from 'react'
 import ReportModal from '../../../components/common/ReportModal'
-
-// ISO 형식의 현재 날짜를 반환하는 유틸
-function isoNow() { 
-  return new Date().toISOString()
-}
+import { isAuthenticated } from '../../../services/authToken'
+import { createPostComment, getPostComments, type PostComment } from '../../../services/comment'
 
 // ISO 형식의 날짜를 `방금`, `분 전`, `시간 전`, `일 전` 형태로 표시하기 위한 유틸
 function formatRelative(iso: string) { 
@@ -24,35 +20,64 @@ function formatRelative(iso: string) {
 
 // 커뮤니티 댓글 섹션 컴포넌트 타입
 type CommunityCommentsSectionProps = {
-  resourceKey: string
+  postId: number
 }
 
-// 커뮤니티 상세 페이지 댓글 섹션 컴포넌트
-export default function CommunityCommentsSection({ resourceKey }: CommunityCommentsSectionProps) {
-  const seeded = useMemo(() => getMockComments(resourceKey), [resourceKey])
+const COMMENT_MAX_LENGTH = 255
 
-  const [comments, setComments] = useState(seeded)
+// 커뮤니티 상세 페이지 댓글 섹션 컴포넌트
+export default function CommunityCommentsSection({ postId }: CommunityCommentsSectionProps) {
+  const canWriteComment = isAuthenticated()
+  const [comments, setComments] = useState<PostComment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [value, setValue] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [reportTargetId, setReportTargetId] = useState<number | null>(null)
 
-  const handleSubmit = () => { // 댓글 등록 핸들러
-    const content = value.trim()
-    if (!content) return
-
-    const next = {
-      id: `${resourceKey}-${Date.now()}`,
-      author: '나',
-      content,
-      createdAt: isoNow(),
+  // postId 변경 시 댓글 재조회
+  useEffect(() => {
+    if (!Number.isFinite(postId) || postId <= 0) {
+      setComments([])
+      setFetchError('댓글을 불러올 게시글 ID가 올바르지 않습니다.')
+      setIsLoading(false)
+      return
     }
 
-    setComments((prev) => [next, ...prev])
-    setValue('')
+    setIsLoading(true)
+    setFetchError(null)
+
+    getPostComments(postId, { page: 0, size: 10, sort: 'createdAt,ASC' })
+      .then((page) => setComments(page.content))
+      .catch((err: unknown) => {
+        setComments([])
+        setFetchError(err instanceof Error ? err.message : '댓글을 불러오는 중 오류가 발생했습니다.')
+      })
+      .finally(() => setIsLoading(false))
+  }, [postId])
+
+  const handleSubmit = async () => { // 댓글 등록 핸들러
+    const content = value.trim()
+    if (!content) return
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    setFetchError(null)
+
+    try {
+      const created = await createPostComment(postId, { content })
+      setComments((prev) => [created, ...prev])
+      setValue('')
+    } catch (err: unknown) {
+      setFetchError(err instanceof Error ? err.message : '댓글 등록 중 오류가 발생했습니다.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
-    <section aria-label="댓글" className="space-y-5">
-      
+    <section aria-label="댓글" className="space-y-4">
+
       {/* 댓글 헤더 */}
       <div className="flex items-end justify-between gap-4">
         <h3 className="text-base font-semibold text-deepOceanNavy">댓글</h3>
@@ -60,59 +85,94 @@ export default function CommunityCommentsSection({ resourceKey }: CommunityComme
       </div>
 
       {/* 댓글 입력 폼 */}
-      <div className="rounded-xl border border-mistSkyBlue/45 bg-foamWhite/30 p-4 md:p-5">
-        <label className="sr-only" htmlFor="community-comment-input">
-          댓글 입력
-        </label>
-        <textarea
-          id="community-comment-input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="댓글을 입력하세요"
-          rows={3}
-          className="w-full resize-none rounded-lg border border-mistSkyBlue/45 bg-white px-3 py-2.5 text-sm leading-relaxed text-deepOceanNavy outline-none transition-colors placeholder:text-softAquaBlue focus:border-waterlineBlue"
-        />
-        <div className="mt-3 flex justify-end">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="rounded-lg bg-waterlineBlue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#005EB8]"
-          >
-            등록
-          </button>
+      {canWriteComment ? (
+        <div className="rounded-xl border border-mistSkyBlue/40 bg-foamWhite/45 p-4 shadow-[0_3px_14px_rgba(52,74,100,0.05)] md:p-5">
+          <label className="sr-only" htmlFor="community-comment-input">
+            댓글 입력
+          </label>
+          <div>
+            <textarea
+              id="community-comment-input"
+              value={value}
+              onChange={(e) => setValue(e.target.value.slice(0, COMMENT_MAX_LENGTH))}
+              placeholder="댓글을 입력하세요"
+              rows={3}
+              className="w-full resize-none rounded-lg border border-mistSkyBlue/45 bg-white px-3 py-2.5 text-sm leading-relaxed text-deepOceanNavy outline-none transition-colors placeholder:text-softAquaBlue focus:border-waterlineBlue"
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-xs text-secondary tabular-nums">
+              {value.length}/{COMMENT_MAX_LENGTH}
+            </p>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!value.trim() || isSubmitting}
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-waterlineBlue px-3 text-xs font-semibold text-white transition-colors hover:bg-[#005EB8] disabled:cursor-not-allowed disabled:bg-mistSkyBlue/70"
+              aria-label="댓글 전송"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M22 2L11 13"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M22 2L15 22L11 13L2 9L22 2Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              등록
+            </button>
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* 댓글 목록 */}
-      {comments.length === 0 ? ( // 댓글 목록이 없으면
-        <p className="rounded-xl border border-mistSkyBlue/35 bg-white/20 px-4 py-6 text-center text-sm text-secondary">
-          아직 댓글이 없습니다.
-        </p>
-      ) : ( // 댓글 목록이 있으면
-        <ul className="divide-y divide-mistSkyBlue/35 rounded-xl border border-mistSkyBlue/35 bg-white/20">
-          {comments.map((comment, index) => (
-            <li key={comment.id} className="px-4 py-4 md:px-5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-deepOceanNavy/85">{comment.author}</span>
-                <div className="flex items-center gap-2">
-                  <time dateTime={comment.createdAt} className="text-xs text-softAquaBlue">
-                    {formatRelative(comment.createdAt)}
-                  </time>
-                  <button
-                    type="button"
-                    onClick={() => setReportTargetId(index + 1)}
-                    className="rounded px-1.5 py-0.5 font-pretendard text-xs text-secondary/60 transition-colors hover:bg-[#fef2f2] hover:text-[#dc2626]"
-                    aria-label="댓글 신고"
-                  >
-                    신고
-                  </button>
+      <div>
+        {isLoading ? (
+          <p className="rounded-lg border border-mistSkyBlue/30 bg-white/70 px-4 py-6 text-center text-sm text-secondary">
+            댓글을 불러오는 중...
+          </p>
+        ) : fetchError ? (
+          <p className="rounded-lg border border-red-200 bg-red-50/70 px-4 py-6 text-center text-sm text-red-500">
+            {fetchError}
+          </p>
+        ) : comments.length === 0 ? ( // 댓글 목록이 없으면
+          <p className="rounded-lg border border-mistSkyBlue/30 bg-white/70 px-4 py-6 text-center text-sm text-secondary">
+            아직 댓글이 없습니다.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {comments.map((comment) => (
+              <li key={comment.id} className="rounded-lg border border-mistSkyBlue/30 bg-white/70 px-4 py-4 md:px-5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-deepOceanNavy/85">{comment.author}</span>
+                  <div className="flex items-center gap-2">
+                    <time dateTime={comment.createdAt} className="text-xs text-softAquaBlue">
+                      {formatRelative(comment.createdAt)}
+                    </time>
+                    <button
+                      type="button"
+                      onClick={() => setReportTargetId(comment.id)}
+                      className="rounded px-1.5 py-0.5 font-pretendard text-xs text-secondary/60 transition-colors hover:bg-[#fef2f2] hover:text-[#dc2626]"
+                      aria-label="댓글 신고"
+                    >
+                      신고
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <p className="mt-2 text-[15px] leading-relaxed text-deepOceanNavy/90">{comment.content}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+                <p className="mt-2 text-[15px] leading-relaxed text-deepOceanNavy/90">{comment.content}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {/* 댓글 신고 모달 */}
       {reportTargetId !== null ? (
         <ReportModal
