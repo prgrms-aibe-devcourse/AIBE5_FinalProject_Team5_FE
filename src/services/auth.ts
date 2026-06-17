@@ -6,8 +6,6 @@ import {
   type TokenBundle,
 } from './authToken'
 
-
-
 /** [이메일 중복 체크_요청] 
  * GET /api/auth/check-email **/
 export interface CheckEmailResponse { // 응답 body(200)
@@ -60,6 +58,18 @@ export interface LoginResponse { // 응답 body(200)
 export async function login(body: LoginRequest): Promise<LoginResponse> {
   const response = await http.post<LoginResponse>('/api/auth/login', body)
   saveAuthSession(response, body.email) // 토큰 
+  return response
+}
+
+/** [구글 로그인_요청]
+ * POST /api/auth/google/login */
+export interface GoogleLoginRequest { // 요청 body
+  idToken: string
+}
+
+export async function googleLogin(body: GoogleLoginRequest): Promise<LoginResponse> {
+  const response = await http.post<LoginResponse>('/api/auth/google/login', body)
+  saveAuthSession(response)
   return response
 }
 
