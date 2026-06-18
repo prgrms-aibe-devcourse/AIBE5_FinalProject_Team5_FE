@@ -44,7 +44,7 @@ export function EnrollmentIcon() {
   )
 }
 
-export const FAVORITES_LIST_GRID_CLASS =
+export const BOOKMARKS_LIST_GRID_CLASS =
   'md:grid-cols-[minmax(0,2fr)_minmax(72px,80px)_minmax(100px,112px)_minmax(240px,1.5fr)_minmax(92px,100px)]'
 
 type CourseRatingBadgeProps = {

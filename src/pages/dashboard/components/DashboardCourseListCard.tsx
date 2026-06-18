@@ -27,7 +27,7 @@ export default function DashboardCourseListCard({ courses }: DashboardCourseList
   }
 
   return (
-    <DashboardCard title="찜 목록">
+    <DashboardCard title="스크랩 목록">
       {courses.length > 0 ? (
         <>
           <ul className="flex flex-col gap-1 px-1 lg:hidden">
@@ -101,7 +101,7 @@ export default function DashboardCourseListCard({ courses }: DashboardCourseList
           </div>
         </>
       ) : (
-        <p className="py-10 text-center font-pretendard text-sm text-secondary">찜한 과정이 없습니다.</p>
+        <p className="py-10 text-center font-pretendard text-sm text-secondary">스크랩한 과정이 없습니다.</p>
       )}
     </DashboardCard>
   )

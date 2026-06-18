@@ -1,4 +1,4 @@
-import { favoriteCourses, recentCourses } from './courses'
+import { mockBookmarkCourses, recentCourses } from './courses'
 
 export type UserCertificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
@@ -11,7 +11,7 @@ export type CertifiableCourse = {
 function buildCertifiableCourses(): CertifiableCourse[] {
   const courseMap = new Map<number, CertifiableCourse>()
 
-  for (const course of favoriteCourses) {
+  for (const course of mockBookmarkCourses) {
     courseMap.set(course.id, { id: course.id, title: course.title, academy: course.academy })
   }
 

@@ -1,20 +1,20 @@
 import { useMemo } from 'react'
 import { getStoredUser } from '../../services/auth'
-import { favoriteCourses, recentCourses, recentPosts } from './data'
+import { mockBookmarkCourses, recentCourses, recentPosts } from './data'
 import DashboardCalendarCard from './components/DashboardCalendarCard'
 import DashboardCourseListCard from './components/DashboardCourseListCard'
 import DashboardRecentCoursesCard from './components/DashboardRecentCoursesCard'
 import DashboardRecentPostsCard from './components/DashboardRecentPostsCard'
 import DashboardShell from './components/DashboardShell'
 
-// 대시보드 메인 페이지 (일정·최근 글·찜·최근 본 과정)
+// 대시보드 메인 페이지 (일정·최근 글·스크랩·최근 본 과정)
 const DASHBOARD_PREVIEW_LIMIT = 5
 
 export default function DashboardPage() {
   const nickname = useMemo(() => getStoredUser()?.nickname ?? '회원', [])
 
-  const previewFavoriteCourses = useMemo(
-    () => favoriteCourses.slice(0, DASHBOARD_PREVIEW_LIMIT),
+  const previewBookmarkCourses = useMemo(
+    () => mockBookmarkCourses.slice(0, DASHBOARD_PREVIEW_LIMIT),
     [],
   )
 
@@ -34,8 +34,8 @@ export default function DashboardPage() {
         {/* 일정·최근 글 */}
         <DashboardCalendarCard />
         <DashboardRecentPostsCard posts={previewRecentPosts} />
-        {/* 찜·최근 본 과정 */}
-        <DashboardCourseListCard courses={previewFavoriteCourses} />
+        {/* 스크랩·최근 본 과정 */}
+        <DashboardCourseListCard courses={previewBookmarkCourses} />
         <DashboardRecentCoursesCard courses={previewRecentCourses} />
       </div>
 

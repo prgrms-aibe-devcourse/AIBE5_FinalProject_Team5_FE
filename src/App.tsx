@@ -7,7 +7,7 @@ import DashboardPage from './pages/dashboard/DashboardPage'
 import SchedulePage from './pages/dashboard/SchedulePage'
 import ProfilePage from './pages/dashboard/ProfilePage'
 import InquiriesPage from './pages/dashboard/InquiriesPage'
-import FavoritesPage from './pages/dashboard/FavoritesPage'
+import BookmarksPage from './pages/dashboard/BookmarksPage'
 import MyPostsPage from './pages/dashboard/MyPostsPage'
 import AiPortfolioPage from './pages/dashboard/AiPortfolioPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -55,7 +55,8 @@ function App() {
       <Route path="/dashboard/schedule" element={<SchedulePage />} />
       <Route path="/dashboard/profile" element={<ProfilePage />} />
       <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
-      <Route path="/dashboard/favorites" element={<FavoritesPage />} />
+      <Route path="/dashboard/bookmarks" element={<BookmarksPage />} />
+      <Route path="/dashboard/favorites" element={<Navigate to="/dashboard/bookmarks" replace />} />
       <Route path="/dashboard/posts" element={<MyPostsPage />} />
       <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
       

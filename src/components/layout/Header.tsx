@@ -14,7 +14,7 @@ const communityLinks = [
 
 const userMenuLinks = [
   { label: '대시보드', to: '/dashboard' },
-  { label: '찜 목록', to: '/dashboard/favorites' },
+  { label: '스크랩 목록', to: '/dashboard/bookmarks' },
   { label: '내가 쓴 글', to: '/dashboard/posts' },
   { label: '일정', to: '/dashboard/schedule' },
   { label: '내 정보', to: '/dashboard/profile' },

@@ -38,7 +38,7 @@ export function toCompareCourseItem(course: Course): CompareCourseItem {
   }
 }
 
-export function toCompareCourseItemFromFavorite(course: {
+export function toCompareCourseItemFromBookmark(course: {
   id: number
   title: string
   academy: string

@@ -9,9 +9,10 @@ interface CourseCardProps {
   course: Course
   isSelected: boolean
   isBookmarked: boolean
+  isBookmarkPending?: boolean
   canAddToCompare: boolean
   onToggleCompare: (course: Course) => void
-  onToggleBookmark: (courseId: string) => void
+  onToggleBookmark: () => void
   onOpenDetail?: (course: Course) => void
   size?: 'default' | 'compact'
 }
@@ -97,6 +98,7 @@ export default function CourseCard({
   course,
   isSelected,
   isBookmarked,
+  isBookmarkPending = false,
   canAddToCompare,
   onToggleCompare,
   onToggleBookmark,
@@ -156,16 +158,17 @@ export default function CourseCard({
           </button>
           <button
             type="button"
-            aria-label={isBookmarked ? '찜 해제' : '찜하기'}
+            aria-label={isBookmarked ? '스크랩 해제' : '스크랩'}
+            disabled={isBookmarkPending}
             onClick={(e) => {
               e.stopPropagation()
-              onToggleBookmark(course.id)
+              onToggleBookmark()
             }}
             className={`${actionButtonClass} ${
               isBookmarked
                 ? 'border-bookmarkRose bg-bookmarkRose/10 text-bookmarkRose'
                 : 'border-mistSkyBlue text-softAquaBlue hover:border-bookmarkRose/50 hover:text-bookmarkRose'
-            }`}
+            } disabled:cursor-not-allowed disabled:opacity-60`}
           >
             <svg className={bookmarkIconClass} viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} aria-hidden="true">
               <path d="M6 4h12v16l-6-4-6 4V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />

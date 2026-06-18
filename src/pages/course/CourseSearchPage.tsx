@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
 import Pagination from '../../components/common/Pagination.tsx'
+import Toast from '../../components/common/Toast.tsx'
 import CourseSearchHero from './components/CourseSearchHero.tsx'
 import CourseResultsToolbar from './components/CourseResultsToolbar.tsx'
 import CourseCard from './components/CourseCard.tsx'
@@ -17,6 +18,7 @@ import {
   MAX_COMPARE_COURSES,
   type CompareCourseItem,
 } from '../../services/courseCompare.ts'
+import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
 
 function buildInitialFilterValues(): Record<string, string> {
   return COURSE_FILTERS.reduce<Record<string, string>>((acc, filter) => {
@@ -41,7 +43,7 @@ export default function CourseSearchPage() {
   const [fetchError, setFetchError] = useState<string | null>(null)
 
   const [selectedCourses, setSelectedCourses] = useState<CompareCourseItem[]>(() => loadCompareCourses())
-  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set())
+  const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
 
   useEffect(() => {
     saveCompareCourses(selectedCourses)
@@ -94,15 +96,6 @@ export default function CourseSearchPage() {
     setSelectedCourses((prev) => prev.filter((item) => item.id !== courseId))
   }
 
-  const handleToggleBookmark = (courseId: string) => {
-    setBookmarkedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(courseId)) next.delete(courseId)
-      else next.add(courseId)
-      return next
-    })
-  }
-
   const handleCompare = () => {
     if (selectedCourses.length < 2) return
     navigate('/courses/compare')
@@ -111,6 +104,10 @@ export default function CourseSearchPage() {
   return (
     <div className="flex min-h-screen flex-col font-pretendard">
       <Header fixed={false} />
+
+      {bookmarkError ? (
+        <Toast message={bookmarkError} variant="error" onClose={clearBookmarkError} />
+      ) : null}
 
       <CourseSearchHero
         keyword={keyword}
@@ -149,11 +146,18 @@ export default function CourseSearchPage() {
                     <CourseCard
                       course={course}
                       isSelected={selectedIds.has(course.id)}
-                      isBookmarked={bookmarkedIds.has(course.id)}
+                      isBookmarked={isBookmarked(course.courseSessionId)}
+                      isBookmarkPending={isPending(course.courseSessionId)}
                       canAddToCompare={selectedCourses.length < MAX_COMPARE_COURSES}
                       onToggleCompare={handleToggleCompare}
-                      onToggleBookmark={handleToggleBookmark}
-                      onOpenDetail={(c) => navigate(`/courses/${c.id}`)}
+                      onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
+                      onOpenDetail={(c) => {
+                        const path =
+                          c.courseSessionId != null
+                            ? `/courses/${c.id}?session=${c.courseSessionId}`
+                            : `/courses/${c.id}`
+                        navigate(path)
+                      }}
                     />
                   </div>
                 ))}

@@ -26,8 +26,8 @@ export function toApiCourse(course: Course): ApiCourse {
   }
 }
 
-/** API 연동 후 제거 예정 — 찜 목록 더미 데이터 */
-export const favoriteCourses: Course[] = [
+/** API 연동 후 제거 예정 — 스크랩 목록 더미 데이터 (대시보드 미리보기용) */
+export const mockBookmarkCourses: Course[] = [
   {
     id: 1,
     title: 'K-Digital Training: 생성형 AI 활용 백엔드 개발',

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
+import Toast from '../../components/common/Toast.tsx'
 import CourseDetailBreadcrumb from './components/CourseDetailBreadcrumb.tsx'
 import CourseDetailHeader from './components/CourseDetailHeader.tsx'
 import CourseDetailTabs, { type CourseDetailTab } from './components/CourseDetailTabs.tsx'
@@ -9,11 +10,18 @@ import CourseDetailInfoSections from './components/CourseDetailInfoSections.tsx'
 import CourseDetailReviewsSection from './components/CourseDetailReviewsSection.tsx'
 import CourseDetailSidebar from './components/CourseDetailSidebar.tsx'
 import { getCourseDetail, type CourseDetail } from '../../services/course.ts'
+import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
 
 export default function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>()
+  const [searchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState<CourseDetailTab>('info')
-  const [isBookmarked, setIsBookmarked] = useState(false)
+  const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
+
+  const sessionParam = searchParams.get('session')
+  const preferredSessionId = sessionParam ? Number(sessionParam) : undefined
+  const resolvedSessionId =
+    preferredSessionId != null && !Number.isNaN(preferredSessionId) ? preferredSessionId : undefined
 
   const [course, setCourse] = useState<CourseDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -35,13 +43,13 @@ export default function CourseDetailPage() {
     setIsLoading(true)
     setFetchError(null)
 
-    getCourseDetail(id)
+    getCourseDetail(id, resolvedSessionId)
       .then(setCourse)
       .catch((err: unknown) => {
         setFetchError(err instanceof Error ? err.message : '과정 정보를 불러올 수 없습니다.')
       })
       .finally(() => setIsLoading(false))
-  }, [courseId])
+  }, [courseId, resolvedSessionId])
 
   if (isLoading) {
     return (
@@ -71,14 +79,19 @@ export default function CourseDetailPage() {
     <div className="flex min-h-screen flex-col font-pretendard">
       <Header fixed={false} />
 
+      {bookmarkError ? (
+        <Toast message={bookmarkError} variant="error" onClose={clearBookmarkError} />
+      ) : null}
+
       <main className="flex-1 min-h-[calc(100dvh-12rem)] px-6 pb-[15.6rem] pt-8 md:px-12 md:pb-[18.2rem] lg:px-20">
         <div className="mx-auto flex w-full max-w-course-main flex-col gap-6 md:gap-8">
           <CourseDetailBreadcrumb />
 
           <CourseDetailHeader
             course={course}
-            isBookmarked={isBookmarked}
-            onToggleBookmark={() => setIsBookmarked((prev) => !prev)}
+            isBookmarked={isBookmarked(course.courseSessionId)}
+            isBookmarkPending={isPending(course.courseSessionId)}
+            onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
           />
 
           <CourseDetailTabs
