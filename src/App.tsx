@@ -56,7 +56,6 @@ function App() {
       <Route path="/dashboard/profile" element={<ProfilePage />} />
       <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
       <Route path="/dashboard/bookmarks" element={<BookmarksPage />} />
-      <Route path="/dashboard/favorites" element={<Navigate to="/dashboard/bookmarks" replace />} />
       <Route path="/dashboard/posts" element={<MyPostsPage />} />
       <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
       

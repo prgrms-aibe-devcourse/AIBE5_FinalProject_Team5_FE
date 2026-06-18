@@ -1,21 +1,21 @@
-export type LoginProvider = 'EMAIL' | 'KAKAO' | 'GOOGLE'
+export type LoginProvider = 'LOCAL' | 'EMAIL' | 'KAKAO' | 'GOOGLE'
 
-export const LOGIN_PROVIDER_LABEL: Record<LoginProvider, string> = {
-  EMAIL: '이메일',
-  KAKAO: '카카오',
-  GOOGLE: '구글',
+export function getProfileEmailDisplay(provider: LoginProvider, email: string) {
+  const emailValue = email.trim() || '--'
+
+  if (provider === 'GOOGLE') {
+    return { label: '이메일(구글 연동)', value: emailValue }
+  }
+
+  if (provider === 'KAKAO') {
+    return { label: '이메일(카카오 연동)', value: emailValue }
+  }
+
+  return { label: '이메일', value: emailValue }
 }
 
-export function getProfileAccountDisplay(provider: LoginProvider, email: string) {
-  if (provider === 'EMAIL') return email
-  return `${LOGIN_PROVIDER_LABEL[provider]} 로그인`
-}
-
-/** API 연동 후 제거 예정 — 프로필 더미 데이터 */
-export const defaultProfile = {
-  nickname: '닉네임',
-  email: 'useremail@email.com',
-  greetingName: '00',
-  joinedAt: '2026-01-15',
-  loginProvider: 'EMAIL' as LoginProvider,
+export function getProfileProviderLabel(provider: LoginProvider) {
+  if (provider === 'GOOGLE') return '구글 연동'
+  if (provider === 'KAKAO') return '카카오 연동'
+  return '이메일 가입'
 }
