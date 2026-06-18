@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react'
-import type { Course } from '../data/courses'
+import type { BookmarkCourseVM } from '../../../services/bookmark'
 import {
   CalendarIcon,
   CourseMetaInline,
@@ -9,8 +9,8 @@ import {
   PriceIcon,
 } from './CourseListMeta'
 
-type FavoriteCourseRowCardProps = {
-  course: Course
+type BookmarkCourseRowCardProps = {
+  course: BookmarkCourseVM
   isInCompare: boolean
   canAddToCompare: boolean
   isBookmarked: boolean
@@ -52,7 +52,7 @@ function BookmarkButton({ isBookmarked, onToggleBookmark }: { isBookmarked: bool
   return (
     <button
       type="button"
-      aria-label={isBookmarked ? '찜 해제' : '찜하기'}
+      aria-label={isBookmarked ? '스크랩 해제' : '스크랩'}
       onClick={(event) => {
         event.stopPropagation()
         onToggleBookmark()
@@ -95,7 +95,7 @@ function ActionButtons({
   )
 }
 
-export default function FavoriteCourseRowCard({
+export default function BookmarkCourseRowCard({
   course,
   isInCompare,
   canAddToCompare,
@@ -103,7 +103,7 @@ export default function FavoriteCourseRowCard({
   onToggleCompare,
   onToggleBookmark,
   onOpenDetail,
-}: FavoriteCourseRowCardProps) {
+}: BookmarkCourseRowCardProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!onOpenDetail) return
     if (event.key === 'Enter' || event.key === ' ') {
@@ -115,6 +115,18 @@ export default function FavoriteCourseRowCard({
   const interactiveClass = onOpenDetail
     ? 'cursor-pointer hover:border-waterlineBlue/35 hover:bg-foamWhite/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-waterlineBlue/50'
     : ''
+
+  const courseForTitle = {
+    id: course.id,
+    title: course.title,
+    academy: course.academy,
+    region: course.region,
+    subsidy: course.subsidy,
+    period: course.period,
+    rating: course.rating,
+    enrollment: course.enrollment,
+    logoUrl: course.logoUrl,
+  }
 
   return (
     <article
@@ -142,7 +154,7 @@ export default function FavoriteCourseRowCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <CourseTitleBlock course={course} />
+          <CourseTitleBlock course={courseForTitle} scoreVariant="satisfaction" />
 
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 border-t border-mistSkyBlue/25 pt-3 sm:gap-x-5">
             <CourseMetaInline icon={<LocationIcon />} nowrap className="text-xs sm:text-sm">
@@ -155,7 +167,7 @@ export default function FavoriteCourseRowCard({
               {course.period}
             </CourseMetaInline>
             <CourseMetaInline icon={<EnrollmentIcon />} nowrap className="text-xs sm:text-sm">
-              {course.enrollment ?? '32/50'}
+              {course.enrollment}
             </CourseMetaInline>
           </div>
         </div>

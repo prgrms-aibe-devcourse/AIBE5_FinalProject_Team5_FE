@@ -116,7 +116,7 @@ export type SideNavbarVariant = 'dashboard' | 'admin'
 
 const dashboardItems: SideNavbarItem[] = [
   { label: '대시보드', href: '/dashboard', icon: 'grid' },
-  { label: '찜 목록', href: '/dashboard/favorites', icon: 'pin' },
+  { label: '스크랩 목록', href: '/dashboard/bookmarks', icon: 'pin' },
   { label: '내가 쓴 글', href: '/dashboard/posts', icon: 'folder' },
   { label: '일정', href: '/dashboard/schedule', icon: 'calendar' },
   { label: '내 정보', href: '/dashboard/profile', icon: 'user' },

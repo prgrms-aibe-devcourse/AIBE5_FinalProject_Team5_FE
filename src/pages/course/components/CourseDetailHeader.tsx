@@ -5,6 +5,7 @@ import CourseThumbnail from './CourseThumbnail.tsx'
 interface CourseDetailHeaderProps {
   course: CourseDetail
   isBookmarked: boolean
+  isBookmarkPending?: boolean
   onToggleBookmark: () => void
 }
 
@@ -23,9 +24,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 // 과정 상세 헤더 (과정 이미지, 제목, 기관, 모집 현황)
 export default function CourseDetailHeader({ 
-  course, // 과정 상세 데이터
-  isBookmarked, // 찜 여부
-  onToggleBookmark, // 찜 토글 핸들러
+  course,
+  isBookmarked,
+  isBookmarkPending = false,
+  onToggleBookmark,
 }: CourseDetailHeaderProps) {
   return (
     <section className="rounded-2xl glass-panel p-5 shadow-sm md:p-8">
@@ -51,8 +53,12 @@ export default function CourseDetailHeader({
               </h1>
               <p className="mt-1 text-sm text-secondary md:text-base">{course.company}</p>
             </div>
-            <button type="button" aria-label={isBookmarked ? '찜 해제' : '찜하기'} onClick={onToggleBookmark}
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors md:h-12 md:w-12 ${
+            <button
+              type="button"
+              aria-label={isBookmarked ? '스크랩 해제' : '스크랩'}
+              disabled={isBookmarkPending}
+              onClick={onToggleBookmark}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors md:h-12 md:w-12 disabled:cursor-not-allowed disabled:opacity-60 ${
                 isBookmarked
                   ? 'border-bookmarkRose bg-bookmarkRose/10 text-bookmarkRose'
                   : 'border-mistSkyBlue text-softAquaBlue hover:border-bookmarkRose/50 hover:text-bookmarkRose'

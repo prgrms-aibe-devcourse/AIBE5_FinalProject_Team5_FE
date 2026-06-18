@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
 import Pagination from '../../components/common/Pagination.tsx'
+import Toast from '../../components/common/Toast.tsx'
 import CourseSearchHero from './components/CourseSearchHero.tsx'
 import CourseResultsToolbar from './components/CourseResultsToolbar.tsx'
 import CourseCard from './components/CourseCard.tsx'
@@ -10,13 +11,9 @@ import CourseComparisonSidebar from './components/CourseComparisonSidebar.tsx'
 import { COURSE_FILTERS } from './data/mockCourses.ts'
 import type { Course, CourseSortKey } from '../../services/course.ts'
 import { getCourses, toCourseListParams } from '../../services/course.ts'
-import {
-  loadCompareCourses,
-  saveCompareCourses,
-  toCompareCourseItem,
-  MAX_COMPARE_COURSES,
-  type CompareCourseItem,
-} from '../../services/courseCompare.ts'
+import { MAX_COMPARE_COURSES } from '../../services/courseCompare.ts'
+import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
+import { useCompareCourses } from '../../hooks/useCompareCourses.ts'
 
 function buildInitialFilterValues(): Record<string, string> {
   return COURSE_FILTERS.reduce<Record<string, string>>((acc, filter) => {
@@ -40,12 +37,14 @@ export default function CourseSearchPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(null)
 
-  const [selectedCourses, setSelectedCourses] = useState<CompareCourseItem[]>(() => loadCompareCourses())
-  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    saveCompareCourses(selectedCourses)
-  }, [selectedCourses])
+  const {
+    selectedCourses,
+    selectedIds,
+    canAddMore,
+    toggleCompareCourse,
+    removeFromCompare,
+  } = useCompareCourses()
+  const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
 
   useEffect(() => {
     const params = toCourseListParams(filterValues, searchKeyword, currentPage)
@@ -65,11 +64,6 @@ export default function CourseSearchPage() {
       .finally(() => setIsLoading(false))
   }, [searchKeyword, filterValues, currentPage])
 
-  const selectedIds = useMemo(
-    () => new Set(selectedCourses.map((c) => c.id)),
-    [selectedCourses],
-  )
-
   const handleFilterChange = (filterId: string, value: string) => {
     setFilterValues((prev) => ({ ...prev, [filterId]: value }))
     setSearchKeyword(keyword)
@@ -81,28 +75,6 @@ export default function CourseSearchPage() {
     setCurrentPage(1)
   }
 
-  const handleToggleCompare = (course: Course) => {
-    setSelectedCourses((prev) => {
-      const exists = prev.some((item) => item.id === course.id)
-      if (exists) return prev.filter((item) => item.id !== course.id)
-      if (prev.length >= MAX_COMPARE_COURSES) return prev
-      return [...prev, toCompareCourseItem(course)]
-    })
-  }
-
-  const handleRemoveFromCompare = (courseId: string) => {
-    setSelectedCourses((prev) => prev.filter((item) => item.id !== courseId))
-  }
-
-  const handleToggleBookmark = (courseId: string) => {
-    setBookmarkedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(courseId)) next.delete(courseId)
-      else next.add(courseId)
-      return next
-    })
-  }
-
   const handleCompare = () => {
     if (selectedCourses.length < 2) return
     navigate('/courses/compare')
@@ -111,6 +83,10 @@ export default function CourseSearchPage() {
   return (
     <div className="flex min-h-screen flex-col font-pretendard">
       <Header fixed={false} />
+
+      {bookmarkError ? (
+        <Toast message={bookmarkError} variant="error" onClose={clearBookmarkError} />
+      ) : null}
 
       <CourseSearchHero
         keyword={keyword}
@@ -149,11 +125,18 @@ export default function CourseSearchPage() {
                     <CourseCard
                       course={course}
                       isSelected={selectedIds.has(course.id)}
-                      isBookmarked={bookmarkedIds.has(course.id)}
-                      canAddToCompare={selectedCourses.length < MAX_COMPARE_COURSES}
-                      onToggleCompare={handleToggleCompare}
-                      onToggleBookmark={handleToggleBookmark}
-                      onOpenDetail={(c) => navigate(`/courses/${c.id}`)}
+                      isBookmarked={isBookmarked(course.courseSessionId)}
+                      isBookmarkPending={isPending(course.courseSessionId)}
+                      canAddToCompare={canAddMore}
+                      onToggleCompare={toggleCompareCourse}
+                      onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
+                      onOpenDetail={(c) => {
+                        const path =
+                          c.courseSessionId != null
+                            ? `/courses/${c.id}?session=${c.courseSessionId}`
+                            : `/courses/${c.id}`
+                        navigate(path)
+                      }}
                     />
                   </div>
                 ))}
@@ -170,7 +153,7 @@ export default function CourseSearchPage() {
           <CourseComparisonSidebar
             selectedCourses={selectedCourses}
             maxCount={MAX_COMPARE_COURSES}
-            onRemove={handleRemoveFromCompare}
+            onRemove={removeFromCompare}
             onCompare={handleCompare}
           />
         </div>

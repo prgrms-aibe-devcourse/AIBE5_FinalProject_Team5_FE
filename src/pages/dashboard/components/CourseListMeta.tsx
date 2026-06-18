@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react'
+import { Star, ThumbsUp } from 'lucide-react'
 import type { Course } from '../data/courses'
 
 const iconClass = 'shrink-0 text-softAquaBlue'
+
+const badgeShellClass =
+  'inline-flex h-[18px] shrink-0 items-center gap-[3px] rounded-full px-1.5 font-pretendard text-[10px] font-semibold leading-none'
+const badgeIconClass = 'size-[10px] shrink-0 flex-none'
 
 export function LocationIcon() {
   return (
@@ -44,29 +49,42 @@ export function EnrollmentIcon() {
   )
 }
 
-export const FAVORITES_LIST_GRID_CLASS =
+export const BOOKMARKS_LIST_GRID_CLASS =
   'md:grid-cols-[minmax(0,2fr)_minmax(72px,80px)_minmax(100px,112px)_minmax(240px,1.5fr)_minmax(92px,100px)]'
 
 type CourseRatingBadgeProps = {
   rating: string
   className?: string
+  variant?: 'rating' | 'satisfaction'
 }
 
-export function CourseRatingBadge({ rating, className = '' }: CourseRatingBadgeProps) {
+export function CourseRatingBadge({
+  rating,
+  className = '',
+  variant = 'rating',
+}: CourseRatingBadgeProps) {
+  const unavailable = rating === '-'
+  const Icon = variant === 'satisfaction' ? ThumbsUp : Star
+  const toneClass = unavailable
+    ? 'bg-mistSkyBlue/20 font-medium text-secondary'
+    : 'bg-waterlineBlue/12 text-waterlineBlue'
+
   return (
-    <span
-      className={`inline-flex shrink-0 items-center gap-0.5 rounded-full bg-waterlineBlue/12 px-2 py-0.5 font-pretendard text-[11px] font-semibold text-waterlineBlue ${className}`}
-    >
-      ★ {rating}
+    <span className={`${badgeShellClass} ${toneClass} ${className}`}>
+      <span className="flex size-[11px] shrink-0 items-center justify-center">
+        <Icon className={badgeIconClass} strokeWidth={2} aria-hidden="true" />
+      </span>
+      <span className="tabular-nums">{rating}</span>
     </span>
   )
 }
 
 type CourseTitleBlockProps = {
   course: Course
+  scoreVariant?: 'rating' | 'satisfaction'
 }
 
-export function CourseTitleBlock({ course }: CourseTitleBlockProps) {
+export function CourseTitleBlock({ course, scoreVariant = 'rating' }: CourseTitleBlockProps) {
   return (
     <div className="min-w-0 flex-1">
       <p className="line-clamp-2 font-pretendard text-sm font-semibold leading-snug text-deepOceanNavy">
@@ -74,7 +92,7 @@ export function CourseTitleBlock({ course }: CourseTitleBlockProps) {
       </p>
       <div className="mt-1.5 flex flex-wrap items-center gap-2 font-pretendard text-xs">
         <span className="text-secondary">{course.academy}</span>
-        <CourseRatingBadge rating={course.rating} />
+        <CourseRatingBadge rating={course.rating} variant={scoreVariant} />
       </div>
     </div>
   )

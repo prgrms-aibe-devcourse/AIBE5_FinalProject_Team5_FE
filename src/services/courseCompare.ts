@@ -7,6 +7,8 @@ import type { Course } from './course.ts'
 
 const COMPARE_STORAGE_KEY = 'bootsignal:course-compare'
 
+export const COMPARE_STORAGE_KEY_EXPORT = COMPARE_STORAGE_KEY
+
 const MAX_ITEMS = 3
 
 export const MAX_COMPARE_COURSES = MAX_ITEMS
@@ -38,7 +40,7 @@ export function toCompareCourseItem(course: Course): CompareCourseItem {
   }
 }
 
-export function toCompareCourseItemFromFavorite(course: {
+export function toCompareCourseItemFromBookmark(course: {
   id: number
   title: string
   academy: string

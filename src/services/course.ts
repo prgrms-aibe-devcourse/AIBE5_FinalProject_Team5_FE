@@ -26,6 +26,7 @@ export type CourseSortKey = 'latest' | 'mostReviews' | 'rating' | 'satisfaction'
 /** 과정 카드 뷰모델 */
 export interface Course {
   id: string
+  courseSessionId?: number
   title: string
   company: string
   location: string
@@ -345,6 +346,7 @@ function formatRating(rating: number | null | undefined): string {
 export function toCourseCardVM(item: CourseListItem): Course {
   return {
     id: String(item.courseId ?? item.id),
+    courseSessionId: item.courseSessionId ?? (item.courseId != null ? item.id : undefined),
     title: item.title,
     company: item.institutionName,
     location: formatAreaCode(item.trngAreaCd),
@@ -357,36 +359,43 @@ export function toCourseCardVM(item: CourseListItem): Course {
   }
 }
 
-export function toCourseDetailVM(detail: BECourseDetail, sessions: CourseSession[]): CourseDetail {
-  // 세션은 traStartDate 기준 오름차순 — 가장 최근(마지막) 회차 사용
+export function toCourseDetailVM(
+  detail: BECourseDetail,
+  sessions: CourseSession[],
+  preferredSessionId?: number,
+): CourseDetail {
   const latestSession = sessions.length > 0 ? sessions[sessions.length - 1] : null
+  const selectedSession =
+    preferredSessionId != null
+      ? sessions.find((session) => session.id === preferredSessionId) ?? latestSession
+      : latestSession
 
-  const dateRange = latestSession
-    ? `${latestSession.traStartDate} ~ ${latestSession.traEndDate}`
+  const dateRange = selectedSession
+    ? `${selectedSession.traStartDate} ~ ${selectedSession.traEndDate}`
     : '-'
 
-  const batch = latestSession ? `${latestSession.trprDegr}기` : '-'
+  const batch = selectedSession ? `${selectedSession.trprDegr}기` : '-'
 
   const recruitment: CourseRecruitment = {
-    capacity: latestSession?.recruitmentCount ?? 0,
-    applicants: latestSession?.selectedTraineeCount ?? 0,
-    confirmed: latestSession?.confirmedTraineeCount ?? 0,
+    capacity: selectedSession?.recruitmentCount ?? 0,
+    applicants: selectedSession?.selectedTraineeCount ?? 0,
+    confirmed: selectedSession?.confirmedTraineeCount ?? 0,
   }
 
   const employmentRate =
-    latestSession?.eiEmplRate6
-      ? `${latestSession.eiEmplRate6}%`
-      : latestSession?.employmentRate !== null && latestSession?.employmentRate !== undefined
-        ? `${latestSession.employmentRate}%`
+    selectedSession?.eiEmplRate6
+      ? `${selectedSession.eiEmplRate6}%`
+      : selectedSession?.employmentRate !== null && selectedSession?.employmentRate !== undefined
+        ? `${selectedSession.employmentRate}%`
         : '-'
 
   const inst = detail.institution
 
-  const otherInfo = latestSession
+  const otherInfo = selectedSession
     ? [
         detail.totalTrainingDays ? `총 훈련 일수: ${detail.totalTrainingDays}일` : '',
         detail.totalTrainingHours ? `총 훈련 시간: ${detail.totalTrainingHours}시간` : '',
-        latestSession.wkendSe === 'Y' ? '주말 훈련 포함' : '평일 훈련',
+        selectedSession.wkendSe === 'Y' ? '주말 훈련 포함' : '평일 훈련',
       ]
         .filter(Boolean)
         .join('\n') || '정보 없음'
@@ -394,10 +403,11 @@ export function toCourseDetailVM(detail: BECourseDetail, sessions: CourseSession
 
   return {
     id: String(detail.id),
+    courseSessionId: selectedSession?.id,
     title: detail.title,
     company: inst?.institutionName ?? '-',
     location: formatAreaCode(detail.trngAreaCd),
-    price: formatCoursePrice(detail.selfPaymentAmount),
+    price: formatCoursePrice(selectedSession?.selfPaymentAmount ?? detail.selfPaymentAmount),
     dateRange,
     satisfaction: formatScore(detail.stdgScor),
     employmentRate,
@@ -413,7 +423,7 @@ export function toCourseDetailVM(detail: BECourseDetail, sessions: CourseSession
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',
     },
-    titleLink: detail.titleLink ?? latestSession?.titleLink ?? null,
+    titleLink: detail.titleLink ?? selectedSession?.titleLink ?? null,
     homepageUrl: inst?.homepageUrl ?? null,
   }
 }
@@ -432,12 +442,12 @@ export async function getCourses(params: CourseListParams): Promise<PageResponse
 }
 
 /** 과정 상세 + 세션을 병렬 조회해 뷰모델로 반환 */
-export async function getCourseDetail(id: number): Promise<CourseDetail> {
+export async function getCourseDetail(id: number, preferredSessionId?: number): Promise<CourseDetail> {
   const [detail, sessions] = await Promise.all([
     http.get<BECourseDetail>(`/api/courses/${id}`, { auth: false }),
     http.get<CourseSession[]>(`/api/courses/${id}/sessions`, { auth: false }),
   ])
-  return toCourseDetailVM(detail, sessions)
+  return toCourseDetailVM(detail, sessions, preferredSessionId)
 }
 
 /** 과정 회차 목록 (raw BE DTO) */
