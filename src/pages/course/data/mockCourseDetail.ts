@@ -37,9 +37,9 @@ const DEFAULT_DETAIL: Omit<CourseDetail, 'id'> = {
   contact: {
     phone: '02-1234-5678',
     email: 'contact@grepp.co',
-    homepage: 'https://www.grepp.co',
   },
-  websiteUrl: 'https://www.grepp.co',
+  titleLink: 'https://www.work24.go.kr',
+  homepageUrl: 'https://www.grepp.co',
 }
 
 /** 목록·상세 mock id 모두 동일 레이아웃으로 응답 */

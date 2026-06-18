@@ -1,5 +1,6 @@
 import type { CourseDetail } from '../../../services/course.ts'
 import CourseRecruitmentBar from './CourseRecruitmentBar.tsx'
+import CourseThumbnail from './CourseThumbnail.tsx'
 
 interface CourseDetailHeaderProps {
   course: CourseDetail
@@ -31,10 +32,12 @@ export default function CourseDetailHeader({
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-8">
         {/* 과정 이미지 */}
         <div className="w-full shrink-0 lg:w-80 xl:w-96">
-          <div className="h-36 w-full overflow-hidden rounded-xl border border-mistSkyBlue/50 bg-foamWhite sm:h-44 md:h-52 lg:h-full lg:min-h-52">
-            {course.logoUrl ? ( // 과정 이미지가 있으면 표시 // 없으면 null
-              <img src={course.logoUrl} alt={`${course.title} 대표 이미지`} className="h-full w-full object-cover" />
-            ) : null}
+          <div className="h-36 w-full overflow-hidden rounded-xl border border-mistSkyBlue/50 sm:h-44 md:h-52 lg:h-full lg:min-h-52">
+            <CourseThumbnail
+              imageUrl={course.logoUrl}
+              alt={`${course.title} 대표 이미지`}
+              className="aspect-auto h-full w-full"
+            />
           </div>
         </div>
 
@@ -50,9 +53,9 @@ export default function CourseDetailHeader({
             </div>
             <button type="button" aria-label={isBookmarked ? '찜 해제' : '찜하기'} onClick={onToggleBookmark}
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors md:h-12 md:w-12 ${
-                isBookmarked // 찜 여부에 따라 버튼 상태 변경
-                  ? 'border-waterlineBlue text-waterlineBlue'
-                  : 'border-mistSkyBlue text-softAquaBlue hover:border-waterlineBlue hover:text-waterlineBlue'
+                isBookmarked
+                  ? 'border-bookmarkRose bg-bookmarkRose/10 text-bookmarkRose'
+                  : 'border-mistSkyBlue text-softAquaBlue hover:border-bookmarkRose/50 hover:text-bookmarkRose'
               }`}
             >
               <svg className="h-7 w-7 md:h-8 md:w-8" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} aria-hidden="true">

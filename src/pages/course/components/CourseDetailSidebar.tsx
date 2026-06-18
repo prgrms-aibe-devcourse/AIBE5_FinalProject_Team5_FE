@@ -94,9 +94,11 @@ interface ContactRowProps {
   label: string
   value: string
   href?: string
+  /** true면 전화번호·이메일과 동일한 값 텍스트 스타일 */
+  plainLink?: boolean
 }
 
-function ContactRow({ icon, label, value, href }: ContactRowProps) {
+function ContactRow({ icon, label, value, href, plainLink }: ContactRowProps) {
   const valueClass =
     'text-sm font-medium leading-snug text-deepOceanNavy break-all md:text-[0.9375rem]'
 
@@ -112,7 +114,11 @@ function ContactRow({ icon, label, value, href }: ContactRowProps) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${valueClass} text-waterlineBlue underline-offset-2 hover:underline`}
+            className={
+              plainLink
+                ? `${valueClass} underline-offset-2 hover:underline`
+                : `${valueClass} text-waterlineBlue underline-offset-2 hover:underline`
+            }
           >
             {value}
           </a>
@@ -155,26 +161,31 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
             <div className="space-y-3.5">
               <ContactRow icon={<PhoneIcon />} label="전화번호" value={course.contact.phone} />
               <ContactRow icon={<MailIcon />} label="이메일" value={course.contact.email} />
-              <ContactRow
-                icon={<LinkIcon />}
-                label="홈페이지"
-                value={course.contact.homepage}
-                href={course.contact.homepage}
-              />
+              {course.titleLink ? (
+                <ContactRow
+                  icon={<LinkIcon />}
+                  label="고용 24 과정 조회"
+                  value="바로가기"
+                  href={course.titleLink}
+                  plainLink
+                />
+              ) : null}
             </div>
           </div>
         </div>
         </div>
       </div>
 
-      <a
-        href={course.websiteUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block w-full rounded-xl bg-deepOceanNavy py-3.5 text-center text-base font-semibold text-white shadow-[0_4px_14px_rgba(52,74,100,0.18)] transition-colors hover:bg-waterlineBlue"
-      >
-        홈페이지 방문
-      </a>
+      {course.homepageUrl ? (
+        <a
+          href={course.homepageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full rounded-xl bg-deepOceanNavy py-3.5 text-center text-base font-semibold text-white shadow-[0_4px_14px_rgba(52,74,100,0.18)] transition-colors hover:bg-waterlineBlue"
+        >
+          홈페이지 방문
+        </a>
+      ) : null}
     </aside>
   )
 }

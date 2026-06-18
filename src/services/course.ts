@@ -15,7 +15,9 @@ export interface CourseFilterConfig {
   id: string
   label: string
   options: CourseFilterOption[]
+  /** true면 목록 전체 표시, false/미설정이면 maxListHeightClass 높이까지 보이고 스크롤 */
   expandList?: boolean
+  maxListHeightClass?: string
 }
 
 /** 정렬 키 (FE 전용 — BE 파라미터 없음) */
@@ -44,7 +46,6 @@ export interface CourseRecruitment {
 export interface CourseContact {
   phone: string
   email: string
-  homepage: string
 }
 
 /** 과정 상세 뷰모델 */
@@ -56,7 +57,8 @@ export interface CourseDetail extends Course {
   otherInfo: string
   institutionInfo: string
   contact: CourseContact
-  websiteUrl: string
+  titleLink: string | null
+  homepageUrl: string | null
 }
 
 // ──────────────────────────────────────────────
@@ -65,6 +67,8 @@ export interface CourseDetail extends Course {
 
 export interface CourseListItem {
   id: number
+  courseId?: number
+  courseSessionId?: number
   trprId: string
   title: string
   institutionName: string
@@ -76,6 +80,12 @@ export interface CourseListItem {
   totalTrainingHours: number | null
   ncsName: string | null
   profileImageUrl: string | null
+  traStartDate?: string | null
+  traEndDate?: string | null
+  eiEmplRate3?: string | null
+  eiEmplRate6?: string | null
+  reviewRating?: number | null
+  employmentRate?: number | null
 }
 
 export interface InstitutionDetail {
@@ -138,55 +148,211 @@ export interface CourseSession {
 }
 
 // ──────────────────────────────────────────────
-// API 파라미터
+// API 파라미터 (BE GET /api/courses 쿼리 규격)
 // ──────────────────────────────────────────────
+
+export type FieldCategory =
+  | 'AI'
+  | 'SECURITY'
+  | 'BIG_DATA'
+  | 'CLOUD'
+  | 'UI_UX'
+  | 'VR'
+  | 'APP_SW'
+  | 'OTHERS'
+
+export type PriceRange = 'BELOW_30' | 'BELOW_45' | 'BELOW_60'
+
+export type DurationFilter = 'WITHIN_3_MONTHS' | 'WITHIN_6_MONTHS' | 'OVER_6_MONTHS'
 
 export interface CourseListParams {
   keyword?: string
   trngAreaCd?: string
-  ncsCd?: string
-  page?: number  // 0-based (BE 규격)
+  fieldCategory?: FieldCategory
+  priceRange?: PriceRange
+  durationFilter?: DurationFilter
+  page?: number // 0-based (BE 규격)
   size?: number
+}
+
+/** BE 분야 카테고리 목록 (fieldCategory 필터 옵션) */
+export const FIELD_CATEGORIES: { category: FieldCategory; label: string }[] = [
+  { category: 'AI', label: '인공지능' },
+  { category: 'SECURITY', label: '보안' },
+  { category: 'BIG_DATA', label: '빅데이터' },
+  { category: 'CLOUD', label: '클라우드' },
+  { category: 'UI_UX', label: 'UI/UX' },
+  { category: 'VR', label: 'VR/AR' },
+  { category: 'APP_SW', label: '응용SW' },
+]
+
+/** BE 지역 코드 목록 (trngAreaCd 필터 옵션) */
+export const TRAINING_AREAS: { code: string; name: string }[] = [
+  { code: '11', name: '서울' },
+  { code: '26', name: '부산' },
+  { code: '27', name: '대구' },
+  { code: '28', name: '인천' },
+  { code: '29', name: '광주' },
+  { code: '30', name: '대전' },
+  { code: '31', name: '울산' },
+  { code: '36', name: '세종' },
+  { code: '41', name: '경기' },
+  { code: '43', name: '충북' },
+  { code: '44', name: '충남' },
+  { code: '46', name: '전남' },
+  { code: '47', name: '경북' },
+  { code: '48', name: '경남' },
+  { code: '50', name: '제주' },
+  { code: '51', name: '강원' },
+  { code: '52', name: '전북' },
+]
+
+export const PRICE_RANGE_OPTIONS: { value: PriceRange; label: string }[] = [
+  { value: 'BELOW_30', label: '30만원 이하' },
+  { value: 'BELOW_45', label: '45만원 이하' },
+  { value: 'BELOW_60', label: '60만원 이하' },
+]
+
+export const DURATION_FILTER_OPTIONS: { value: DurationFilter; label: string }[] = [
+  { value: 'WITHIN_3_MONTHS', label: '3개월 이내' },
+  { value: 'WITHIN_6_MONTHS', label: '6개월 이내' },
+  { value: 'OVER_6_MONTHS', label: '6개월 이상' },
+]
+
+const FILTER_ALL = 'all'
+
+/** BE 지역 코드 → 지역명 (카드 location 표시용) */
+export function buildAreaCodeMap(): Record<string, string> {
+  return Object.fromEntries(TRAINING_AREAS.map(({ code, name }) => [code, name]))
+}
+
+/** 필터 UI 설정 — BE enum·목록 기준 */
+export function buildCourseFilters(): CourseFilterConfig[] {
+  return [
+    {
+      id: 'category',
+      label: '분야',
+      expandList: true,
+      options: [
+        { value: FILTER_ALL, label: '전체 분야' },
+        ...FIELD_CATEGORIES.map(({ category, label }) => ({ value: category, label })),
+      ],
+    },
+    {
+      id: 'price',
+      label: '가격',
+      options: [
+        { value: FILTER_ALL, label: '전체 가격' },
+        ...PRICE_RANGE_OPTIONS.map(({ value, label }) => ({ value, label })),
+      ],
+    },
+    {
+      id: 'region',
+      label: '지역',
+      maxListHeightClass: 'max-h-52',
+      options: [
+        { value: FILTER_ALL, label: '전체 지역' },
+        ...TRAINING_AREAS.map(({ code, name }) => ({ value: code, label: name })),
+      ],
+    },
+    {
+      id: 'duration',
+      label: '기간',
+      options: [
+        { value: FILTER_ALL, label: '전체 기간' },
+        ...DURATION_FILTER_OPTIONS.map(({ value, label }) => ({ value, label })),
+      ],
+    },
+  ]
+}
+
+/** 필터 UI 상태 → GET /api/courses 쿼리 파라미터 */
+export function toCourseListParams(
+  filterValues: Record<string, string>,
+  keyword: string,
+  currentPage: number,
+  size = 9,
+): CourseListParams {
+  const category = filterValues.category
+  const price = filterValues.price
+  const region = filterValues.region
+  const duration = filterValues.duration
+
+  return {
+    keyword: keyword.trim() || undefined,
+    fieldCategory: category && category !== FILTER_ALL ? (category as FieldCategory) : undefined,
+    priceRange: price && price !== FILTER_ALL ? (price as PriceRange) : undefined,
+    trngAreaCd: region && region !== FILTER_ALL ? region : undefined,
+    durationFilter: duration && duration !== FILTER_ALL ? (duration as DurationFilter) : undefined,
+    page: currentPage - 1,
+    size,
+  }
 }
 
 // ──────────────────────────────────────────────
 // 매퍼 (BE DTO → FE 뷰모델)
 // ──────────────────────────────────────────────
 
-const AREA_CODE_MAP: Record<string, string> = {
-  '11': '서울', '26': '부산', '27': '대구', '28': '인천',
-  '29': '광주', '30': '대전', '31': '울산', '36': '세종',
-  '41': '경기', '42': '강원', '43': '충북', '44': '충남',
-  '45': '전북', '46': '전남', '47': '경북', '48': '경남', '50': '제주',
-}
+const AREA_CODE_MAP = buildAreaCodeMap()
 
 function formatAreaCode(code: string | null | undefined): string {
   if (!code) return '-'
-  return AREA_CODE_MAP[code] ?? code
+  const prefix = code.slice(0, 2)
+  return AREA_CODE_MAP[prefix] ?? code
 }
 
-function formatPrice(courseMan: number | null): string {
-  if (courseMan === null) return '-'
-  if (courseMan === 0) return '무료'
-  return courseMan.toLocaleString('ko-KR') + '원'
+export function formatCoursePrice(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined) return '-'
+  if (amount === 0) return '무료'
+  return amount.toLocaleString('ko-KR') + '원'
+}
+
+function formatDateRange(
+  start: string | null | undefined,
+  end: string | null | undefined,
+): string {
+  if (start && end) return `${start} ~ ${end}`
+  if (start || end) return start ?? end ?? '-'
+  return '-'
+}
+
+/** 카드 통계 등 짧은 영역용 — 데이터 없음 표시 */
+export const COURSE_STAT_PLACEHOLDER = '—'
+
+export function isCourseStatPlaceholder(value: string): boolean {
+  return value === COURSE_STAT_PLACEHOLDER
+}
+
+function isStatMissing(value: number | null | undefined): boolean {
+  return value === null || value === undefined || value === 0
 }
 
 function formatScore(score: number | null | undefined): string {
-  if (score === null || score === undefined) return '-'
-  return `${score}/5`
+  if (isStatMissing(score)) return COURSE_STAT_PLACEHOLDER
+  return String(score)
+}
+
+function formatEmploymentRate(rate: number | null | undefined): string {
+  if (isStatMissing(rate)) return COURSE_STAT_PLACEHOLDER
+  return `${rate}%`
+}
+
+function formatRating(rating: number | null | undefined): string {
+  if (isStatMissing(rating)) return COURSE_STAT_PLACEHOLDER
+  return String(rating)
 }
 
 export function toCourseCardVM(item: CourseListItem): Course {
   return {
-    id: String(item.id),
+    id: String(item.courseId ?? item.id),
     title: item.title,
     company: item.institutionName,
     location: formatAreaCode(item.trngAreaCd),
-    price: formatPrice(item.courseMan),
-    dateRange: '-',
+    price: formatCoursePrice(item.selfPaymentAmount),
+    dateRange: formatDateRange(item.traStartDate, item.traEndDate),
     satisfaction: formatScore(item.stdgScor),
-    employmentRate: '-',
-    rating: '-',
+    employmentRate: formatEmploymentRate(item.employmentRate),
+    rating: formatRating(item.reviewRating),
     logoUrl: item.profileImageUrl ?? undefined,
   }
 }
@@ -231,7 +397,7 @@ export function toCourseDetailVM(detail: BECourseDetail, sessions: CourseSession
     title: detail.title,
     company: inst?.institutionName ?? '-',
     location: formatAreaCode(detail.trngAreaCd),
-    price: formatPrice(detail.selfPaymentAmount),
+    price: formatCoursePrice(detail.selfPaymentAmount),
     dateRange,
     satisfaction: formatScore(detail.stdgScor),
     employmentRate,
@@ -246,9 +412,9 @@ export function toCourseDetailVM(detail: BECourseDetail, sessions: CourseSession
     contact: {
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',
-      homepage: inst?.homepageUrl ?? '-',
     },
-    websiteUrl: detail.titleLink ?? inst?.homepageUrl ?? '#',
+    titleLink: detail.titleLink ?? latestSession?.titleLink ?? null,
+    homepageUrl: inst?.homepageUrl ?? null,
   }
 }
 

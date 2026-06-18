@@ -1,7 +1,26 @@
-import { ApiError } from './ApiError'
+import { ApiError, isExpiredAuthTokenError } from './ApiError'
+import { setTokenExpiredLogoutFlash } from './authFlash'
 import { getAccessToken, getTokenType } from './authToken'
 import type { ApiResponse } from './apiTypes'
 const BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+
+let isHandlingAuthSessionExpired = false
+
+async function handleAuthSessionExpired(): Promise<void> {
+  if (isHandlingAuthSessionExpired) return
+  isHandlingAuthSessionExpired = true
+
+  try {
+    const { logout } = await import('./auth')
+    await logout()
+  } catch {
+    const { clearAuthSession } = await import('./auth')
+    clearAuthSession()
+  }
+
+  setTokenExpiredLogoutFlash()
+  window.location.replace('/')
+}
 
 // 쿼리 파라미터 빌드
 function buildQuery(params: Record<string, unknown>): string {
@@ -29,6 +48,7 @@ async function request<T>(path: string, init: RequestInit & RequestOptions = {})
   }
 
   // 인증 헤더 추가
+  const sentAuthToken = Boolean(auth && getAccessToken())
   if (auth) {
     const token = getAccessToken()
     if (token) {
@@ -45,11 +65,18 @@ async function request<T>(path: string, init: RequestInit & RequestOptions = {})
   if (json.success) return json.data
 
   const err = json.error
-  throw new ApiError(
+  const apiError = new ApiError(
     err?.code ?? 'UNKNOWN',
     err?.message ?? '알 수 없는 오류가 발생했습니다.',
     res.status,
   )
+
+  // auth: true 요청에서 만료된 access token 응답 시 로그아웃
+  if (sentAuthToken && isExpiredAuthTokenError(apiError)) {
+    void handleAuthSessionExpired()
+  }
+
+  throw apiError
 }
 
 // HTTP 요청 메소드 모음

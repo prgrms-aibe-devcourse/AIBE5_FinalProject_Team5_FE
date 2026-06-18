@@ -59,8 +59,8 @@ function BookmarkButton({ isBookmarked, onToggleBookmark }: { isBookmarked: bool
       }}
       className={`flex h-8 w-8 items-center justify-center rounded-full border bg-white shadow-sm transition-colors ${
         isBookmarked
-          ? 'border-waterlineBlue text-waterlineBlue'
-          : 'border-mistSkyBlue text-softAquaBlue hover:border-waterlineBlue hover:text-waterlineBlue'
+          ? 'border-bookmarkRose bg-bookmarkRose/10 text-bookmarkRose'
+          : 'border-mistSkyBlue text-softAquaBlue hover:border-bookmarkRose/50 hover:text-bookmarkRose'
       }`}
     >
       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} aria-hidden="true">

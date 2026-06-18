@@ -8,8 +8,8 @@ import CourseResultsToolbar from './components/CourseResultsToolbar.tsx'
 import CourseCard from './components/CourseCard.tsx'
 import CourseComparisonSidebar from './components/CourseComparisonSidebar.tsx'
 import { COURSE_FILTERS } from './data/mockCourses.ts'
-import type { Course, CourseListParams, CourseSortKey } from '../../services/course.ts'
-import { getCourses } from '../../services/course.ts'
+import type { Course, CourseSortKey } from '../../services/course.ts'
+import { getCourses, toCourseListParams } from '../../services/course.ts'
 import {
   loadCompareCourses,
   saveCompareCourses,
@@ -48,12 +48,7 @@ export default function CourseSearchPage() {
   }, [selectedCourses])
 
   useEffect(() => {
-    const params: CourseListParams = {
-      keyword: searchKeyword.trim() || undefined,
-      trngAreaCd: filterValues.region !== 'all' ? filterValues.region : undefined,
-      page: currentPage - 1, // FE 1-based → BE 0-based
-      size: 9,
-    }
+    const params = toCourseListParams(filterValues, searchKeyword, currentPage)
 
     setIsLoading(true)
     setFetchError(null)
@@ -77,6 +72,7 @@ export default function CourseSearchPage() {
 
   const handleFilterChange = (filterId: string, value: string) => {
     setFilterValues((prev) => ({ ...prev, [filterId]: value }))
+    setSearchKeyword(keyword)
     setCurrentPage(1)
   }
 

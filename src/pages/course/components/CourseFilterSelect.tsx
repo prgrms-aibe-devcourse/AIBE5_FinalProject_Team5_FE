@@ -53,7 +53,7 @@ export default function CourseFilterSelect({ filter, value, onChange }: CourseFi
           role="listbox"
           aria-label={`${filter.label} 옵션`}
           className={`absolute left-0 right-0 top-[calc(100%+0.375rem)] z-50 overflow-x-hidden rounded-2xl border border-mistSkyBlue/80 bg-white py-1.5 shadow-[0_8px_28px_rgba(52,74,100,0.12)] ${
-            filter.expandList ? '' : 'max-h-60 overflow-y-auto'
+            filter.expandList ? '' : `${filter.maxListHeightClass ?? 'max-h-60'} overflow-y-auto overscroll-contain`
           }`}
         >
           {filter.options.map((option) => {
