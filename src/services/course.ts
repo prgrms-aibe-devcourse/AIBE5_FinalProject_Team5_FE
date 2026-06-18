@@ -344,7 +344,7 @@ function formatRating(rating: number | null | undefined): string {
 
 export function toCourseCardVM(item: CourseListItem): Course {
   return {
-    id: String(item.id),
+    id: String(item.courseId ?? item.id),
     title: item.title,
     company: item.institutionName,
     location: formatAreaCode(item.trngAreaCd),

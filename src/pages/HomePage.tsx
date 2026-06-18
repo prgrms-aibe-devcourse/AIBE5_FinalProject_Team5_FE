@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
+import Toast from '../components/common/Toast'
 import CourseSearchSection from './home/components/CourseSearchSection'
 import PopularCoursesSection from './home/components/PopularCoursesSection'
 import ReviewsSection from './home/components/ReviewsSection'
+import { consumeAuthLogoutFlashMessage } from '../services/authFlash'
 import { useSmoothSectionScroll } from './home/useSmoothSectionScroll'
 import beforeHeroVideoMp4 from '../assets/b4main1.mp4'
 import heroVideoMp4 from '../assets/main main final.mp4'
@@ -17,6 +19,7 @@ const BEFORE_HERO_EXIT_TIME = 96 / 24
 const LOOP_ENTRY_TIME = 0
 
 export default function HomePage() {
+  const [authLogoutToast, setAuthLogoutToast] = useState<string | null>(null)
   const [shouldPlayEntrySequence] = useState(() => {
     try {
       const navigationEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
@@ -44,6 +47,11 @@ export default function HomePage() {
 
   const handleIntroComplete = useCallback(() => {
     setShowHeroIntro(false)
+  }, [])
+
+  useEffect(() => {
+    const message = consumeAuthLogoutFlashMessage()
+    if (message) setAuthLogoutToast(message)
   }, [])
 
   const startLoopHeroVideo = useCallback(() => {
@@ -186,6 +194,13 @@ export default function HomePage() {
 
   return (
     <div className={`home-page min-h-screen flex flex-col ${showHeroIntro ? 'home-page--intro-active' : ''}`}>
+      {authLogoutToast ? (
+        <Toast
+          message={authLogoutToast}
+          variant="info"
+          onClose={() => setAuthLogoutToast(null)}
+        />
+      ) : null}
       {showHeroIntro && <HeroWaveIntro onComplete={handleIntroComplete} />}
 
       <Header />

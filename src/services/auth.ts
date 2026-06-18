@@ -94,7 +94,7 @@ export async function logout(): Promise<void> {
   }
 }
 
-// 로그아웃 시 토큰 + localStorage 프로필 전부 삭제 
+// 로그아웃 시 토큰 + localStorage 프로필 전부 삭제
 export function clearAuthSession(): void {
   clearTokens()
   clearStoredUser()
