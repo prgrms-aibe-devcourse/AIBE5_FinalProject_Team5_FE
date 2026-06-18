@@ -8,12 +8,9 @@ import {
   type BookmarkSort,
 } from '../../services/bookmark'
 import { useBookmarkSessions } from '../../hooks/useBookmarkSessions'
+import { useCompareCourses } from '../../hooks/useCompareCourses'
 import {
-  loadCompareCourses,
   MAX_COMPARE_COURSES,
-  saveCompareCourses,
-  toCompareCourseItemFromBookmark,
-  type CompareCourseItem,
 } from '../../services/courseCompare'
 import CourseComparisonSidebar from '../course/components/CourseComparisonSidebar'
 import { COURSE_SORT_MODES, type CourseSortMode } from './data/courses'
@@ -24,7 +21,7 @@ import BookmarkCourseRowCard from './components/BookmarkCourseRowCard'
 const PAGE_SIZE = 10
 
 function toBookmarkSort(sortMode: CourseSortMode): BookmarkSort {
-  if (sortMode === '평점순') return 'rating'
+  if (sortMode === '만족도순') return 'rating'
   return 'latest'
 }
 
@@ -32,20 +29,22 @@ function toBookmarkSort(sortMode: CourseSortMode): BookmarkSort {
 export default function BookmarksPage() {
   const navigate = useNavigate()
   const { toggleBookmark } = useBookmarkSessions()
+  const {
+    selectedCourses,
+    selectedIds,
+    canAddMore,
+    toggleCompareBookmark,
+    removeFromCompare,
+  } = useCompareCourses()
 
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortMode, setSortMode] = useState<CourseSortMode>('정렬')
+  const [sortMode, setSortMode] = useState<CourseSortMode>('만족도순')
   const [bookmarks, setBookmarks] = useState<BookmarkCourseVM[]>([])
   const [totalElements, setTotalElements] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
-  const [selectedCourses, setSelectedCourses] = useState<CompareCourseItem[]>(() => loadCompareCourses())
-
-  useEffect(() => {
-    saveCompareCourses(selectedCourses)
-  }, [selectedCourses])
 
   const requestParams = useMemo(
     () => ({
@@ -75,25 +74,9 @@ export default function BookmarksPage() {
       .finally(() => setIsLoading(false))
   }, [requestParams])
 
-  const selectedIds = useMemo(
-    () => new Set(selectedCourses.map((course) => course.id)),
-    [selectedCourses],
-  )
-
   const handleSortChange = (nextSort: CourseSortMode) => {
     setSortMode(nextSort)
     setCurrentPage(1)
-  }
-
-  const handleToggleCompare = (course: BookmarkCourseVM) => {
-    const courseId = String(course.id)
-
-    setSelectedCourses((prev) => {
-      const exists = prev.some((item) => item.id === courseId)
-      if (exists) return prev.filter((item) => item.id !== courseId)
-      if (prev.length >= MAX_COMPARE_COURSES) return prev
-      return [...prev, toCompareCourseItemFromBookmark(course)]
-    })
   }
 
   const handleRemoveBookmark = async (courseSessionId: number) => {
@@ -108,10 +91,6 @@ export default function BookmarksPage() {
     if (bookmarks.length === 1 && currentPage > 1) {
       setCurrentPage((prev) => prev - 1)
     }
-  }
-
-  const handleRemoveFromCompare = (courseId: string) => {
-    setSelectedCourses((prev) => prev.filter((item) => item.id !== courseId))
   }
 
   const handleCompare = () => {
@@ -183,9 +162,9 @@ export default function BookmarksPage() {
                     <BookmarkCourseRowCard
                       course={course}
                       isInCompare={selectedIds.has(String(course.id))}
-                      canAddToCompare={selectedCourses.length < MAX_COMPARE_COURSES}
+                      canAddToCompare={canAddMore}
                       isBookmarked
-                      onToggleCompare={() => handleToggleCompare(course)}
+                      onToggleCompare={() => toggleCompareBookmark(course)}
                       onToggleBookmark={() => void handleRemoveBookmark(course.courseSessionId)}
                       onOpenDetail={() =>
                         navigate(`/courses/${course.id}?session=${course.courseSessionId}`)
@@ -208,7 +187,7 @@ export default function BookmarksPage() {
         <CourseComparisonSidebar
           selectedCourses={selectedCourses}
           maxCount={MAX_COMPARE_COURSES}
-          onRemove={handleRemoveFromCompare}
+          onRemove={removeFromCompare}
           onCompare={handleCompare}
         />
       </div>

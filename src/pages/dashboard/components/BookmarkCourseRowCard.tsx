@@ -154,7 +154,7 @@ export default function BookmarkCourseRowCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <CourseTitleBlock course={courseForTitle} />
+          <CourseTitleBlock course={courseForTitle} scoreVariant="satisfaction" />
 
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 border-t border-mistSkyBlue/25 pt-3 sm:gap-x-5">
             <CourseMetaInline icon={<LocationIcon />} nowrap className="text-xs sm:text-sm">

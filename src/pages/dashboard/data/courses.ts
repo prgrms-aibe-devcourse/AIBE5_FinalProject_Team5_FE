@@ -163,5 +163,5 @@ export const recentCourses: RecentCourse[] = [
   },
 ]
 
-export const COURSE_SORT_MODES = ['정렬', '평점순', '최신순'] as const
+export const COURSE_SORT_MODES = ['만족도순', '임박순'] as const
 export type CourseSortMode = (typeof COURSE_SORT_MODES)[number]

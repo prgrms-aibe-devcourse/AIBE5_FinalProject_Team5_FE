@@ -4,12 +4,15 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { BookmarkProvider } from './contexts/BookmarkContext.tsx'
+import { CompareCoursesProvider } from './contexts/CompareCoursesContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <BookmarkProvider>
-        <App />
+        <CompareCoursesProvider>
+          <App />
+        </CompareCoursesProvider>
       </BookmarkProvider>
     </BrowserRouter>
   </StrictMode>,

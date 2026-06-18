@@ -24,7 +24,7 @@ export interface BookmarkCourseSession {
 export interface BookmarkCourseInfo {
   id: number
   title: string
-  stdgScor: number
+  stdgScor: number | null
 }
 
 export interface BookmarkInstitution {
@@ -88,6 +88,11 @@ function formatRegion(address: string | null): string {
   return match[1].replace(/(특별시|광역시|특별자치시|특별자치도)$/, '')
 }
 
+function formatSatisfactionScore(score: number | null | undefined): string {
+  if (score === null || score === undefined || score === 0) return '-'
+  return `${score}%`
+}
+
 export function toBookmarkCourseVM(item: BookmarkListItem): BookmarkCourseVM {
   return {
     id: item.course.id,
@@ -98,7 +103,7 @@ export function toBookmarkCourseVM(item: BookmarkListItem): BookmarkCourseVM {
     region: formatRegion(item.institution.address),
     subsidy: formatCoursePrice(item.courseSession.selfPaymentAmount),
     period: `${item.startDate} ~ ${item.endDate}`,
-    rating: item.course.stdgScor != null ? String(item.course.stdgScor) : '-',
+    rating: formatSatisfactionScore(item.course.stdgScor),
     enrollment: formatEnrollment(item.courseSession),
     logoUrl: item.institution.profileImageUrl ?? undefined,
   }
