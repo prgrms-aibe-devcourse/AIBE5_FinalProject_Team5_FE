@@ -1,5 +1,6 @@
 import type { CourseDetail } from '../../../services/course.ts'
 import CourseRecruitmentBar from './CourseRecruitmentBar.tsx'
+import CourseThumbnail from './CourseThumbnail.tsx'
 
 interface CourseDetailHeaderProps {
   course: CourseDetail
@@ -31,10 +32,12 @@ export default function CourseDetailHeader({
       <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-8">
         {/* 과정 이미지 */}
         <div className="w-full shrink-0 lg:w-80 xl:w-96">
-          <div className="h-36 w-full overflow-hidden rounded-xl border border-mistSkyBlue/50 bg-foamWhite sm:h-44 md:h-52 lg:h-full lg:min-h-52">
-            {course.logoUrl ? ( // 과정 이미지가 있으면 표시 // 없으면 null
-              <img src={course.logoUrl} alt={`${course.title} 대표 이미지`} className="h-full w-full object-cover" />
-            ) : null}
+          <div className="h-36 w-full overflow-hidden rounded-xl border border-mistSkyBlue/50 sm:h-44 md:h-52 lg:h-full lg:min-h-52">
+            <CourseThumbnail
+              imageUrl={course.logoUrl}
+              alt={`${course.title} 대표 이미지`}
+              className="aspect-auto h-full w-full"
+            />
           </div>
         </div>
 

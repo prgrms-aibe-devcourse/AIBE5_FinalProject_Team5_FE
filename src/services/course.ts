@@ -46,7 +46,6 @@ export interface CourseRecruitment {
 export interface CourseContact {
   phone: string
   email: string
-  homepage: string
 }
 
 /** 과정 상세 뷰모델 */
@@ -58,7 +57,8 @@ export interface CourseDetail extends Course {
   otherInfo: string
   institutionInfo: string
   contact: CourseContact
-  websiteUrl: string
+  titleLink: string | null
+  homepageUrl: string | null
 }
 
 // ──────────────────────────────────────────────
@@ -412,9 +412,9 @@ export function toCourseDetailVM(detail: BECourseDetail, sessions: CourseSession
     contact: {
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',
-      homepage: inst?.homepageUrl ?? '-',
     },
-    websiteUrl: detail.titleLink ?? inst?.homepageUrl ?? '#',
+    titleLink: detail.titleLink ?? latestSession?.titleLink ?? null,
+    homepageUrl: inst?.homepageUrl ?? null,
   }
 }
 
