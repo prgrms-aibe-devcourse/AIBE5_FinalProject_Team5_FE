@@ -1,5 +1,14 @@
 import { useState, type FormEvent } from 'react'
-import { PASSWORD_MISMATCH_MESSAGE, passwordsMatch } from '../../../../utils/validation'
+import AuthInputWithButton from '../../../auth/components/AuthInputWithButton'
+import { ApiError } from '../../../../services/ApiError'
+import {
+  PASSWORD_CONFIRM_REQUIRED_MESSAGE,
+  PASSWORD_MATCH_MESSAGE,
+  PASSWORD_MISMATCH_MESSAGE,
+  getPasswordFormatError,
+  getPasswordValidationError,
+  passwordsMatch,
+} from '../../../../utils/validation'
 import DashboardActionButton from '../DashboardActionButton'
 import { scheduleInputClassName } from '../ScheduleEventForm'
 import DashboardModal from './DashboardModal'
@@ -11,7 +20,7 @@ export type PasswordChangePayload = {
 
 type PasswordChangeModalProps = {
   onClose: () => void
-  onSubmit: (payload: PasswordChangePayload) => void
+  onSubmit: (payload: PasswordChangePayload) => void | Promise<void>
 }
 
 type PasswordFieldProps = {
@@ -20,9 +29,10 @@ type PasswordFieldProps = {
   onChange: (value: string) => void
   placeholder: string
   autoComplete: string
+  error?: string
 }
 
-function PasswordField({ label, value, onChange, placeholder, autoComplete }: PasswordFieldProps) {
+function PasswordField({ label, value, onChange, placeholder, autoComplete, error }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false)
 
   return (
@@ -33,7 +43,7 @@ function PasswordField({ label, value, onChange, placeholder, autoComplete }: Pa
           type={visible ? 'text' : 'password'}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className={`${scheduleInputClassName} pr-11`}
+          className={`${scheduleInputClassName} pr-11 ${error ? '!border-red-500 focus:!border-red-500 focus:!ring-red-500/20' : ''}`}
           placeholder={placeholder}
           autoComplete={autoComplete}
         />
@@ -68,6 +78,7 @@ function PasswordField({ label, value, onChange, placeholder, autoComplete }: Pa
           </svg>
         </button>
       </div>
+      {error ? <p className="mt-1.5 font-pretendard text-xs font-medium text-red-600">{error}</p> : null}
     </label>
   )
 }
@@ -76,10 +87,47 @@ export default function PasswordChangeModal({ onClose, onSubmit }: PasswordChang
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordConfirmError, setPasswordConfirmError] = useState<string | null>(null)
+  const [newPasswordError, setNewPasswordError] = useState<string | null>(null)
+  const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false)
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const resetPasswordConfirmState = () => {
+    setPasswordConfirmError(null)
+    setIsPasswordConfirmed(false)
+  }
+
+  const handlePasswordConfirm = () => {
+    const passwordValidationError = getPasswordValidationError(newPassword)
+    if (passwordValidationError) {
+      setNewPasswordError(passwordValidationError)
+      setPasswordConfirmError(null)
+      setIsPasswordConfirmed(false)
+      return
+    }
+
+    if (!confirmPassword.trim()) {
+      setPasswordConfirmError('비밀번호 확인을 입력해 주세요.')
+      setIsPasswordConfirmed(false)
+      return
+    }
+
+    if (passwordsMatch(newPassword, confirmPassword)) {
+      setNewPasswordError(null)
+      setPasswordConfirmError(null)
+      setIsPasswordConfirmed(true)
+      return
+    }
+
+    setPasswordConfirmError(PASSWORD_MISMATCH_MESSAGE)
+    setIsPasswordConfirmed(false)
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (isSubmitting) return
 
     if (!currentPassword.trim()) {
       setError('현재 비밀번호를 입력해주세요.')
@@ -91,13 +139,22 @@ export default function PasswordChangeModal({ onClose, onSubmit }: PasswordChang
       return
     }
 
+    const passwordValidationError = getPasswordValidationError(newPassword)
+    if (passwordValidationError) {
+      setNewPasswordError(passwordValidationError)
+      return
+    }
+
     if (!confirmPassword.trim()) {
       setError('새 비밀번호 확인을 입력해주세요.')
       return
     }
 
-    if (!passwordsMatch(newPassword, confirmPassword)) {
-      setError(PASSWORD_MISMATCH_MESSAGE)
+    if (!isPasswordConfirmed || !passwordsMatch(newPassword, confirmPassword)) {
+      setPasswordConfirmError(
+        isPasswordConfirmed ? PASSWORD_MISMATCH_MESSAGE : PASSWORD_CONFIRM_REQUIRED_MESSAGE,
+      )
+      setIsPasswordConfirmed(false)
       return
     }
 
@@ -106,10 +163,21 @@ export default function PasswordChangeModal({ onClose, onSubmit }: PasswordChang
       return
     }
 
-    onSubmit({
-      currentPassword: currentPassword.trim(),
-      newPassword: newPassword.trim(),
-    })
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      await onSubmit({
+        currentPassword: currentPassword.trim(),
+        newPassword: newPassword.trim(),
+      })
+    } catch (err: unknown) {
+      setError(
+        err instanceof ApiError ? err.message : '비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -120,8 +188,13 @@ export default function PasswordChangeModal({ onClose, onSubmit }: PasswordChang
       ariaLabelledBy="password-change-modal-title"
       footer={
         <div className="flex justify-end gap-3">
-          <DashboardActionButton label="취소" variant="secondary" onClick={onClose} />
-          <DashboardActionButton label="변경" type="submit" form="password-change-form" />
+          <DashboardActionButton label="취소" variant="secondary" onClick={onClose} disabled={isSubmitting} />
+          <DashboardActionButton
+            label={isSubmitting ? '변경 중...' : '변경'}
+            type="submit"
+            form="password-change-form"
+            disabled={isSubmitting}
+          />
         </div>
       }
     >
@@ -142,21 +215,31 @@ export default function PasswordChangeModal({ onClose, onSubmit }: PasswordChang
           value={newPassword}
           onChange={(value) => {
             setNewPassword(value)
+            resetPasswordConfirmState()
+            setNewPasswordError(getPasswordFormatError(value))
             setError('')
           }}
-          placeholder="새 비밀번호를 입력해주세요"
+          placeholder="8자 이상의 새 비밀번호를 입력해주세요"
           autoComplete="new-password"
+          error={newPasswordError ?? undefined}
         />
 
-        <PasswordField
+        <AuthInputWithButton
           label="새 비밀번호 확인"
+          type="password"
           value={confirmPassword}
-          onChange={(value) => {
-            setConfirmPassword(value)
+          onChange={(event) => {
+            setConfirmPassword(event.target.value)
+            resetPasswordConfirmState()
             setError('')
           }}
           placeholder="새 비밀번호를 다시 입력해주세요"
           autoComplete="new-password"
+          buttonLabel="확인"
+          onButtonClick={handlePasswordConfirm}
+          buttonDisabled={!confirmPassword.trim() || !newPassword.trim()}
+          error={passwordConfirmError ?? undefined}
+          success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
         />
 
         {error ? <p className="font-pretendard text-xs font-medium text-red-600">{error}</p> : null}

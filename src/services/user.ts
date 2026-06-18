@@ -35,3 +35,20 @@ export async function updateMyProfile(params: UpdateMyProfileParams): Promise<Us
 
   return http.patch<UserProfile>('/api/users/me', formData, { auth: true })
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface ChangePasswordResult {
+  completed: boolean
+}
+
+export async function changePassword(body: ChangePasswordRequest): Promise<ChangePasswordResult> {
+  return http.patch<ChangePasswordResult>('/api/members/me/password', body, { auth: true })
+}
+
+export async function deleteMyAccount(): Promise<void> {
+  await http.delete<void>('/api/members/me', { auth: true })
+}

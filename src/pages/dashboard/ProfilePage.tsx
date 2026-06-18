@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Toast from '../../components/common/Toast'
 import { ApiError } from '../../services/ApiError'
-import { updateStoredUserProfile } from '../../services/auth'
-import { getMyProfile, updateMyProfile, type UserProfile } from '../../services/user'
+import { clearAuthSession, updateStoredUserProfile } from '../../services/auth'
+import { changePassword, deleteMyAccount, getMyProfile, updateMyProfile, type UserProfile } from '../../services/user'
 import {
   myCertificationRequests,
   type CertificationDocumentType,
@@ -165,6 +166,7 @@ function toDocumentId(requests: UserCertificationRequest[]) {
 
 // 내 정보 페이지 (프로필·과정 인증)
 export default function ProfilePage() {
+  const navigate = useNavigate()
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   // --- 모달·토스트 ---
@@ -190,6 +192,7 @@ export default function ProfilePage() {
   const [imageError, setImageError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isWithdrawing, setIsWithdrawing] = useState(false)
   const [toast, setToast] = useState('')
 
   const isLocalAccount = profile?.provider === 'LOCAL'
@@ -314,9 +317,11 @@ export default function ProfilePage() {
     }
   }
 
-  const handlePasswordChange = (_payload: PasswordChangePayload) => {
+  const handlePasswordChange = async (payload: PasswordChangePayload) => {
+    await changePassword(payload)
     setPasswordOpen(false)
-    showToast('비밀번호를 변경했어요.')
+    clearAuthSession()
+    navigate('/login', { replace: true })
   }
 
   const openPasswordChange = () => {
@@ -329,9 +334,21 @@ export default function ProfilePage() {
     setWithdrawOpen(true)
   }
 
-  const handleWithdraw = () => {
-    setWithdrawOpen(false)
-    showToast('회원 탈퇴는 준비 중입니다.')
+  const handleWithdraw = async () => {
+    setIsWithdrawing(true)
+
+    try {
+      await deleteMyAccount()
+      setWithdrawOpen(false)
+      clearAuthSession()
+      navigate('/', { replace: true })
+    } catch (err: unknown) {
+      showToast(
+        err instanceof ApiError ? err.message : '회원 탈퇴에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+      )
+    } finally {
+      setIsWithdrawing(false)
+    }
   }
 
   const handleCertificationSubmit = ({ courseName, files }: CourseCertificationSubmitPayload) => {
@@ -498,7 +515,11 @@ export default function ProfilePage() {
       ) : null}
 
       {withdrawOpen ? (
-        <AccountWithdrawModal onClose={() => setWithdrawOpen(false)} onConfirm={handleWithdraw} />
+        <AccountWithdrawModal
+          onClose={() => setWithdrawOpen(false)}
+          onConfirm={() => void handleWithdraw()}
+          isWithdrawing={isWithdrawing}
+        />
       ) : null}
 
       {certificationOpen ? (

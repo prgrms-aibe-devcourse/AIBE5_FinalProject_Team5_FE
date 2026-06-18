@@ -19,6 +19,9 @@ import {
   PASSWORD_CONFIRM_REQUIRED_MESSAGE,
   PASSWORD_MATCH_MESSAGE,
   PASSWORD_MISMATCH_MESSAGE,
+  getPasswordFormatError,
+  getPasswordValidationError,
+  isValidPassword,
   passwordsMatch,
 } from '../../utils/validation.ts'
 import { checkEmail, signup } from '../../services/auth.ts'
@@ -35,6 +38,7 @@ export default function SignupPage() {
   const [emailError, setEmailError] = useState<string | null>(null)
   const [nicknameError, setNicknameError] = useState<string | null>(null)
   const [passwordConfirmError, setPasswordConfirmError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [isEmailChecking, setIsEmailChecking] = useState(false)
   const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false)
@@ -90,6 +94,14 @@ export default function SignupPage() {
 
   // 비밀번호 확인
   const handlePasswordConfirm = () => {
+    const passwordValidationError = getPasswordValidationError(password)
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError)
+      setPasswordConfirmError(null)
+      setIsPasswordConfirmed(false)
+      return
+    }
+
     if (!confirmPassword.trim()) {
       setPasswordConfirmError('비밀번호 확인을 입력해 주세요.')
       setIsPasswordConfirmed(false)
@@ -97,6 +109,7 @@ export default function SignupPage() {
     }
 
     if (passwordsMatch(password, confirmPassword)) {
+      setPasswordError(null)
       setPasswordConfirmError(null)
       setIsPasswordConfirmed(true)
       return
@@ -126,6 +139,12 @@ export default function SignupPage() {
       return
     }
 
+    const passwordValidationError = getPasswordValidationError(password)
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError)
+      return
+    }
+
     if (!isPasswordConfirmed || !passwordsMatch(password, confirmPassword)) {
       setPasswordConfirmError(
         isPasswordConfirmed ? PASSWORD_MISMATCH_MESSAGE : PASSWORD_CONFIRM_REQUIRED_MESSAGE,
@@ -136,6 +155,7 @@ export default function SignupPage() {
 
     setEmailError(null)
     setNicknameError(null)
+    setPasswordError(null)
     setPasswordConfirmError(null)
     setSignupError(null)
     setIsSubmitting(true)
@@ -237,9 +257,12 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => {
-                  setPassword(e.target.value)
+                  const value = e.target.value
+                  setPassword(value)
                   resetPasswordConfirmState()
+                  setPasswordError(getPasswordFormatError(value))
                 }}
+                error={passwordError ?? undefined}
               />
 
               <AuthInputWithButton

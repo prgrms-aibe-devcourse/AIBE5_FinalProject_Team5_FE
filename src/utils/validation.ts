@@ -18,6 +18,37 @@ export const PASSWORD_MISMATCH_MESSAGE = '비밀번호가 일치하지 않습니
 export const PASSWORD_MATCH_MESSAGE = '비밀번호가 일치합니다.'
 export const PASSWORD_CONFIRM_REQUIRED_MESSAGE = '비밀번호 확인 버튼을 눌러 주세요.'
 
+export const PASSWORD_MIN_LENGTH = 8
+export const PASSWORD_MAX_LENGTH = 64
+export const PASSWORD_MIN_LENGTH_MESSAGE = '비밀번호는 8자 이상이어야 합니다.'
+export const PASSWORD_MAX_LENGTH_MESSAGE = `비밀번호는 ${PASSWORD_MAX_LENGTH}자 이하여야 합니다.`
+export const PASSWORD_REQUIRED_MESSAGE = '비밀번호를 입력해 주세요.'
+
+/** @deprecated PASSWORD_MIN_LENGTH_MESSAGE 사용 */
+export const PASSWORD_LENGTH_MESSAGE = PASSWORD_MIN_LENGTH_MESSAGE
+
+/** 입력 중 표시용 — 빈 값이면 null */
+export function getPasswordFormatError(password: string): string | null {
+  if (!password) return null
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    return PASSWORD_MIN_LENGTH_MESSAGE
+  }
+  if (password.length > PASSWORD_MAX_LENGTH) {
+    return PASSWORD_MAX_LENGTH_MESSAGE
+  }
+  return null
+}
+
+/** 제출·확인 시 검사용 */
+export function getPasswordValidationError(password: string): string | null {
+  if (!password.trim()) return PASSWORD_REQUIRED_MESSAGE
+  return getPasswordFormatError(password)
+}
+
+export function isValidPassword(password: string): boolean {
+  return getPasswordValidationError(password) === null
+}
+
 export const NICKNAME_MAX_LENGTH = 8
 export const NICKNAME_LENGTH_MESSAGE = '닉네임은 8자 이하로 입력해 주세요.'
 
@@ -51,6 +82,7 @@ export function isSignupFormValid(
       !isNicknameTooLong(nickname) &&
       isEmailVerified &&
       isPasswordConfirmed &&
+      isValidPassword(password) &&
       passwordsMatch(password, confirmPassword),
   )
 }
