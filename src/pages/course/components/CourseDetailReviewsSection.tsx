@@ -10,8 +10,6 @@ import CourseVerifiedReviewStep3QualityModal from './modal/CourseVerifiedReviewS
 import CourseVerifiedReviewStep4ProjectModal from './modal/CourseVerifiedReviewStep4ProjectModal.tsx'
 import CourseVerifiedReviewStep5DetailModal from './modal/CourseVerifiedReviewStep5DetailModal.tsx'
 
-type ReviewSource = 'site' | 'goyo24'
-
 interface CourseDetailReviewsSectionProps {
   courseId: number
 }

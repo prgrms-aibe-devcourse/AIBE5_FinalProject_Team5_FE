@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo Installing frontend dependencies...
+      - npm ci
+
+  build:
+    commands:
+      - echo Building Vite frontend...
+      - npm run build
+
+  post_build:
+    commands:
+      - echo Deploying frontend to S3...
+      - aws s3 sync dist/ s3://$S3_BUCKET --delete
+      - |
+        if [ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]; then
+          echo Creating CloudFront invalidation...
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        else
+          echo CLOUDFRONT_DISTRIBUTION_ID is not set. Skipping invalidation.
+        fi
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: dist
