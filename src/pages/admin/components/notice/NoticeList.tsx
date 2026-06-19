@@ -1,4 +1,4 @@
-import type { Notice } from '../../AdminNoticesPage'
+import type { AdminNoticeResponse } from '../../../../services/notice'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 import { truncateText } from '../../../../utils/truncateText'
 import AdminListActionButton from '../AdminListActionButton'
@@ -24,7 +24,7 @@ const LIST_COLUMNS = [
 ]
 
 type NoticeListProps = {
-  notices: Notice[]
+  notices: AdminNoticeResponse[]
   isEmpty: boolean
   onView: (id: number) => void
 }
