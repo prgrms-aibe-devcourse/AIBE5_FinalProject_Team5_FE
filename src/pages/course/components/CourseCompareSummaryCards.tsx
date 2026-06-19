@@ -29,7 +29,11 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
                 </h2>
                 <p className="mt-2 text-xs text-secondary">{course.dateRange}</p>
                 <Link
-                  to={`/courses/${course.id}`}
+                  to={
+                    course.courseSessionId != null
+                      ? `/courses/${course.courseSessionId}`
+                      : `/courses/${course.id}`
+                  }
                   className="mt-2.5 text-xs font-semibold text-waterlineBlue underline underline-offset-2 hover:text-deepOceanNavy"
                 >
                   상세 보기

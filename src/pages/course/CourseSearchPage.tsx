@@ -131,11 +131,8 @@ export default function CourseSearchPage() {
                       onToggleCompare={toggleCompareCourse}
                       onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
                       onOpenDetail={(c) => {
-                        const path =
-                          c.courseSessionId != null
-                            ? `/courses/${c.id}?session=${c.courseSessionId}`
-                            : `/courses/${c.id}`
-                        navigate(path)
+                        if (c.courseSessionId == null) return
+                        navigate(`/courses/${c.courseSessionId}`)
                       }}
                     />
                   </div>

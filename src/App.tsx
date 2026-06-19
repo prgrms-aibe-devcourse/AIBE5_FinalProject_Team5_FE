@@ -48,7 +48,7 @@ function App() {
       {/* 과정 조회 */}
       <Route path="/courses" element={<CourseSearchPage />} />
       <Route path="/courses/compare" element={<CourseComparePage />} />
-      <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+      <Route path="/courses/:courseSessionId" element={<CourseDetailPage />} />
 
       {/* 대시보드 (마이페이지) */}
       <Route path="/dashboard" element={<DashboardPage />} />
