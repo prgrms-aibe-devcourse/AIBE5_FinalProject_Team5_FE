@@ -294,7 +294,7 @@ function VerifiedReviewDetailPanel({ detail }: { detail: CourseReviewVerifiedDet
           <DetailChip label="6개월 취업" value={detail.employmentStatusIn6Months} />
         ) : null}
         {detail.completionStatus === '중도 포기' ? (
-          <DetailChip label="포기 사유" value={formatDropoutReason(detail.dropoutMajorReason, detail.dropoutSubReason)} />
+          <DetailChip label="포기 사유" value={formatDropoutReason(detail.dropoutMajorReason ?? undefined, detail.dropoutSubReason ?? undefined)} />
         ) : null}
       </VerifiedDetailSectionRow>
       <VerifiedDetailSectionRow title="과정 난이도">

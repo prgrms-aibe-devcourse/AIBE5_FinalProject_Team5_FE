@@ -9,8 +9,8 @@ export const initialCertificationRequests: CertificationRequest[] = [
     status: 'PENDING',
     requestedAt: '2026-06-02',
     documents: [
-      { id: 1, name: '수료증명서.pdf', uploadedAt: '2026-06-02' },
-      { id: 2, name: '출석부_최종.pdf', uploadedAt: '2026-06-02' },
+      { id: 1, name: '수료증명서.pdf', type: 'TRAINING_HISTORY' as const, uploadedAt: '2026-06-02' },
+      { id: 2, name: '출석부_최종.pdf', type: 'ONLINE_APPLICATION' as const, uploadedAt: '2026-06-02' },
     ],
   },
   {
@@ -19,7 +19,7 @@ export const initialCertificationRequests: CertificationRequest[] = [
     courseName: 'Java 백엔드 개발자 양성과정',
     status: 'PENDING',
     requestedAt: '2026-06-01',
-    documents: [{ id: 1, name: '과정수료증.pdf', uploadedAt: '2026-06-01' }],
+    documents: [{ id: 1, name: '과정수료증.pdf', type: 'TRAINING_HISTORY' as const, uploadedAt: '2026-06-01' }],
   },
   {
     id: 3,
@@ -28,8 +28,8 @@ export const initialCertificationRequests: CertificationRequest[] = [
     status: 'APPROVED',
     requestedAt: '2026-05-28',
     documents: [
-      { id: 1, name: '프로젝트결과보고서.pdf', uploadedAt: '2026-05-28' },
-      { id: 2, name: '수료증.pdf', uploadedAt: '2026-05-28' },
+      { id: 1, name: '프로젝트결과보고서.pdf', type: 'TRAINING_HISTORY' as const, uploadedAt: '2026-05-28' },
+      { id: 2, name: '수료증.pdf', type: 'ONLINE_APPLICATION' as const, uploadedAt: '2026-05-28' },
     ],
   },
   {
@@ -39,7 +39,7 @@ export const initialCertificationRequests: CertificationRequest[] = [
     status: 'REJECTED',
     requestedAt: '2026-05-25',
     rejectReason: '제출하신 수료증의 과정명이 신청 과정과 일치하지 않습니다.',
-    documents: [{ id: 1, name: '증빙서류_제출본.pdf', uploadedAt: '2026-05-25' }],
+    documents: [{ id: 1, name: '증빙서류_제출본.pdf', type: 'TRAINING_HISTORY' as const, uploadedAt: '2026-05-25' }],
   },
   {
     id: 5,
@@ -48,9 +48,9 @@ export const initialCertificationRequests: CertificationRequest[] = [
     status: 'PENDING',
     requestedAt: '2026-05-24',
     documents: [
-      { id: 1, name: 'AWS자격증사본.pdf', uploadedAt: '2026-05-24' },
-      { id: 2, name: '수료확인서.pdf', uploadedAt: '2026-05-24' },
-      { id: 3, name: '출석증빙.pdf', uploadedAt: '2026-05-24' },
+      { id: 1, name: 'AWS자격증사본.pdf', type: 'TRAINING_HISTORY' as const, uploadedAt: '2026-05-24' },
+      { id: 2, name: '수료확인서.pdf', type: 'ONLINE_APPLICATION' as const, uploadedAt: '2026-05-24' },
+      { id: 3, name: '출석증빙.pdf', type: 'TRAINING_HISTORY' as const, uploadedAt: '2026-05-24' },
     ],
   },
 ]

@@ -5,7 +5,7 @@
 
 import type { CourseDetail } from '../../../services/course.ts'
 
-const DEFAULT_DETAIL: Omit<CourseDetail, 'id'> = {
+const DEFAULT_DETAIL: Omit<CourseDetail, 'id' | 'courseId'> = {
   title: 'K-Digital Training: 생성형 AI 활용 백엔드 개발',
   company: '(주) 그렙',
   location: '서울',

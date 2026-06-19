@@ -99,7 +99,7 @@ export default function CourseDetailPage() {
               {activeTab === 'reviews' ? (
                 <CourseDetailReviewsSection
                   courseId={course.courseId}
-                  courseSessionId={course.courseSessionId}
+                  courseSessionId={course.courseSessionId ?? 0}
                   onReviewSubmitted={() => setActiveTab('reviews')}
                 />
               ) : null}

@@ -21,7 +21,6 @@ import {
   PASSWORD_MISMATCH_MESSAGE,
   getPasswordFormatError,
   getPasswordValidationError,
-  isValidPassword,
   passwordsMatch,
 } from '../../utils/validation.ts'
 import { checkEmail, signup } from '../../services/auth.ts'
