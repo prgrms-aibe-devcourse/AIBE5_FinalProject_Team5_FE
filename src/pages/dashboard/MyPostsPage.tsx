@@ -4,6 +4,7 @@ import Pagination from '../../components/common/Pagination'
 import Tabs from '../../components/common/Tabs'
 import {
   MY_POST_TABS,
+  getCommentEditNavigationState,
   getUserActivityEditPath,
   getUserActivityPath,
   type MyPostTab,
@@ -18,6 +19,7 @@ import {
   getMyPageReviews,
   type MyPagePostType,
 } from '../../services/mypage'
+import { deletePostComment } from '../../services/comment'
 import { deletePost } from '../../services/post'
 
 const PAGE_SIZE = 10
@@ -103,6 +105,7 @@ export default function MyPostsPage() {
             title: it.titleOrContent,
             board: tabToBoardLabel(activeTab),
             createdAt: formatIsoToDateLabel(it.createdAt),
+            parentPostId: it.postId,
           })),
         )
         setTotalPages(Math.max(1, data.totalPages))
@@ -119,6 +122,8 @@ export default function MyPostsPage() {
             title: it.titleOrContent,
             board: tabToBoardLabel(activeTab),
             createdAt: formatIsoToDateLabel(it.createdAt),
+            courseId: it.courseId,
+            courseSessionId: it.courseSessionId,
           })),
         )
         setTotalPages(Math.max(1, data.totalPages))
@@ -176,7 +181,14 @@ export default function MyPostsPage() {
 
   // --- 이벤트 핸들러 ---
   const handleEdit = (item: UserActivityItem) => {
-    navigate(getUserActivityEditPath(item))
+    if (item.kind === 'comment') {
+      const path = getUserActivityEditPath(item)
+      if (!path) return
+      navigate(path, { state: getCommentEditNavigationState(item) })
+      return
+    }
+    const path = getUserActivityEditPath(item)
+    if (path) navigate(path)
   }
 
   const handleDeleteRequest = (item: UserActivityItem) => {
@@ -198,6 +210,19 @@ export default function MyPostsPage() {
       } finally {
         setIsDeleting(false)
       }
+    } else if (activeTab === 'COMMENT' && deleteTarget.kind === 'comment') {
+      try {
+        setIsDeleting(true)
+        await deletePostComment(deleteTarget.id)
+      } catch (err: unknown) {
+        setActionError(err instanceof Error ? err.message : '댓글 삭제 중 오류가 발생했습니다.')
+        return
+      } finally {
+        setIsDeleting(false)
+      }
+    } else {
+      setDeleteTarget(null)
+      return
     }
 
     setItems((prev) => prev.filter((item) => !(item.kind === deleteTarget.kind && item.id === deleteTarget.id)))
@@ -259,20 +284,23 @@ export default function MyPostsPage() {
       ) : (
         <>
           <ul className="flex flex-col gap-3">
-            {items.map((item) => (
+            {items.map((item) => {
+              const detailPath = getUserActivityPath(item)
+              return (
               <li key={`${item.kind}-${item.id}`}>
                 <MyPostRowCard
                   item={item}
                   onOpenDetail={
-                    activeTab === 'REVIEW'
-                      ? undefined
-                      : () => navigate(getUserActivityPath(item))
+                    detailPath
+                      ? () => navigate(detailPath, { state: { title: item.title } })
+                      : undefined
                   }
                   onEdit={activeTab === 'REVIEW' ? undefined : () => handleEdit(item)}
                   onDelete={() => handleDeleteRequest(item)}
                 />
               </li>
-            ))}
+              )
+            })}
           </ul>
 
           <Pagination

@@ -100,3 +100,21 @@ export async function createPostComment(
   })
   return toCommentVM(item)
 }
+
+export interface UpdatePostCommentRequest {
+  content: string
+}
+
+export async function updatePostComment(
+  commentId: number,
+  body: UpdatePostCommentRequest,
+): Promise<PostComment> {
+  const item = await http.patch<CreatePostCommentResponseDto>(`/api/comments/${commentId}`, body, {
+    auth: true,
+  })
+  return toCommentVM(item)
+}
+
+export async function deletePostComment(commentId: number): Promise<void> {
+  await http.delete<void>(`/api/comments/${commentId}`, { auth: true })
+}

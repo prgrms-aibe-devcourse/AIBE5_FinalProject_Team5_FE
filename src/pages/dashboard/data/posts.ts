@@ -38,22 +38,34 @@ export type UserActivityItem = {
   commentCount?: number
   parentTitle?: string
   parentPostId?: number
+  courseId?: number
+  courseSessionId?: number
 }
 
-export function getUserPostPath(post: Pick<UserPost, 'id' | 'board'>) {
-  return `/community/posts/${post.id}`
+export function getUserPostPath(postId: number) {
+  return `/community/posts/${postId}`
 }
 
-export function getUserActivityPath(item: UserActivityItem) {
-  if (item.kind === 'comment' && item.parentPostId != null) {
-    return getUserPostPath({ id: item.parentPostId, board: item.board })
+export function getUserActivityPath(item: UserActivityItem): string | null {
+  if (item.kind === 'comment') {
+    return item.parentPostId != null ? getUserPostPath(item.parentPostId) : null
   }
-  return getUserPostPath({ id: item.id, board: item.board })
+  if (item.board === '리뷰' && item.courseSessionId != null) {
+    return `/courses/${item.courseSessionId}`
+  }
+  return getUserPostPath(item.id)
 }
 
-export function getUserActivityEditPath(item: UserActivityItem) {
-  if (item.kind === 'comment') return getUserActivityPath(item)
+export function getUserActivityEditPath(item: UserActivityItem): string | null {
+  if (item.kind === 'comment') {
+    return item.parentPostId != null ? getUserPostPath(item.parentPostId) : null
+  }
   return `/community/posts/edit/${item.id}`
+}
+
+export function getCommentEditNavigationState(item: UserActivityItem) {
+  if (item.kind !== 'comment') return undefined
+  return { editCommentId: item.id }
 }
 
 function postToActivity(post: UserPost): UserActivityItem {
