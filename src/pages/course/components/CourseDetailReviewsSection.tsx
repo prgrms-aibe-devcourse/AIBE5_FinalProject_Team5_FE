@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CourseReviewListPanel from './CourseReviewListPanel.tsx'
 import CourseReviewStatsPanel from './CourseReviewStatsPanel.tsx'
+import CourseGoyoReviewSummaryPanel from './CourseGoyoReviewSummaryPanel.tsx'
 import CourseGeneralReviewModal from './modal/CourseGeneralReviewModal.tsx'
 import CourseReviewTypeSelectModal from './modal/CourseReviewTypeSelectModal.tsx'
 import CourseReviewSubmitSuccessModal from './modal/CourseReviewSubmitSuccessModal.tsx'
@@ -230,6 +231,7 @@ export default function CourseDetailReviewsSection({
   return (
     <section className="space-y-6 rounded-2xl">
       <CourseReviewStatsPanel courseId={courseId} refreshKey={listRefreshKey} />
+      <CourseGoyoReviewSummaryPanel courseId={courseId} refreshKey={listRefreshKey} />
       <CourseReviewListPanel
         courseId={courseId}
         refreshKey={listRefreshKey}

@@ -47,7 +47,7 @@ export default function CourseReviewStatsPanel({ courseId, refreshKey = 0 }: Cou
       <div className="mb-2 px-1">
         <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
           <span className="flex h-6 w-6 items-center justify-center text-waterlineBlue"><StatsIcon /></span>
-          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">후기 통계</h3>
+          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">인증 후기 통계</h3>
         </div>
       </div>
       <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
