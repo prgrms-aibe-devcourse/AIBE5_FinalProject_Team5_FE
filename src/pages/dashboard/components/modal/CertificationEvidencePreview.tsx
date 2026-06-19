@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError } from '../../../../services/ApiError'
-import { getVerificationEvidence, toVerificationEvidenceType } from '../../../../services/verification'
+import {
+  getVerificationEvidence,
+  toVerificationEvidenceType,
+  type VerificationEvidenceType,
+} from '../../../../services/verification'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 import { getCertificationDocumentLabel, type CertificationDocument } from '../../data/certifications'
 import { EvidencePreviewFallback } from './certificationEvidenceUi'
@@ -8,6 +12,10 @@ import { EvidencePreviewFallback } from './certificationEvidenceUi'
 type CertificationEvidencePreviewProps = {
   verificationId: number
   document: CertificationDocument
+  fetchEvidence?: (
+    verificationId: number,
+    evidenceType: VerificationEvidenceType,
+  ) => Promise<Blob>
 }
 
 function isPreviewableImage(blob: Blob, fileName: string) {
@@ -18,6 +26,7 @@ function isPreviewableImage(blob: Blob, fileName: string) {
 export default function CertificationEvidencePreview({
   verificationId,
   document,
+  fetchEvidence = getVerificationEvidence,
 }: CertificationEvidencePreviewProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -37,7 +46,7 @@ export default function CertificationEvidencePreview({
 
     const evidenceType = toVerificationEvidenceType(document.type)
 
-    getVerificationEvidence(verificationId, evidenceType)
+    fetchEvidence(verificationId, evidenceType)
       .then((blob) => {
         const url = URL.createObjectURL(blob)
         setPreviewUrl(url)
@@ -49,7 +58,7 @@ export default function CertificationEvidencePreview({
         )
       })
       .finally(() => setIsLoading(false))
-  }, [document.name, document.type, verificationId])
+  }, [document.name, document.type, fetchEvidence, verificationId])
 
   useEffect(() => {
     loadEvidence()

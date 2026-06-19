@@ -87,6 +87,132 @@ export function toUserCertificationRequest(item: VerificationListItem): UserCert
   }
 }
 
+export type AdminProofDocument = {
+  id: number
+  name: string
+  type: CertificationDocumentType
+  uploadedAt: string
+}
+
+export type AdminCertificationRequest = {
+  id: number
+  userName: string
+  courseName: string
+  status: VerificationStatus
+  requestedAt: string
+  documents: AdminProofDocument[]
+  rejectReason?: string
+}
+
+export type AdminCertificationDetail = AdminCertificationRequest & {
+  adminMemo?: string
+  processedByNickname?: string
+  processedAt?: string
+}
+
+function toAdminProofDocuments(item: VerificationListItem): AdminProofDocument[] {
+  return [
+    toCertificationDocument(
+      item.verificationId,
+      'TRAINING_HISTORY',
+      item.jobTrainingHistoryFile,
+      item.createdAt,
+      1,
+    ),
+    toCertificationDocument(
+      item.verificationId,
+      'ONLINE_APPLICATION',
+      item.onlineCourseApplicationFile,
+      item.createdAt,
+      2,
+    ),
+  ].filter((document): document is CertificationDocument => document !== null)
+}
+
+export interface AdminVerificationListParams {
+  status?: VerificationStatus
+  page?: number
+  size?: number
+}
+
+export function toAdminCertificationRequest(item: VerificationListItem): AdminCertificationRequest {
+  return {
+    id: item.verificationId,
+    userName: item.userNickname,
+    courseName: item.courseTitle,
+    status: item.status,
+    requestedAt: toDateOnly(item.createdAt),
+    documents: toAdminProofDocuments(item),
+    rejectReason: item.rejectReason ?? undefined,
+  }
+}
+
+export function toAdminCertificationDetail(item: VerificationListItem): AdminCertificationDetail {
+  return {
+    ...toAdminCertificationRequest(item),
+    adminMemo: item.adminMemo ?? undefined,
+    processedByNickname: item.processedByNickname ?? undefined,
+    processedAt: item.processedAt ?? undefined,
+  }
+}
+
+/** 관리자 인증 신청 목록 (GET /api/admin/verifications) */
+export async function getAdminVerifications(
+  params: AdminVerificationListParams = {},
+): Promise<PageResponse<AdminCertificationRequest>> {
+  const page = await http.get<PageResponse<VerificationListItem>>('/api/admin/verifications', {
+    query: params as Record<string, unknown>,
+    auth: true,
+  })
+
+  return {
+    ...page,
+    content: page.content.map(toAdminCertificationRequest),
+  }
+}
+
+/** 관리자 인증 신청 상세 (GET /api/admin/verifications/{verificationId}) */
+export async function getAdminVerificationDetail(
+  verificationId: number,
+): Promise<AdminCertificationDetail> {
+  const detail = await http.get<VerificationListItem>(`/api/admin/verifications/${verificationId}`, {
+    auth: true,
+  })
+
+  return toAdminCertificationDetail(detail)
+}
+
+/** 관리자 인증 신청 승인 (PATCH /api/admin/verifications/{verificationId}/approve) */
+export async function approveAdminVerification(
+  verificationId: number,
+  memo?: string,
+): Promise<AdminCertificationDetail> {
+  const trimmedMemo = memo?.trim()
+  const body = trimmedMemo ? { memo: trimmedMemo } : {}
+
+  const detail = await http.patch<VerificationListItem>(
+    `/api/admin/verifications/${verificationId}/approve`,
+    body,
+    { auth: true },
+  )
+
+  return toAdminCertificationDetail(detail)
+}
+
+/** 관리자 인증 신청 반려 (PATCH /api/admin/verifications/{verificationId}/reject) */
+export async function rejectAdminVerification(
+  verificationId: number,
+  reason: string,
+): Promise<AdminCertificationDetail> {
+  const detail = await http.patch<VerificationListItem>(
+    `/api/admin/verifications/${verificationId}/reject`,
+    { reason },
+    { auth: true },
+  )
+
+  return toAdminCertificationDetail(detail)
+}
+
 /** 내 인증 신청 목록 (GET /api/verifications/my) */
 export async function getMyVerifications(
   params: MyVerificationListParams = {},
@@ -131,6 +257,16 @@ export async function getVerificationEvidence(
   evidenceType: VerificationEvidenceType,
 ): Promise<Blob> {
   return http.getBlob(`/api/verifications/${verificationId}/evidence/${evidenceType}`, { auth: true })
+}
+
+/** 관리자 제출 자료 다운로드 (GET /api/admin/verifications/{verificationId}/evidence/{evidenceType}) */
+export async function getAdminVerificationEvidence(
+  verificationId: number,
+  evidenceType: VerificationEvidenceType,
+): Promise<Blob> {
+  return http.getBlob(`/api/admin/verifications/${verificationId}/evidence/${evidenceType}`, {
+    auth: true,
+  })
 }
 
 /** 사용자 수강 인증 신청 (POST /api/verifications) */
