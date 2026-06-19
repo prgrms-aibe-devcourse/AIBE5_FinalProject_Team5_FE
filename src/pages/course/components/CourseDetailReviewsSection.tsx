@@ -16,6 +16,7 @@ import {
   createCourseReview,
   type CreateVerifiedReviewDetailPayload,
 } from '../../../services/review.ts'
+import { hasMyReviewForCourseSession } from '../../../services/mypage.ts'
 import { hasApprovedVerificationForSession } from '../../../services/verification.ts'
 
 interface CourseDetailReviewsSectionProps {
@@ -135,19 +136,38 @@ export default function CourseDetailReviewsSection({
   const [isVerifiedReviewStep5ModalOpen, setIsVerifiedReviewStep5ModalOpen] = useState(false)
   const [isReviewSubmitSuccessModalOpen, setIsReviewSubmitSuccessModalOpen] = useState(false)
   const [reviewTypeWarningMessage, setReviewTypeWarningMessage] = useState<string | null>(null)
+  const [reviewWriteBlockMessage, setReviewWriteBlockMessage] = useState<string | null>(null)
+  const [isCheckingReviewEligibility, setIsCheckingReviewEligibility] = useState(false)
   const [isCheckingVerification, setIsCheckingVerification] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [generalSubmitError, setGeneralSubmitError] = useState<string | null>(null)
   const [verifiedSubmitError, setVerifiedSubmitError] = useState<string | null>(null)
   const [verifiedDraft, setVerifiedDraft] = useState<VerifiedReviewDraft>({})
 
-  const handleWriteReviewClick = useCallback(() => {
+  const handleWriteReviewClick = useCallback(async () => {
     if (!isAuthenticated()) {
       navigate('/login')
       return
     }
-    setIsReviewTypeModalOpen(true)
-  }, [navigate])
+
+    setReviewWriteBlockMessage(null)
+    setIsCheckingReviewEligibility(true)
+
+    try {
+      const alreadyReviewed = await hasMyReviewForCourseSession(courseId, courseSessionId)
+      if (alreadyReviewed) {
+        setReviewWriteBlockMessage('이미 해당 회차에 후기를 작성하셨습니다.')
+        return
+      }
+
+      setReviewTypeWarningMessage(null)
+      setIsReviewTypeModalOpen(true)
+    } catch (error) {
+      setReviewWriteBlockMessage(getReviewSubmitErrorMessage(error))
+    } finally {
+      setIsCheckingReviewEligibility(false)
+    }
+  }, [courseId, courseSessionId, navigate])
 
   const handleReviewSubmitted = useCallback(() => {
     setListRefreshKey((key) => key + 1)
@@ -254,6 +274,41 @@ export default function CourseDetailReviewsSection({
           }
         }}
       />
+
+      {isCheckingReviewEligibility ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-deepOceanNavy/25 px-4">
+          <p className="rounded-xl bg-white px-5 py-3 text-sm font-medium text-deepOceanNavy shadow-lg">
+            후기 작성 가능 여부 확인 중...
+          </p>
+        </div>
+      ) : null}
+
+      {reviewWriteBlockMessage ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="후기 작성 안내"
+          onClick={() => setReviewWriteBlockMessage(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-mistSkyBlue/50 bg-white p-6 shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="text-base font-semibold text-deepOceanNavy">후기를 작성할 수 없습니다</p>
+            <p className="mt-2 text-sm text-secondary">{reviewWriteBlockMessage}</p>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setReviewWriteBlockMessage(null)}
+                className="inline-flex min-w-20 items-center justify-center rounded-lg bg-deepOceanNavy px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {isCheckingVerification ? (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-deepOceanNavy/25 px-4">
