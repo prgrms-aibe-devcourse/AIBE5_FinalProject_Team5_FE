@@ -68,11 +68,37 @@ function VerifiedStatsIcon() {
   )
 }
 
+function EligibilityIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M9 12l2 2 4-4M7.5 4.5h9A2.5 2.5 0 0119 7v10a2.5 2.5 0 01-2.5 2.5h-9A2.5 2.5 0 015 17V7a2.5 2.5 0 012.5-2.5z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function GoalsIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M12 4V2M12 22v-2M4 12H2M22 12h-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 const SECTION_ICON_MAP: Record<string, ReactNode> = {
   '기본 정보': <BasicInfoIcon />,
   '모집 현황': <RecruitmentIcon />,
   '평가 지표': <RatingIcon />,
   '과정 정보': <CourseInfoIcon />,
+  '지원자격': <EligibilityIcon />,
+  '과정목표': <GoalsIcon />,
   '인증 리뷰 통계': <VerifiedStatsIcon />,
 }
 

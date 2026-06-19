@@ -14,7 +14,7 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
       <div className="grid gap-3" style={{ gridTemplateColumns: layout.gridTemplateColumns }}>
         <div aria-hidden="true" />
         {courses.map((course) => (
-          <div key={course.id} className="flex justify-center px-1 sm:px-2">
+          <div key={course.courseSessionId ?? course.id} className="flex justify-center px-1 sm:px-2">
             <article
               className={`flex w-full flex-col overflow-hidden rounded-xl glass-panel shadow-sm ${layout.summaryCardMaxWidth}`}
             >

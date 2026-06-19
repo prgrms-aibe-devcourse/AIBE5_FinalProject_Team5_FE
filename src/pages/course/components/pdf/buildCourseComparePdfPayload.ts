@@ -1,12 +1,12 @@
 import type { CourseDetail } from '../../../../services/course.ts'
-import type { VerifiedReviewStats } from '../../data/mockCourseReviews.ts'
+import type { VerifiedReviewStatistics } from '../../../../services/review.ts'
 import { COMPARE_TABLE_ROWS } from '../../data/mockCourseCompare.ts'
 import { groupCompareRows } from '../groupCompareRows.ts'
 import type { CourseComparePdfPayload } from './courseComparePdfTypes.ts'
 
 export function buildCourseComparePdfPayload(
   courses: CourseDetail[],
-  statsByColumn: VerifiedReviewStats[],
+  statsByColumn: VerifiedReviewStatistics[],
 ): CourseComparePdfPayload {
   const sections = groupCompareRows(COMPARE_TABLE_ROWS)
 

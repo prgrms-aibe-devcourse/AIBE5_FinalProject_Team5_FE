@@ -61,6 +61,8 @@ export interface CourseDetail extends Course {
   contact: CourseContact
   titleLink: string | null
   homepageUrl: string | null
+  /** stdgScor → 5점 만점 환산 (비교 요약 별점용) */
+  satisfactionOutOf5?: number | null
 }
 
 // ──────────────────────────────────────────────
@@ -364,6 +366,27 @@ export function isCourseStatPlaceholder(value: string): boolean {
   return value === COURSE_STAT_PLACEHOLDER
 }
 
+/** 화면 표시용 결측값 여부 (정보 없음, -, —, 0%) */
+export function isMissingDisplayValue(value: string | null | undefined): boolean {
+  if (!value) return true
+  const trimmed = value.trim()
+  if (trimmed === '-' || trimmed === '—' || trimmed === '정보 없음' || trimmed === COURSE_STAT_PLACEHOLDER) {
+    return true
+  }
+  if (trimmed.endsWith('%')) {
+    const numeric = parseFloat(trimmed.replace(/[^\d.]/g, ''))
+    if (Number.isNaN(numeric) || numeric === 0) return true
+  }
+  return false
+}
+
+/** 고용24 stdgScor(100점/%) → 5점 만점 환산. 5 이하 값은 이미 5점 척도로 간주 */
+export function stdgScorToFivePoint(score: number | null | undefined): number | null {
+  if (score == null || score === 0) return null
+  const outOf5 = score > 5 ? (score / 100) * 5 : score
+  return Math.min(5, Math.round(outOf5 * 10) / 10)
+}
+
 function isStatMissing(value: number | null | undefined): boolean {
   return value === null || value === undefined || value === 0
 }
@@ -381,6 +404,23 @@ function formatEmploymentRate(rate: number | null | undefined): string {
 function formatRating(rating: number | null | undefined): string {
   if (isStatMissing(rating)) return COURSE_STAT_PLACEHOLDER
   return String(rating)
+}
+
+function formatSessionEmploymentRate(
+  employmentRate: number | null | undefined,
+  eiEmplRate6: string | null | undefined,
+): string {
+  if (!isStatMissing(employmentRate)) {
+    return `${employmentRate}%`
+  }
+  const fallback = eiEmplRate6?.trim()
+  if (fallback) {
+    const parsed = parseFloat(fallback.replace(/[^\d.]/g, ''))
+    if (!Number.isNaN(parsed) && parsed !== 0) {
+      return fallback.endsWith('%') ? fallback : `${fallback}%`
+    }
+  }
+  return '-'
 }
 
 export function toCourseCardVM(item: CourseListItem): Course {
@@ -435,11 +475,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
     confirmed: detail.confirmedTraineeCount ?? 0,
   }
 
-  const employmentRate = detail.eiEmplRate6
-    ? `${detail.eiEmplRate6}%`
-    : detail.employmentRate !== null && detail.employmentRate !== undefined
-      ? `${detail.employmentRate}%`
-      : '-'
+  const employmentRate = formatSessionEmploymentRate(detail.employmentRate, detail.eiEmplRate6)
 
   const otherInfo =
     [
@@ -448,7 +484,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
       formatWeekendLabel(detail.wkendSe),
     ]
       .filter(Boolean)
-      .join('\n') || '정보 없음'
+      .join('\n') || '-'
 
   return {
     id: String(detail.courseId),
@@ -459,15 +495,16 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
     price: formatCoursePrice(detail.selfPaymentAmount),
     dateRange,
     satisfaction: formatScore(detail.stdgScor),
+    satisfactionOutOf5: stdgScorToFivePoint(detail.stdgScor),
     employmentRate,
     rating: '-',
     logoUrl: inst?.profileImageUrl ?? undefined,
     batch,
     recruitment,
-    eligibility: detail.trainingTargetRequirements ?? '정보 없음',
-    goals: detail.trainingGoal ?? '정보 없음',
+    eligibility: detail.trainingTargetRequirements?.trim() || '-',
+    goals: detail.trainingGoal?.trim() || '-',
     otherInfo,
-    institutionInfo: inst?.introduction ?? '정보 없음',
+    institutionInfo: inst?.introduction?.trim() || '-',
     contact: {
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',

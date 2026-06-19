@@ -12,11 +12,12 @@ export interface CompareLayoutConfig {
 export function getCompareLayoutConfig(courseCount: number): CompareLayoutConfig {
   const columnCount: CompareColumnCount = courseCount === 2 ? 2 : 3
   const labelColumn = '10.5rem'
+  const courseColumns = `repeat(${columnCount}, minmax(0, 1fr))`
 
   if (columnCount === 2) {
     return {
       columnCount,
-      gridTemplateColumns: `${labelColumn} repeat(2, minmax(0, 1fr))`,
+      gridTemplateColumns: `${labelColumn} ${courseColumns}`,
       containerClassName: 'mx-auto w-full max-w-5xl',
       scrollMinWidth: '36rem',
       summaryCardMaxWidth: 'max-w-[20rem]',
@@ -25,7 +26,7 @@ export function getCompareLayoutConfig(courseCount: number): CompareLayoutConfig
 
   return {
     columnCount,
-    gridTemplateColumns: `${labelColumn} repeat(3, minmax(0, 1fr))`,
+    gridTemplateColumns: `${labelColumn} ${courseColumns}`,
     containerClassName: 'w-full',
     scrollMinWidth: '40rem',
     summaryCardMaxWidth: 'max-w-[17rem]',
