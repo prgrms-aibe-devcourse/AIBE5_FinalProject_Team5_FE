@@ -28,7 +28,7 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
 
   return (
     <section className="space-y-6 rounded-2xl">
-      <CourseReviewStatsPanel />
+      <CourseReviewStatsPanel courseId={courseId} />
       <CourseReviewListPanel courseId={courseId} onClickWriteReview={() => setIsReviewTypeModalOpen(true)} />
 
       {/* 리뷰 유형 선택 모달 */}

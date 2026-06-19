@@ -1,8 +1,14 @@
+import { useEffect, useState } from 'react'
+import { buildPriorKnowledgeConicGradient } from '../data/mockCourseReviews.ts'
 import {
-  MOCK_VERIFIED_REVIEWS,
-  buildPriorKnowledgeConicGradient,
-  getVerifiedReviewStats,
-} from '../data/mockCourseReviews.ts'
+  createEmptyVerifiedReviewStatistics,
+  getVerifiedReviewStatistics,
+  type VerifiedReviewStatistics,
+} from '../../../services/review.ts'
+
+interface CourseReviewStatsPanelProps {
+  courseId: number
+}
 
 function StatsIcon() {
   return (
@@ -13,10 +19,25 @@ function StatsIcon() {
 }
 
 // 과정 후기 통계 패널 (인증 리뷰 항목 기반)
-export default function CourseReviewStatsPanel() {
-  const { reviewCount, averageRating, ratingBars, priorKnowledgeDistribution, qualityMetrics } =
-    getVerifiedReviewStats(MOCK_VERIFIED_REVIEWS)
+export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPanelProps) {
+  const [stats, setStats] = useState<VerifiedReviewStatistics>(() => createEmptyVerifiedReviewStatistics())
+  const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
+  useEffect(() => {
+    setIsLoading(true)
+    setFetchError(null)
+
+    getVerifiedReviewStatistics(courseId)
+      .then(setStats)
+      .catch((err: unknown) => {
+        setStats(createEmptyVerifiedReviewStatistics())
+        setFetchError(err instanceof Error ? err.message : '리뷰 통계를 불러올 수 없습니다.')
+      })
+      .finally(() => setIsLoading(false))
+  }, [courseId])
+
+  const { reviewCount, averageRating, ratingBars, priorKnowledgeDistribution, qualityMetrics } = stats
   const maxRatingCount = Math.max(...ratingBars.map((item) => item.count), 1)
   const priorKnowledgeGradient = buildPriorKnowledgeConicGradient(priorKnowledgeDistribution)
 
@@ -31,6 +52,12 @@ export default function CourseReviewStatsPanel() {
       <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
 
       <div className="p-4 md:p-5">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 text-secondary">불러오는 중...</div>
+        ) : fetchError ? (
+          <div className="flex items-center justify-center py-16 text-red-400">{fetchError}</div>
+        ) : (
+        <>
         <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
           <div className="flex h-full items-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/35 p-4">
             <div className="grid w-full items-center gap-4 md:grid-cols-[auto_1fr] md:gap-6">
@@ -102,6 +129,8 @@ export default function CourseReviewStatsPanel() {
             ))}
           </ul>
         </div>
+        </>
+        )}
       </div>
       </div>
     </div>
