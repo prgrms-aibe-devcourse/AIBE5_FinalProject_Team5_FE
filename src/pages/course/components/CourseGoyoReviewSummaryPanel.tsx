@@ -13,8 +13,10 @@ interface CourseGoyoReviewSummaryPanelProps {
 }
 
 type SummaryViewState =
-  | 'loading'
+  | 'checking'
   | 'insufficient'
+  | 'ready'
+  | 'fetching'
   | 'login_required'
   | 'success'
   | 'error'
@@ -130,15 +132,15 @@ export default function CourseGoyoReviewSummaryPanel({
   courseId,
   refreshKey = 0,
 }: CourseGoyoReviewSummaryPanelProps) {
-  const [viewState, setViewState] = useState<SummaryViewState>('loading')
+  const [viewState, setViewState] = useState<SummaryViewState>('checking')
   const [summary, setSummary] = useState<ReviewSummary | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
 
-    async function loadSummary() {
-      setViewState('loading')
+    async function checkEligibility() {
+      setViewState('checking')
       setErrorMessage(null)
       setSummary(null)
 
@@ -147,22 +149,12 @@ export default function CourseGoyoReviewSummaryPanel({
         if (cancelled) return
 
         const count = crawled.totalElements ?? 0
-
         if (count < MIN_GOYO_REVIEWS_FOR_SUMMARY) {
           setViewState('insufficient')
           return
         }
 
-        if (!isAuthenticated()) {
-          setViewState('login_required')
-          return
-        }
-
-        const data = await createReviewSummary(courseId)
-        if (cancelled) return
-
-        setSummary(data)
-        setViewState('success')
+        setViewState('ready')
       } catch (error) {
         if (cancelled) return
         setErrorMessage(getSummaryErrorMessage(error))
@@ -170,12 +162,31 @@ export default function CourseGoyoReviewSummaryPanel({
       }
     }
 
-    void loadSummary()
+    void checkEligibility()
 
     return () => {
       cancelled = true
     }
   }, [courseId, refreshKey])
+
+  const handleFetchSummary = async () => {
+    if (!isAuthenticated()) {
+      setViewState('login_required')
+      return
+    }
+
+    setViewState('fetching')
+    setErrorMessage(null)
+
+    try {
+      const data = await createReviewSummary(courseId)
+      setSummary(data)
+      setViewState('success')
+    } catch (error) {
+      setErrorMessage(getSummaryErrorMessage(error))
+      setViewState('error')
+    }
+  }
 
   return (
     <div>
@@ -191,13 +202,57 @@ export default function CourseGoyoReviewSummaryPanel({
 
       <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
         <div className="p-4 md:p-5">
-          {viewState === 'loading' ? (
+          {viewState === 'checking' ? (
             <div className="flex flex-col items-center justify-center gap-3 py-12">
               <div
                 className="h-8 w-8 animate-spin rounded-full border-[3px] border-mistSkyBlue/35 border-t-waterlineBlue"
                 aria-hidden="true"
               />
-              <p className="text-sm text-secondary">고용 24 리뷰 요약을 준비하는 중...</p>
+              <p className="text-sm text-secondary">고용 24 후기 수를 확인하는 중...</p>
+            </div>
+          ) : null}
+
+          {viewState === 'ready' || viewState === 'login_required' || viewState === 'error' ? (
+            <div className="flex flex-col items-center gap-3 py-10">
+              {viewState === 'login_required' ? (
+                <InfoNotice>
+                  <p>고용 24 리뷰 요약은 로그인 후 확인할 수 있습니다.</p>
+                  <Link
+                    to="/login"
+                    className="mt-2 inline-flex items-center gap-1 font-semibold text-waterlineBlue transition-colors hover:text-deepOceanNavy"
+                  >
+                    로그인하러 가기
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </InfoNotice>
+              ) : null}
+
+              {viewState === 'error' ? (
+                <div className="w-full rounded-lg border border-red-200/80 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+                  {errorMessage}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={() => void handleFetchSummary()}
+                className="inline-flex items-center justify-center rounded-lg border border-dashed border-waterlineBlue/50 bg-waterlineBlue/8 px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:bg-waterlineBlue/12"
+              >
+                AI 요약 불러오기 (배포 전 테스트)
+              </button>
+              <p className="text-center text-xs text-secondary">
+                버튼을 눌렀을 때만 AI 요약 API가 호출됩니다.
+              </p>
+            </div>
+          ) : null}
+
+          {viewState === 'fetching' ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12">
+              <div
+                className="h-8 w-8 animate-spin rounded-full border-[3px] border-mistSkyBlue/35 border-t-waterlineBlue"
+                aria-hidden="true"
+              />
+              <p className="text-sm text-secondary">고용 24 리뷰 요약을 생성하는 중...</p>
             </div>
           ) : null}
 
@@ -207,25 +262,6 @@ export default function CourseGoyoReviewSummaryPanel({
                 신뢰도 있는 AI 요약은 고용 24 후기가 6건 이상일 때 제공됩니다.
               </p>
             </InfoNotice>
-          ) : null}
-
-          {viewState === 'login_required' ? (
-            <InfoNotice>
-              <p>고용 24 리뷰 요약은 로그인 후 확인할 수 있습니다.</p>
-              <Link
-                to="/login"
-                className="mt-2 inline-flex items-center gap-1 font-semibold text-waterlineBlue transition-colors hover:text-deepOceanNavy"
-              >
-                로그인하러 가기
-                <span aria-hidden="true">→</span>
-              </Link>
-            </InfoNotice>
-          ) : null}
-
-          {viewState === 'error' ? (
-            <div className="rounded-lg border border-red-200/80 bg-red-50/80 px-4 py-3 text-sm text-red-800">
-              {errorMessage}
-            </div>
           ) : null}
 
           {viewState === 'success' && summary ? (
