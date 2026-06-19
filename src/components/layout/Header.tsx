@@ -24,7 +24,6 @@ const userMenuLinks = [
 
 const adminMenuLinks = [
   { label: '대시보드', to: '/admin' },
-  { label: '리뷰 관리', to: '/admin/reviews' },
   { label: '인증 관리', to: '/admin/certifications' },
   { label: '문의 관리', to: '/admin/inquiries' },
   { label: '신고내역', to: '/admin/reports' },

@@ -18,7 +18,6 @@ import AdminCertificationsPage from './pages/admin/AdminCertificationsPage'
 import AdminInquiriesPage from './pages/admin/AdminInquiriesPage'
 import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminNoticesPage from './pages/admin/AdminNoticesPage'
-import AdminReviewsPage from './pages/admin/AdminReviewsPage'
 import CommunityLayout from './pages/community/CommunityLayout'
 import CommunityArticlePage from './pages/community/CommunityArticlePage'
 import CommunityPostsPage from './pages/community/CommunityPostsPage'
@@ -105,7 +104,6 @@ function App() {
       <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
       <Route path="/admin/reports" element={<AdminReportsPage />} />
       <Route path="/admin/notices" element={<AdminNoticesPage />} />
-      <Route path="/admin/reviews" element={<AdminReviewsPage />} />
     </Routes>
   )
 }
