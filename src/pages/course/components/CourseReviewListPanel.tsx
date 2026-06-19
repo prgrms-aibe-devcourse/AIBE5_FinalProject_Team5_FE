@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Pagination from '../../../components/common/Pagination.tsx'
 import { MOCK_REVIEWS, MOCK_VERIFIED_REVIEWS, type MockReviewItem, type MockVerifiedReviewItem, type VerifiedReviewDetail } from '../data/mockCourseReviews.ts'
 import { getCrawledReviews, type CrawledReview } from '../../../services/review.ts'
@@ -7,6 +7,11 @@ const ITEMS_PER_PAGE = 5
 
 type ReviewSource = 'site' | 'goyo24'
 type SiteFilter = 'all' | 'general' | 'verified'
+
+const REVIEW_SOURCE_TABS: { id: ReviewSource; label: string; description: string }[] = [
+  { id: 'site', label: '부트시그널', description: '부트시그널 회원이 작성한 후기' },
+  { id: 'goyo24', label: '고용 24', description: '고용 24에서 수집한 후기' },
+]
 
 interface CourseReviewListPanelProps {
   courseId: number
@@ -19,6 +24,68 @@ function ReviewIcon() {
       <path d="M7 8h10M7 12h6m-6 9l-3-3V5a2 2 0 012-2h12a2 2 0 012 2v11a2 2 0 01-2 2H9l-2 3z"
         stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  )
+}
+
+function ReviewSourceTabs({
+  activeSource,
+  onSourceChange,
+}: {
+  activeSource: ReviewSource
+  onSourceChange: (source: ReviewSource) => void
+}) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const activeRef = useRef<HTMLButtonElement>(null)
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
+
+  useLayoutEffect(() => {
+    const el = activeRef.current
+    const container = containerRef.current
+    if (!el || !container) return
+
+    const containerRect = container.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    setIndicatorStyle({
+      left: elRect.left - containerRect.left,
+      width: elRect.width,
+    })
+  }, [activeSource])
+
+  return (
+    <div role="tablist" aria-label="후기 출처" className="w-full">
+      <div
+        ref={containerRef}
+        className="relative grid grid-cols-2 gap-1 rounded-2xl border border-mistSkyBlue/40 bg-white/40 p-1.5 shadow-[0_4px_20px_rgba(52,74,100,0.10)] backdrop-blur-md"
+      >
+        <span
+          className="pointer-events-none absolute top-1.5 h-[calc(100%-0.75rem)] rounded-xl bg-deepOceanNavy shadow-[0_2px_8px_rgba(52,74,100,0.22)] transition-all duration-200 ease-out"
+          style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+          aria-hidden="true"
+        />
+
+        {REVIEW_SOURCE_TABS.map(({ id, label, description }) => {
+          const isActive = activeSource === id
+
+          return (
+            <button
+              key={id}
+              ref={isActive ? activeRef : null}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              aria-label={description}
+              title={description}
+              onClick={() => onSourceChange(id)}
+              className={`relative z-10 flex min-w-0 items-center justify-center rounded-xl px-2 py-2.5 transition-colors duration-150 sm:px-4 sm:py-3 ${
+                isActive ? 'text-white' : 'text-deepOceanNavy/60 hover:text-deepOceanNavy'
+              }`}
+            >
+              <span className="truncate text-[0.82rem] font-semibold sm:text-sm">{label}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -55,11 +122,21 @@ function formatDropoutReason(major?: string, sub?: string) {
   return `${major}>${sub}`
 }
 
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return ''
+
+  const dateOnly = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (dateOnly) {
+    return `${dateOnly[1]}.${dateOnly[2]}.${dateOnly[3]}`
+  }
+
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return ''
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
+}
+
+function formatReviewedAt(dateStr: string | null | undefined): string {
+  return formatDate(dateStr) || '-'
 }
 
 function VerifiedReviewDetailPanel({ detail }: { detail: VerifiedReviewDetail }) {
@@ -102,6 +179,27 @@ function VerifiedReviewDetailPanel({ detail }: { detail: VerifiedReviewDetail })
   )
 }
 
+function CrawledReviewCard({ review }: { review: CrawledReview }) {
+  return (
+    <article className="rounded-xl border border-mistSkyBlue/30 bg-foamWhite/35 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-base font-semibold text-deepOceanNavy">{review.reviewerNickname ?? '익명'}</p>
+        <span className="inline-flex items-center rounded-full bg-[#1A6DFF]/10 px-2 py-0.5 text-[0.7rem] font-semibold text-[#1A6DFF]">
+          고용 24
+        </span>
+      </div>
+      {review.rating !== null ? (
+        <p className="mt-1 text-[0.95rem]">
+          <Stars count={Math.round(review.rating)} />
+        </p>
+      ) : null}
+      {review.content ? (
+        <p className="mt-2 text-[0.95rem] leading-relaxed text-deepOceanNavy/90 md:text-base">{review.content}</p>
+      ) : null}
+    </article>
+  )
+}
+
 const isVerified = (r: MockReviewItem): r is MockVerifiedReviewItem => 'verified' in r && (r as MockVerifiedReviewItem).verified === true
 
 function SiteReviewCard({ review, expanded, onToggle }: {
@@ -110,18 +208,30 @@ function SiteReviewCard({ review, expanded, onToggle }: {
   onToggle: () => void
 }) {
   const verified = isVerified(review)
+  const reviewedAt = 'reviewedAt' in review ? review.reviewedAt : null
+
   return (
     <article className="rounded-xl border border-mistSkyBlue/30 bg-foamWhite/35 p-4">
-      <div className="flex items-center gap-2">
-        <p className="text-base font-semibold text-deepOceanNavy">{review.user}</p>
-        {verified && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-waterlineBlue/15 px-2 py-0.5 text-[0.7rem] font-semibold text-waterlineBlue">
-            <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            인증됨
-          </span>
-        )}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <p className="text-base font-semibold text-deepOceanNavy">{review.user}</p>
+          {verified && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-waterlineBlue/15 px-2 py-0.5 text-[0.7rem] font-semibold text-waterlineBlue">
+              <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              인증됨
+            </span>
+          )}
+        </div>
+        {reviewedAt ? (
+          <time
+            className="shrink-0 text-xs tabular-nums text-secondary"
+            dateTime={reviewedAt}
+          >
+            {formatReviewedAt(reviewedAt)}
+          </time>
+        ) : null}
       </div>
       <p className="text-[0.95rem]"><Stars count={review.rating} /></p>
       <p className="mt-2 text-[0.95rem] leading-relaxed text-deepOceanNavy/90 md:text-base">{review.content}</p>
@@ -168,7 +278,7 @@ export default function CourseReviewListPanel({ courseId, onClickWriteReview }: 
   const [goyoLoading, setGoyoLoading] = useState(false)
   const [goyoError, setGoyoError] = useState<string | null>(null)
 
-  useEffect(() => { setCurrentPage(1) }, [reviewSource, siteFilter])
+  useEffect(() => { setCurrentPage(1) }, [reviewSource, siteFilter, courseId])
 
   useEffect(() => {
     if (currentPage > siteTotalPages && reviewSource === 'site') setCurrentPage(siteTotalPages)
@@ -176,18 +286,38 @@ export default function CourseReviewListPanel({ courseId, onClickWriteReview }: 
 
   useEffect(() => {
     if (reviewSource !== 'goyo24') return
+
+    let cancelled = false
     setGoyoLoading(true)
     setGoyoError(null)
-    getCrawledReviews(courseId, currentPage - 1, 10)
+
+    getCrawledReviews(courseId, currentPage - 1, ITEMS_PER_PAGE)
       .then((data) => {
-        setGoyoReviews(data.content)
-        setGoyoTotalPages(data.totalPages || 1)
-        setGoyoTotalElements(data.totalElements)
+        if (cancelled) return
+
+        const apiTotalPages = data.totalPages ?? 0
+        setGoyoReviews(data.content ?? [])
+        setGoyoTotalElements(data.totalElements ?? 0)
+        setGoyoTotalPages(Math.max(1, apiTotalPages))
+
+        if (apiTotalPages > 0 && currentPage > apiTotalPages) {
+          setCurrentPage(apiTotalPages)
+        }
       })
       .catch((err: unknown) => {
-        setGoyoError(err instanceof Error ? err.message : '리뷰를 불러올 수 없습니다.')
+        if (cancelled) return
+        setGoyoReviews([])
+        setGoyoTotalElements(0)
+        setGoyoTotalPages(1)
+        setGoyoError(err instanceof Error ? err.message : '후기를 불러올 수 없습니다.')
       })
-      .finally(() => setGoyoLoading(false))
+      .finally(() => {
+        if (!cancelled) setGoyoLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [courseId, reviewSource, currentPage])
 
   const toggleExpanded = (id: number) => {
@@ -198,50 +328,42 @@ export default function CourseReviewListPanel({ courseId, onClickWriteReview }: 
 
   const FILTERS: { key: SiteFilter; label: string; verified?: boolean }[] = [
     { key: 'all', label: '전체' },
-    { key: 'general', label: '일반 리뷰' },
-    { key: 'verified', label: '인증됨 리뷰', verified: true },
+    { key: 'general', label: '일반 후기' },
+    { key: 'verified', label: '인증 후기', verified: true },
   ]
 
   return (
     <div>
-      {/* 헤더 — 카드 바깥 */}
-      <div className="mb-2 flex items-center justify-between px-1">
+      <div className="mb-2 px-1">
         <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
           <span className="flex h-6 w-6 items-center justify-center text-waterlineBlue">
             <ReviewIcon />
           </span>
-          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">리뷰 내역</h3>
-        </div>
-        {/* 소스 토글 */}
-        <div className="flex overflow-hidden rounded-lg border border-mistSkyBlue/40 bg-white/80 backdrop-blur-sm">
-          {(['site', 'goyo24'] as ReviewSource[]).map((src, i) => (
-            <button key={src} type="button" onClick={() => setReviewSource(src)}
-              className={`px-4 py-1.5 text-sm transition-colors ${i > 0 ? 'border-l border-mistSkyBlue/35' : ''} ${
-                reviewSource === src
-                  ? 'bg-waterlineBlue/15 font-semibold text-waterlineBlue'
-                  : 'font-medium text-deepOceanNavy hover:bg-foamWhite/70'
-              }`}>
-              {src === 'site' ? '사이트 리뷰' : '고용24 리뷰'}
-            </button>
-          ))}
+          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">후기 내역</h3>
         </div>
       </div>
 
-      {/* 카드 */}
       <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+        <div className="border-b border-mistSkyBlue/30 bg-gradient-to-r from-mistSkyBlue/20 via-softAquaBlue/10 to-waterlineBlue/10 px-4 py-3 md:px-5 md:py-4">
+          <ReviewSourceTabs activeSource={reviewSource} onSourceChange={setReviewSource} />
+        </div>
+
         <div className="p-4 md:p-5">
           {reviewSource === 'site' ? (
             <>
-              {/* 필터 + 액션 */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-mistSkyBlue/20 pb-4">
+                <div className="flex flex-wrap gap-1.5">
                   {FILTERS.map(({ key, label, verified }) => (
-                    <button key={key} type="button" onClick={() => setSiteFilter(key)}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSiteFilter(key)}
+                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                         siteFilter === key
-                          ? 'border-waterlineBlue bg-waterlineBlue/10 text-waterlineBlue'
-                          : 'border-mistSkyBlue/40 text-secondary hover:border-waterlineBlue hover:text-deepOceanNavy'
-                      }`}>
+                          ? 'bg-deepOceanNavy text-white'
+                          : 'bg-foamWhite/60 text-secondary hover:bg-mistSkyBlue/20 hover:text-deepOceanNavy'
+                      }`}
+                    >
                       {verified && (
                         <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                           <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -252,15 +374,18 @@ export default function CourseReviewListPanel({ courseId, onClickWriteReview }: 
                   ))}
                 </div>
                 <div className="flex items-center gap-3">
-                  <p className="text-[0.9rem] text-secondary">
-                    총 <span className="font-bold text-deepOceanNavy">{reviewPool.length}</span>개
+                  <p className="text-sm text-secondary">
+                    총 <span className="font-semibold tabular-nums text-deepOceanNavy">{reviewPool.length}</span>개
                   </p>
-                  <button type="button" onClick={onClickWriteReview}
-                    className="inline-flex items-center gap-2 rounded-lg border border-deepOceanNavy/15 bg-deepOceanNavy px-4 py-2 text-[0.95rem] font-semibold text-white shadow-[0_3px_10px_rgba(52,74,100,0.18)] transition-colors hover:bg-waterlineBlue">
+                  <button
+                    type="button"
+                    onClick={onClickWriteReview}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-deepOceanNavy px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue"
+                  >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M4 20h4l10-10a2 2 0 10-4-4L4 16v4z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    리뷰 작성
+                    후기 작성
                   </button>
                 </div>
               </div>
@@ -273,33 +398,29 @@ export default function CourseReviewListPanel({ courseId, onClickWriteReview }: 
             </>
           ) : (
             <>
-              <p className="mb-4 text-[0.9rem] text-secondary">
-                총 <span className="font-bold text-deepOceanNavy">{goyoTotalElements}</span>개의 고용24 리뷰
-              </p>
+              <div className="border-b border-mistSkyBlue/20 pb-4">
+                <p className="text-sm text-secondary">
+                  총 <span className="font-semibold tabular-nums text-deepOceanNavy">{goyoTotalElements}</span>개
+                </p>
+              </div>
               {goyoLoading ? (
-                <div className="flex items-center justify-center py-16 text-secondary">불러오는 중...</div>
+                <div className="flex items-center justify-center py-16 text-sm text-secondary">불러오는 중...</div>
               ) : goyoError ? (
-                <div className="flex items-center justify-center py-16 text-red-400">{goyoError}</div>
+                <div className="flex items-center justify-center py-16 text-sm text-red-400">{goyoError}</div>
               ) : goyoReviews.length === 0 ? (
-                <div className="flex items-center justify-center py-16 text-secondary">고용24 리뷰가 없습니다.</div>
+                <div className="flex items-center justify-center py-16 text-sm text-secondary">후기가 없습니다.</div>
               ) : (
-                <div className="space-y-3">
+                <div className="mt-4 space-y-3">
                   {goyoReviews.map((review) => (
-                    <article key={review.id} className="rounded-xl border border-mistSkyBlue/30 bg-foamWhite/35 p-4">
-                      <div className="flex items-center gap-2">
-                        <p className="text-base font-semibold text-deepOceanNavy">{review.reviewerNickname ?? '익명'}</p>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#1A6DFF]/10 px-2 py-0.5 text-[0.7rem] font-semibold text-[#1A6DFF]">고용24</span>
-                        {review.reviewedAt && <span className="ml-auto text-xs text-secondary">{formatDate(review.reviewedAt)}</span>}
-                      </div>
-                      {review.rating !== null && <p className="mt-1 text-[0.95rem]"><Stars count={Math.round(review.rating)} /></p>}
-                      {review.content && <p className="mt-2 text-[0.95rem] leading-relaxed text-deepOceanNavy/90 md:text-base">{review.content}</p>}
-                    </article>
+                    <CrawledReviewCard key={review.id} review={review} />
                   ))}
                 </div>
               )}
             </>
           )}
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} className="mt-5" />
+          {totalPages > 1 && (reviewSource === 'site' || (!goyoLoading && !goyoError)) ? (
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} className="mt-5" />
+          ) : null}
         </div>
       </div>
     </div>

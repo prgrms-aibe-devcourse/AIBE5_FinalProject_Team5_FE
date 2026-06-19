@@ -22,16 +22,9 @@ function Work24Badge() {
         <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.15" />
         <text x="8" y="11.5" textAnchor="middle" fontSize="8" fontWeight="bold" fill="currentColor">W</text>
       </svg>
-      고용24
+      고용 24
     </span>
   )
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  if (isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
 
 export default function CourseGoyoReviewPanel({ courseId }: CourseGoyoReviewPanelProps) {
@@ -45,14 +38,14 @@ export default function CourseGoyoReviewPanel({ courseId }: CourseGoyoReviewPane
   useEffect(() => {
     setIsLoading(true)
     setFetchError(null)
-    getCrawledReviews(courseId, currentPage - 1, 10)
+    getCrawledReviews(courseId, currentPage - 1, 5)
       .then((data) => {
         setReviews(data.content)
         setTotalPages(data.totalPages || 1)
         setTotalElements(data.totalElements)
       })
       .catch((err: unknown) => {
-        setFetchError(err instanceof Error ? err.message : '리뷰를 불러올 수 없습니다.')
+        setFetchError(err instanceof Error ? err.message : '후기를 불러올 수 없습니다.')
       })
       .finally(() => setIsLoading(false))
   }, [courseId, currentPage])
@@ -62,7 +55,7 @@ export default function CourseGoyoReviewPanel({ courseId }: CourseGoyoReviewPane
       <div className="p-4 md:p-5">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-[0.95rem] text-secondary">
-            총 <span className="font-bold text-deepOceanNavy">{totalElements}</span>개의 고용24 리뷰
+            총 <span className="font-bold text-deepOceanNavy">{totalElements}</span>개의 고용24 후기
           </p>
         </div>
 
@@ -72,7 +65,7 @@ export default function CourseGoyoReviewPanel({ courseId }: CourseGoyoReviewPane
           <div className="flex items-center justify-center py-16 text-red-400">{fetchError}</div>
         ) : reviews.length === 0 ? (
           <div className="flex items-center justify-center py-16 text-secondary">
-            고용24 리뷰가 없습니다.
+            고용24 후기가 없습니다.
           </div>
         ) : (
           <div className="space-y-3">
@@ -86,11 +79,6 @@ export default function CourseGoyoReviewPanel({ courseId }: CourseGoyoReviewPane
                     {review.reviewerNickname ?? '익명'}
                   </p>
                   <Work24Badge />
-                  {review.reviewedAt && (
-                    <span className="ml-auto text-xs text-secondary">
-                      {formatDate(review.reviewedAt)}
-                    </span>
-                  )}
                 </div>
                 {review.rating !== null && (
                   <p className="mt-1 text-[0.95rem]">

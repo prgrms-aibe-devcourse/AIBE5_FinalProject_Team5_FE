@@ -105,7 +105,7 @@ export async function fetchCompareReviewStatistics(
 ): Promise<VerifiedReviewStatistics[]> {
   return Promise.all(
     courses.map((course) =>
-      getVerifiedReviewStatistics(Number(course.id)).catch(() => createEmptyVerifiedReviewStatistics()),
+      getVerifiedReviewStatistics(course.courseId).catch(() => createEmptyVerifiedReviewStatistics()),
     ),
   )
 }

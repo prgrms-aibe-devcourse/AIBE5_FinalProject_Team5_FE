@@ -26,6 +26,7 @@ export type CourseSortKey = 'latest' | 'mostReviews' | 'rating' | 'satisfaction'
 
 /** 과정 카드 뷰모델 */
 export interface Course {
+  /** 과정 ID — `/api/courses/{courseId}` 계열 API용 */
   id: string
   courseSessionId?: number
   title: string
@@ -52,6 +53,8 @@ export interface CourseContact {
 
 /** 과정 상세 뷰모델 */
 export interface CourseDetail extends Course {
+  /** 과정 ID (회차 ID `courseSessionId`와 구분) */
+  courseId: number
   batch: string
   recruitment: CourseRecruitment
   eligibility: string
@@ -488,6 +491,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
 
   return {
     id: String(detail.courseId),
+    courseId: detail.courseId,
     courseSessionId: detail.id,
     title: detail.title,
     company: inst?.institutionName ?? '-',

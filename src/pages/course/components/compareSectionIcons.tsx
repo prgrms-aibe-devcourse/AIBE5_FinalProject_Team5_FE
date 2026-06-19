@@ -99,7 +99,7 @@ const SECTION_ICON_MAP: Record<string, ReactNode> = {
   '과정 정보': <CourseInfoIcon />,
   '지원자격': <EligibilityIcon />,
   '과정목표': <GoalsIcon />,
-  '인증 리뷰 통계': <VerifiedStatsIcon />,
+  '인증 후기 통계': <VerifiedStatsIcon />,
 }
 
 export function CompareSectionIcon({ label }: { label: string }) {

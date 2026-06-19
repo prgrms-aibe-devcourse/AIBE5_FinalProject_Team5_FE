@@ -97,7 +97,7 @@ export default function CourseDetailPage() {
             <div className="min-w-0 flex-1" role="tabpanel">
               {activeTab === 'info' ? <CourseDetailInfoSections course={course} /> : null}
               {activeTab === 'reviews' ? (
-                <CourseDetailReviewsSection courseId={Number(course.id)} />
+                <CourseDetailReviewsSection courseId={course.courseId} />
               ) : null}
             </div>
 

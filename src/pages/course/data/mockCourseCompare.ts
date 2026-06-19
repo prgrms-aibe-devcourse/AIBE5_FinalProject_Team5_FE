@@ -25,6 +25,6 @@ export const COMPARE_TABLE_ROWS: CompareTableRow[] = [
   { type: 'field', label: '지원자격', getValue: (c) => c.eligibility, multiline: true },
   { type: 'section', label: '과정목표', contentOnly: true },
   { type: 'field', label: '과정목표', getValue: (c) => c.goals, multiline: true },
-  { type: 'section', label: '인증 리뷰 통계' },
+  { type: 'section', label: '인증 후기 통계' },
   { type: 'stats' },
 ]

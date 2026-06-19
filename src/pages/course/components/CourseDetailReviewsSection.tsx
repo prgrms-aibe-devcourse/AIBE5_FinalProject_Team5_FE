@@ -31,7 +31,7 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
       <CourseReviewStatsPanel courseId={courseId} />
       <CourseReviewListPanel courseId={courseId} onClickWriteReview={() => setIsReviewTypeModalOpen(true)} />
 
-      {/* 리뷰 유형 선택 모달 */}
+      {/* 후기 유형 선택 모달 */}
       <CourseReviewTypeSelectModal
         isOpen={isReviewTypeModalOpen}
         onClose={() => {
@@ -42,7 +42,7 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
         onSelectType={(type) => {
           if (type === 'verified') {
             if (!isVerifiedReviewUser) {
-              setReviewTypeWarningMessage('미인증 사용자입니다. 인증 후 인증 리뷰를 작성할 수 있습니다.')
+              setReviewTypeWarningMessage('미인증 사용자입니다. 인증 후 인증 후기를 작성할 수 있습니다.')
               return
             }
             setIsReviewTypeModalOpen(false)

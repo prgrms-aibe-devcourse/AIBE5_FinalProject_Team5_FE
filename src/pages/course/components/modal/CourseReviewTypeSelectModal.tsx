@@ -10,8 +10,8 @@ interface CourseReviewTypeSelectModalProps {
 }
 
 const REVIEW_TYPE_OPTIONS: { id: ReviewType; label: string; description: string; emoji: string }[] = [
-  { id: 'general', label: '일반 리뷰', description: '수강 경험을 자유롭게 남겨요.', emoji: '✍️' },
-  { id: 'verified', label: '인증 리뷰', description: '인증 절차 후 신뢰도 높은 리뷰를 작성해요.', emoji: '✅' },
+  { id: 'general', label: '일반 후기', description: '수강 경험을 자유롭게 남겨요.', emoji: '✍️' },
+  { id: 'verified', label: '인증 후기', description: '인증 절차 후 신뢰도 높은 후기를 작성해요.', emoji: '✅' },
 ]
 
 export default function CourseReviewTypeSelectModal({
@@ -45,7 +45,7 @@ export default function CourseReviewTypeSelectModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
-      aria-label="리뷰 유형 선택"
+      aria-label="후기 유형 선택"
       onClick={onClose}
     >
       <div
@@ -53,11 +53,11 @@ export default function CourseReviewTypeSelectModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">리뷰 유형 선택</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 유형 선택</h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="리뷰 유형 선택 모달 닫기"
+            aria-label="후기 유형 선택 모달 닫기"
             className="rounded-lg p-2 text-secondary transition-colors hover:bg-white/80 hover:text-deepOceanNavy"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -98,7 +98,7 @@ export default function CourseReviewTypeSelectModal({
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-mistSkyBlue/45 bg-foamWhite/45 px-4 py-3 text-sm text-deepOceanNavy/80">
-            <p>* 프리미엄 리뷰는 별도 인증 과정이 필요합니다.</p>
+            <p>* 프리미엄 후기는 별도 인증 과정이 필요합니다.</p>
             <a href="#" className="font-semibold text-waterlineBlue underline underline-offset-2 hover:text-deepOceanNavy">
               인증하러 가기
             </a>

@@ -18,7 +18,7 @@ function StatsIcon() {
   )
 }
 
-// 과정 후기 통계 패널 (인증 리뷰 항목 기반)
+// 과정 후기 통계 패널 (인증 후기 항목 기반)
 export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPanelProps) {
   const [stats, setStats] = useState<VerifiedReviewStatistics>(() => createEmptyVerifiedReviewStatistics())
   const [isLoading, setIsLoading] = useState(true)
@@ -32,7 +32,7 @@ export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPa
       .then(setStats)
       .catch((err: unknown) => {
         setStats(createEmptyVerifiedReviewStatistics())
-        setFetchError(err instanceof Error ? err.message : '리뷰 통계를 불러올 수 없습니다.')
+        setFetchError(err instanceof Error ? err.message : '후기 통계를 불러올 수 없습니다.')
       })
       .finally(() => setIsLoading(false))
   }, [courseId])
@@ -46,7 +46,7 @@ export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPa
       <div className="mb-2 px-1">
         <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
           <span className="flex h-6 w-6 items-center justify-center text-waterlineBlue"><StatsIcon /></span>
-          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">리뷰 통계</h3>
+          <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">후기 통계</h3>
         </div>
       </div>
       <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
@@ -71,7 +71,7 @@ export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPa
                   </span>
                 </div>
                 <p className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-mistSkyBlue/55 bg-white px-3 py-1 text-[0.72rem] font-semibold text-deepOceanNavy md:text-xs">
-                  <span className="text-waterlineBlue">인증 리뷰</span>
+                  <span className="text-waterlineBlue">인증 후기</span>
                   <span>{reviewCount}개</span>
                 </p>
               </div>

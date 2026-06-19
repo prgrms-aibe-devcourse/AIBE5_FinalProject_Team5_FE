@@ -10,6 +10,92 @@ export interface CrawledReview {
   crawledAt: string
 }
 
+/** BE 크롤링 후기 응답 — camelCase / snake_case 모두 허용 */
+type CrawledReviewDTO = {
+  id?: number
+  source?: CrawledReview['source']
+  reviewerNickname?: string | null
+  reviewer_nickname?: string | null
+  rating?: number | null
+  content?: string | null
+  reviewedAt?: unknown
+  reviewed_at?: unknown
+  reviewDate?: unknown
+  review_date?: unknown
+  crawledAt?: unknown
+  crawled_at?: unknown
+}
+
+function pickNullableString(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      if (trimmed) return trimmed
+    }
+  }
+  return null
+}
+
+function pickNullableNumber(value: unknown): number | null {
+  if (typeof value === 'number' && !Number.isNaN(value)) return value
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+    if (!Number.isNaN(parsed)) return parsed
+  }
+  return null
+}
+
+function formatIsoDateTime(y: number, m: number, d: number, h = 0, min = 0, s = 0): string {
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}T${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+/** API 날짜 필드 → ISO-like 문자열 (LocalDateTime 배열/객체 포함) */
+export function parseApiDateTime(value: unknown): string | null {
+  if (value == null) return null
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed || null
+  }
+
+  if (Array.isArray(value)) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = value
+    if (typeof year === 'number' && typeof month === 'number' && typeof day === 'number') {
+      return formatIsoDateTime(year, month, day, Number(hour), Number(minute), Number(second))
+    }
+    return null
+  }
+
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>
+    if ('year' in record) {
+      const year = Number(record.year)
+      const month = Number(record.monthValue ?? record.month)
+      const day = Number(record.dayOfMonth ?? record.day)
+      const hour = Number(record.hour ?? 0)
+      const minute = Number(record.minute ?? 0)
+      const second = Number(record.second ?? 0)
+      if (!Number.isNaN(year) && !Number.isNaN(month) && !Number.isNaN(day)) {
+        return formatIsoDateTime(year, month, day, hour, minute, second)
+      }
+    }
+  }
+
+  return null
+}
+
+function toCrawledReview(raw: CrawledReviewDTO): CrawledReview {
+  return {
+    id: Number(raw.id),
+    source: raw.source ?? 'WORK24',
+    reviewerNickname: pickNullableString(raw.reviewerNickname, raw.reviewer_nickname),
+    rating: pickNullableNumber(raw.rating),
+    content: pickNullableString(raw.content),
+    reviewedAt: parseApiDateTime(raw.reviewedAt ?? raw.reviewed_at ?? raw.reviewDate ?? raw.review_date),
+    crawledAt: parseApiDateTime(raw.crawledAt ?? raw.crawled_at) ?? '',
+  }
+}
+
 // ApiResponse<Page<T>> → http.get이 data를 unwrap → Spring Page 구조
 export interface SpringPage<T> {
   content: T[]
@@ -22,18 +108,25 @@ export interface SpringPage<T> {
   empty: boolean
 }
 
-export function getCrawledReviews(
+/** 고용 24 등 크롤링 후기 목록 — GET /api/courses/{courseId}/crawled-reviews (courseSessionId 아님) */
+export async function getCrawledReviews(
   courseId: number,
   page = 0,
   size = 10,
+  sort = 'crawledAt,desc',
 ): Promise<SpringPage<CrawledReview>> {
-  return http.get<SpringPage<CrawledReview>>(
+  const data = await http.get<SpringPage<CrawledReviewDTO>>(
     `/api/courses/${courseId}/crawled-reviews`,
     {
-      query: { page, size, sort: 'crawledAt,desc' },
+      query: { page, size, sort },
       auth: false,
     },
   )
+
+  return {
+    ...data,
+    content: (data.content ?? []).map(toCrawledReview),
+  }
 }
 
 // ──────────────────────────────────────────────

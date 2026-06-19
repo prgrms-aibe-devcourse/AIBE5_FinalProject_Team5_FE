@@ -91,7 +91,7 @@ export default function CourseVerifiedReviewStep3QualityModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
-      aria-label="인증 리뷰 작성 3단계"
+      aria-label="인증 후기 작성 3단계"
       onClick={onClose}
     >
       <div
@@ -99,11 +99,11 @@ export default function CourseVerifiedReviewStep3QualityModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">리뷰 작성</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 작성</h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="리뷰 작성 모달 닫기"
+            aria-label="후기 작성 모달 닫기"
             className="rounded-lg p-2 text-secondary transition-colors hover:bg-white/80 hover:text-deepOceanNavy"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">

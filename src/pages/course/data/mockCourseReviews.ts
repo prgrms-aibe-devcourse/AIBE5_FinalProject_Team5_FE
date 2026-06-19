@@ -13,6 +13,7 @@ export interface MockReviewItem {
   user: string
   rating: number
   content: string
+  reviewedAt?: string | null
 }
 
 export interface VerifiedReviewDetail {

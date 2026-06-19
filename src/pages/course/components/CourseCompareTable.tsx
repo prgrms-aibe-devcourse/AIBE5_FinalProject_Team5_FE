@@ -118,7 +118,7 @@ function CompareStatsCell({ stats }: { stats: VerifiedReviewStatistics }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3 rounded-lg border border-mistSkyBlue/35 bg-foamWhite/60 px-3 py-2.5">
         <div>
-          <p className="text-[0.7rem] font-medium text-secondary">인증 리뷰</p>
+          <p className="text-[0.7rem] font-medium text-secondary">인증 후기</p>
           <p className="text-lg font-bold text-deepOceanNavy">{stats.reviewCount}건</p>
         </div>
         <div className="text-right">
