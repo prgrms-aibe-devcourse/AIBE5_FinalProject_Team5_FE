@@ -219,6 +219,7 @@ export interface CourseListParams {
   durationFilter?: DurationFilter
   page?: number // 0-based (BE 규격)
   size?: number
+  sort?: string
 }
 
 /** BE 분야 카테고리 목록 (fieldCategory 필터 옵션) */
