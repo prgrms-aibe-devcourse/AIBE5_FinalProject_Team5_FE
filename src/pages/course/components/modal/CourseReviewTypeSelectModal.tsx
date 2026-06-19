@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 type ReviewType = 'general' | 'verified'
 
@@ -99,9 +100,13 @@ export default function CourseReviewTypeSelectModal({
 
           <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-mistSkyBlue/45 bg-foamWhite/45 px-4 py-3 text-sm text-deepOceanNavy/80">
             <p>* 프리미엄 후기는 별도 인증 과정이 필요합니다.</p>
-            <a href="#" className="font-semibold text-waterlineBlue underline underline-offset-2 hover:text-deepOceanNavy">
+            <Link
+              to="/dashboard/profile"
+              onClick={onClose}
+              className="font-semibold text-waterlineBlue underline underline-offset-2 hover:text-deepOceanNavy"
+            >
               인증하러 가기
-            </a>
+            </Link>
           </div>
 
           {warningMessage ? (

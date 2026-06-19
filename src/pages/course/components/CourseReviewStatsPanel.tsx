@@ -8,6 +8,7 @@ import {
 
 interface CourseReviewStatsPanelProps {
   courseId: number
+  refreshKey?: number
 }
 
 function StatsIcon() {
@@ -19,7 +20,7 @@ function StatsIcon() {
 }
 
 // 과정 후기 통계 패널 (인증 후기 항목 기반)
-export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPanelProps) {
+export default function CourseReviewStatsPanel({ courseId, refreshKey = 0 }: CourseReviewStatsPanelProps) {
   const [stats, setStats] = useState<VerifiedReviewStatistics>(() => createEmptyVerifiedReviewStatistics())
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
@@ -35,7 +36,7 @@ export default function CourseReviewStatsPanel({ courseId }: CourseReviewStatsPa
         setFetchError(err instanceof Error ? err.message : '후기 통계를 불러올 수 없습니다.')
       })
       .finally(() => setIsLoading(false))
-  }, [courseId])
+  }, [courseId, refreshKey])
 
   const { reviewCount, averageRating, ratingBars, priorKnowledgeDistribution, qualityMetrics } = stats
   const maxRatingCount = Math.max(...ratingBars.map((item) => item.count), 1)

@@ -385,3 +385,57 @@ export async function getVerifiedReviewStatistics(courseId: number): Promise<Ver
   )
   return toVerifiedReviewStatistics(data)
 }
+
+// ──────────────────────────────────────────────
+// 과정 리뷰 작성 POST /api/courses/{courseId}/reviews
+// ──────────────────────────────────────────────
+
+export interface CreateVerifiedReviewDetailPayload {
+  priorKnowledgeLevel: string
+  age: number
+  learningGoal: string
+  attendanceType: string
+  cohort: number
+  courseDifficulty: string
+  progressSpeed: string
+  teamProjectDifficulty: string
+  avgSelfStudyHours: number
+  instructorDeliveryRating: number
+  curriculumRating: number
+  employmentSupportRating: number
+  projectCount: number
+  projectAchievementRating: number
+  toolSupportRating: number
+  mentoringSatisfactionRating: number
+  completionStatus: string
+  employmentStatus?: string
+  dropoutMajorReason?: string
+  dropoutSubReason?: string
+  collaborationComment?: string
+}
+
+export interface CreateGeneralReviewPayload {
+  courseSessionId: number
+  reviewType: 'GENERAL'
+  overallRating: number
+  content: string
+}
+
+export interface CreateVerifiedReviewPayload {
+  courseSessionId: number
+  reviewType: 'VERIFIED'
+  verifiedDetail: CreateVerifiedReviewDetailPayload
+  content?: string
+  rating?: number
+}
+
+export type CreateCourseReviewPayload = CreateGeneralReviewPayload | CreateVerifiedReviewPayload
+
+/** 과정 리뷰 작성 */
+export async function createCourseReview(
+  courseId: number,
+  payload: CreateCourseReviewPayload,
+): Promise<CourseReview> {
+  const data = await http.post<CourseReviewDTO>(`/api/courses/${courseId}/reviews`, payload, { auth: true })
+  return toCourseReview(data)
+}

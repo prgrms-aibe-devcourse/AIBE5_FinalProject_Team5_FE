@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import CourseReviewListPanel from './CourseReviewListPanel.tsx'
 import CourseReviewStatsPanel from './CourseReviewStatsPanel.tsx'
 import CourseGeneralReviewModal from './modal/CourseGeneralReviewModal.tsx'
@@ -9,13 +10,122 @@ import CourseVerifiedReviewStep2RatingModal from './modal/CourseVerifiedReviewSt
 import CourseVerifiedReviewStep3QualityModal from './modal/CourseVerifiedReviewStep3QualityModal.tsx'
 import CourseVerifiedReviewStep4ProjectModal from './modal/CourseVerifiedReviewStep4ProjectModal.tsx'
 import CourseVerifiedReviewStep5DetailModal from './modal/CourseVerifiedReviewStep5DetailModal.tsx'
+import { ApiError } from '../../../services/ApiError.ts'
+import { isAuthenticated } from '../../../services/authToken.ts'
+import {
+  createCourseReview,
+  type CreateVerifiedReviewDetailPayload,
+} from '../../../services/review.ts'
+import { hasApprovedVerificationForSession } from '../../../services/verification.ts'
 
 interface CourseDetailReviewsSectionProps {
   courseId: number
+  courseSessionId: number
+  onReviewSubmitted?: () => void
 }
 
-export default function CourseDetailReviewsSection({ courseId }: CourseDetailReviewsSectionProps) {
-  const isVerifiedReviewUser = true
+type VerifiedReviewDraft = {
+  step1?: {
+    priorKnowledgeLevel: string
+    age: string
+    learningGoal: string
+    attendanceType: string
+    cohort: string
+  }
+  step2?: {
+    courseDifficulty: string
+    progressSpeed: string
+    teamProjectDifficulty: string
+    avgSelfStudyHours: string
+  }
+  step3?: {
+    instructorDeliveryRating: number
+    curriculumRating: number
+    employmentSupportRating: number
+  }
+  step4?: {
+    projectCount: string
+    projectAchievementRating: number
+    toolSupportRating: number
+    mentoringSatisfactionRating: number
+  }
+}
+
+function getReviewSubmitErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.code) {
+      case 'VERIFICATION_NOT_APPROVED':
+        return '수료 인증이 승인되지 않아 인증 후기를 작성할 수 없습니다.'
+      case 'REVIEW_ALREADY_EXISTS':
+        return '이미 해당 회차에 후기를 작성하셨습니다.'
+      case 'UNAUTHORIZED':
+        return '로그인이 필요합니다.'
+      default:
+        return error.message
+    }
+  }
+
+  return error instanceof Error ? error.message : '후기 작성에 실패했습니다.'
+}
+
+function buildVerifiedDetailPayload(
+  draft: VerifiedReviewDraft,
+  step5: {
+    completionStatus: string
+    dropoutMajorReason: string
+    dropoutSubReason: string
+    collaborationComment: string
+    employmentStatus: string
+  },
+): CreateVerifiedReviewDetailPayload {
+  if (!draft.step1 || !draft.step2 || !draft.step3 || !draft.step4) {
+    throw new Error('인증 후기 작성 정보가 누락되었습니다.')
+  }
+
+  const detail: CreateVerifiedReviewDetailPayload = {
+    priorKnowledgeLevel: draft.step1.priorKnowledgeLevel,
+    age: Number(draft.step1.age),
+    learningGoal: draft.step1.learningGoal,
+    attendanceType: draft.step1.attendanceType,
+    cohort: Number(draft.step1.cohort),
+    courseDifficulty: draft.step2.courseDifficulty,
+    progressSpeed: draft.step2.progressSpeed,
+    teamProjectDifficulty: draft.step2.teamProjectDifficulty,
+    avgSelfStudyHours: Number(draft.step2.avgSelfStudyHours),
+    instructorDeliveryRating: draft.step3.instructorDeliveryRating,
+    curriculumRating: draft.step3.curriculumRating,
+    employmentSupportRating: draft.step3.employmentSupportRating,
+    projectCount: Number(draft.step4.projectCount),
+    projectAchievementRating: draft.step4.projectAchievementRating,
+    toolSupportRating: draft.step4.toolSupportRating,
+    mentoringSatisfactionRating: draft.step4.mentoringSatisfactionRating,
+    completionStatus: step5.completionStatus,
+  }
+
+  if (step5.completionStatus === 'completed') {
+    detail.employmentStatus = step5.employmentStatus
+  }
+
+  if (step5.completionStatus === 'dropout') {
+    detail.dropoutMajorReason = step5.dropoutMajorReason
+    detail.dropoutSubReason = step5.dropoutSubReason
+  }
+
+  const comment = step5.collaborationComment.trim()
+  if (comment) {
+    detail.collaborationComment = comment
+  }
+
+  return detail
+}
+
+export default function CourseDetailReviewsSection({
+  courseId,
+  courseSessionId,
+  onReviewSubmitted,
+}: CourseDetailReviewsSectionProps) {
+  const navigate = useNavigate()
+  const [listRefreshKey, setListRefreshKey] = useState(0)
   const [isReviewTypeModalOpen, setIsReviewTypeModalOpen] = useState(false)
   const [isGeneralReviewModalOpen, setIsGeneralReviewModalOpen] = useState(false)
   const [isVerifiedReviewStep1ModalOpen, setIsVerifiedReviewStep1ModalOpen] = useState(false)
@@ -25,13 +135,87 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
   const [isVerifiedReviewStep5ModalOpen, setIsVerifiedReviewStep5ModalOpen] = useState(false)
   const [isReviewSubmitSuccessModalOpen, setIsReviewSubmitSuccessModalOpen] = useState(false)
   const [reviewTypeWarningMessage, setReviewTypeWarningMessage] = useState<string | null>(null)
+  const [isCheckingVerification, setIsCheckingVerification] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [generalSubmitError, setGeneralSubmitError] = useState<string | null>(null)
+  const [verifiedSubmitError, setVerifiedSubmitError] = useState<string | null>(null)
+  const [verifiedDraft, setVerifiedDraft] = useState<VerifiedReviewDraft>({})
+
+  const handleWriteReviewClick = useCallback(() => {
+    if (!isAuthenticated()) {
+      navigate('/login')
+      return
+    }
+    setIsReviewTypeModalOpen(true)
+  }, [navigate])
+
+  const handleReviewSubmitted = useCallback(() => {
+    setListRefreshKey((key) => key + 1)
+    onReviewSubmitted?.()
+    setIsReviewSubmitSuccessModalOpen(true)
+  }, [onReviewSubmitted])
+
+  const handleGeneralSubmit = async (payload: { overallRating: number; content: string }) => {
+    setIsSubmitting(true)
+    setGeneralSubmitError(null)
+
+    try {
+      await createCourseReview(courseId, {
+        courseSessionId,
+        reviewType: 'GENERAL',
+        overallRating: payload.overallRating,
+        content: payload.content,
+      })
+
+      setIsGeneralReviewModalOpen(false)
+      handleReviewSubmitted()
+    } catch (error) {
+      setGeneralSubmitError(getReviewSubmitErrorMessage(error))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleVerifiedSubmit = async (step5: {
+    completionStatus: string
+    dropoutMajorReason: string
+    dropoutSubReason: string
+    collaborationComment: string
+    employmentStatus: string
+  }) => {
+    setIsSubmitting(true)
+    setVerifiedSubmitError(null)
+
+    try {
+      const verifiedDetail = buildVerifiedDetailPayload(verifiedDraft, step5)
+      const comment = step5.collaborationComment.trim()
+
+      await createCourseReview(courseId, {
+        courseSessionId,
+        reviewType: 'VERIFIED',
+        verifiedDetail,
+        ...(comment ? { content: comment } : {}),
+      })
+
+      setIsVerifiedReviewStep5ModalOpen(false)
+      setVerifiedDraft({})
+      handleReviewSubmitted()
+    } catch (error) {
+      setVerifiedSubmitError(getReviewSubmitErrorMessage(error))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <section className="space-y-6 rounded-2xl">
-      <CourseReviewStatsPanel courseId={courseId} />
-      <CourseReviewListPanel courseId={courseId} onClickWriteReview={() => setIsReviewTypeModalOpen(true)} />
+      <CourseReviewStatsPanel courseId={courseId} refreshKey={listRefreshKey} />
+      <CourseReviewListPanel
+        courseId={courseId}
+        refreshKey={listRefreshKey}
+        onClickWriteReview={handleWriteReviewClick}
+      />
 
-      {/* 후기 유형 선택 모달 */}
       <CourseReviewTypeSelectModal
         isOpen={isReviewTypeModalOpen}
         onClose={() => {
@@ -39,36 +223,60 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
           setReviewTypeWarningMessage(null)
         }}
         warningMessage={reviewTypeWarningMessage}
-        onSelectType={(type) => {
+        onSelectType={async (type) => {
           if (type === 'verified') {
-            if (!isVerifiedReviewUser) {
-              setReviewTypeWarningMessage('미인증 사용자입니다. 인증 후 인증 후기를 작성할 수 있습니다.')
-              return
-            }
-            setIsReviewTypeModalOpen(false)
             setReviewTypeWarningMessage(null)
-            setIsVerifiedReviewStep1ModalOpen(true)
+            setIsCheckingVerification(true)
+
+            try {
+              const approved = await hasApprovedVerificationForSession(courseSessionId)
+              if (!approved) {
+                setReviewTypeWarningMessage('미인증 사용자입니다. 인증 후 인증 후기를 작성할 수 있습니다.')
+                return
+              }
+
+              setVerifiedDraft({})
+              setIsReviewTypeModalOpen(false)
+              setIsVerifiedReviewStep1ModalOpen(true)
+            } catch (error) {
+              setReviewTypeWarningMessage(getReviewSubmitErrorMessage(error))
+            } finally {
+              setIsCheckingVerification(false)
+            }
             return
           }
+
           if (type === 'general') {
             setIsReviewTypeModalOpen(false)
             setReviewTypeWarningMessage(null)
+            setGeneralSubmitError(null)
             setIsGeneralReviewModalOpen(true)
           }
         }}
       />
 
+      {isCheckingVerification ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-deepOceanNavy/25 px-4">
+          <p className="rounded-xl bg-white px-5 py-3 text-sm font-medium text-deepOceanNavy shadow-lg">
+            인증 상태 확인 중...
+          </p>
+        </div>
+      ) : null}
+
       <CourseGeneralReviewModal
         isOpen={isGeneralReviewModalOpen}
-        onClose={() => setIsGeneralReviewModalOpen(false)}
+        onClose={() => {
+          setIsGeneralReviewModalOpen(false)
+          setGeneralSubmitError(null)
+        }}
         onBack={() => {
           setIsGeneralReviewModalOpen(false)
+          setGeneralSubmitError(null)
           setIsReviewTypeModalOpen(true)
         }}
-        onSubmit={() => {
-          setIsGeneralReviewModalOpen(false)
-          setIsReviewSubmitSuccessModalOpen(true)
-        }}
+        onSubmit={handleGeneralSubmit}
+        isSubmitting={isSubmitting}
+        submitError={generalSubmitError}
       />
 
       <CourseVerifiedReviewStep1InfoModal
@@ -78,7 +286,8 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
           setIsVerifiedReviewStep1ModalOpen(false)
           setIsReviewTypeModalOpen(true)
         }}
-        onNext={() => {
+        onNext={(payload) => {
+          setVerifiedDraft((current) => ({ ...current, step1: payload }))
           setIsVerifiedReviewStep1ModalOpen(false)
           setIsVerifiedReviewStep2ModalOpen(true)
         }}
@@ -91,7 +300,8 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
           setIsVerifiedReviewStep2ModalOpen(false)
           setIsVerifiedReviewStep1ModalOpen(true)
         }}
-        onNext={() => {
+        onNext={(payload) => {
+          setVerifiedDraft((current) => ({ ...current, step2: payload }))
           setIsVerifiedReviewStep2ModalOpen(false)
           setIsVerifiedReviewStep3ModalOpen(true)
         }}
@@ -104,7 +314,8 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
           setIsVerifiedReviewStep3ModalOpen(false)
           setIsVerifiedReviewStep2ModalOpen(true)
         }}
-        onNext={() => {
+        onNext={(payload) => {
+          setVerifiedDraft((current) => ({ ...current, step3: payload }))
           setIsVerifiedReviewStep3ModalOpen(false)
           setIsVerifiedReviewStep4ModalOpen(true)
         }}
@@ -117,23 +328,28 @@ export default function CourseDetailReviewsSection({ courseId }: CourseDetailRev
           setIsVerifiedReviewStep4ModalOpen(false)
           setIsVerifiedReviewStep3ModalOpen(true)
         }}
-        onNext={() => {
+        onNext={(payload) => {
+          setVerifiedDraft((current) => ({ ...current, step4: payload }))
           setIsVerifiedReviewStep4ModalOpen(false)
+          setVerifiedSubmitError(null)
           setIsVerifiedReviewStep5ModalOpen(true)
         }}
       />
 
       <CourseVerifiedReviewStep5DetailModal
         isOpen={isVerifiedReviewStep5ModalOpen}
-        onClose={() => setIsVerifiedReviewStep5ModalOpen(false)}
+        onClose={() => {
+          setIsVerifiedReviewStep5ModalOpen(false)
+          setVerifiedSubmitError(null)
+        }}
         onBack={() => {
           setIsVerifiedReviewStep5ModalOpen(false)
+          setVerifiedSubmitError(null)
           setIsVerifiedReviewStep4ModalOpen(true)
         }}
-        onSubmit={() => {
-          setIsVerifiedReviewStep5ModalOpen(false)
-          setIsReviewSubmitSuccessModalOpen(true)
-        }}
+        onSubmit={handleVerifiedSubmit}
+        isSubmitting={isSubmitting}
+        submitError={verifiedSubmitError}
       />
 
       <CourseReviewSubmitSuccessModal

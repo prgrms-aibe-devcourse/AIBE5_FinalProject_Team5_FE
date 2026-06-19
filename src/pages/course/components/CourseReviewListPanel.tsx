@@ -21,6 +21,7 @@ const REVIEW_SOURCE_TABS: { id: ReviewSource; label: string; description: string
 
 interface CourseReviewListPanelProps {
   courseId: number
+  refreshKey?: number
   onClickWriteReview?: () => void
 }
 
@@ -403,7 +404,7 @@ function SiteReviewCard({ review, expanded, onToggle }: {
   )
 }
 
-export default function CourseReviewListPanel({ courseId, onClickWriteReview }: CourseReviewListPanelProps) {
+export default function CourseReviewListPanel({ courseId, refreshKey = 0, onClickWriteReview }: CourseReviewListPanelProps) {
   const [reviewSource, setReviewSource] = useState<ReviewSource>('site')
   const [siteFilter, setSiteFilter] = useState<SiteFilter>('all')
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
@@ -463,7 +464,7 @@ export default function CourseReviewListPanel({ courseId, onClickWriteReview }: 
     return () => {
       cancelled = true
     }
-  }, [courseId, reviewSource, siteFilter, currentPage])
+  }, [courseId, reviewSource, siteFilter, currentPage, refreshKey])
 
   useEffect(() => {
     if (reviewSource !== 'goyo24') return

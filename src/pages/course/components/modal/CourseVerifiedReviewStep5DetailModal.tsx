@@ -14,6 +14,8 @@ interface CourseVerifiedReviewStep5DetailModalProps {
     collaborationComment: string
     employmentStatus: string
   }) => void
+  isSubmitting?: boolean
+  submitError?: string | null
 }
 
 const DROPOUT_MAJOR_REASON_FILTER: CourseFilterConfig = {
@@ -80,6 +82,8 @@ export default function CourseVerifiedReviewStep5DetailModal({
   onClose,
   onBack,
   onSubmit,
+  isSubmitting = false,
+  submitError = null,
 }: CourseVerifiedReviewStep5DetailModalProps) {
   const [completionStatus, setCompletionStatus] = useState('dropout')
   const [dropoutMajorReason, setDropoutMajorReason] = useState('')
@@ -213,18 +217,27 @@ export default function CourseVerifiedReviewStep5DetailModal({
           </div>
         </div>
 
+        {submitError ? (
+          <div className="px-6 md:px-7">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
+              {submitError}
+            </div>
+          </div>
+        ) : null}
+
         <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60"
+              disabled={isSubmitting}
+              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60 disabled:cursor-not-allowed disabled:opacity-60"
             >
               이전
             </button>
             <button
               type="button"
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               onClick={() =>
                 onSubmit?.({
                   completionStatus,
@@ -236,7 +249,7 @@ export default function CourseVerifiedReviewStep5DetailModal({
               }
               className="inline-flex min-w-24 items-center justify-center rounded-lg bg-deepOceanNavy px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue disabled:cursor-not-allowed disabled:bg-secondary/50"
             >
-              제출
+              {isSubmitting ? '제출 중...' : '제출'}
             </button>
           </div>
         </div>

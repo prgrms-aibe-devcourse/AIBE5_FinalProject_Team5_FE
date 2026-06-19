@@ -269,6 +269,16 @@ export async function getAdminVerificationEvidence(
   })
 }
 
+/** 해당 회차에 승인된 수강 인증이 있는지 확인 */
+export async function hasApprovedVerificationForSession(courseSessionId: number): Promise<boolean> {
+  const page = await http.get<PageResponse<VerificationListItem>>('/api/verifications/my', {
+    query: { status: 'APPROVED', size: 100 },
+    auth: true,
+  })
+
+  return (page.content ?? []).some((item) => item.courseSessionId === courseSessionId && item.status === 'APPROVED')
+}
+
 /** 사용자 수강 인증 신청 (POST /api/verifications) */
 export async function submitVerification(params: SubmitVerificationParams): Promise<UserCertificationRequest> {
   const formData = new FormData()

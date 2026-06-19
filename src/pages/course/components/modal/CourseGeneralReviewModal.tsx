@@ -5,6 +5,8 @@ interface CourseGeneralReviewModalProps {
   onClose: () => void
   onBack?: () => void
   onSubmit?: (payload: { overallRating: number; content: string }) => void
+  isSubmitting?: boolean
+  submitError?: string | null
 }
 
 function StarButton({
@@ -30,7 +32,14 @@ function StarButton({
   )
 }
 
-export default function CourseGeneralReviewModal({ isOpen, onClose, onBack, onSubmit }: CourseGeneralReviewModalProps) {
+export default function CourseGeneralReviewModal({
+  isOpen,
+  onClose,
+  onBack,
+  onSubmit,
+  isSubmitting = false,
+  submitError = null,
+}: CourseGeneralReviewModalProps) {
   const [overallRating, setOverallRating] = useState(0)
   const [content, setContent] = useState('')
 
@@ -108,22 +117,31 @@ export default function CourseGeneralReviewModal({ isOpen, onClose, onBack, onSu
           </article>
         </div>
 
+        {submitError ? (
+          <div className="px-6 md:px-7">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
+              {submitError}
+            </div>
+          </div>
+        ) : null}
+
         <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60"
+              disabled={isSubmitting}
+              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60 disabled:cursor-not-allowed disabled:opacity-60"
             >
               이전
             </button>
             <button
               type="button"
-              disabled={!isSubmitEnabled}
+              disabled={!isSubmitEnabled || isSubmitting}
               onClick={() => onSubmit?.({ overallRating, content: content.trim() })}
               className="inline-flex min-w-24 items-center justify-center rounded-lg bg-deepOceanNavy px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue disabled:cursor-not-allowed disabled:bg-secondary/50"
             >
-              제출
+              {isSubmitting ? '제출 중...' : '제출'}
             </button>
           </div>
         </div>
