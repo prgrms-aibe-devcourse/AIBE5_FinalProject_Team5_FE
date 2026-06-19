@@ -168,6 +168,7 @@ export interface CourseReview {
   content: string
   createdAt: string
   verifiedDetail: CourseReviewVerifiedDetail | null
+  courseTitle: string | null
 }
 
 type CourseReviewVerifiedDetailDTO = Partial<CourseReviewVerifiedDetail> & {
@@ -191,6 +192,7 @@ type CourseReviewDTO = {
   user_profile_image_url?: string | null
   courseId?: number
   courseTitle?: string | null
+  course_title?: string | null
   courseSessionId?: number | null
   reviewType?: string
   review_type?: string
@@ -249,6 +251,7 @@ function toCourseReview(raw: CourseReviewDTO): CourseReview {
     content: pickNullableString(raw.content) ?? '',
     createdAt: parseApiDateTime(raw.createdAt ?? raw.created_at) ?? '',
     verifiedDetail: reviewType === 'VERIFIED' ? toCourseReviewVerifiedDetail(verifiedRaw) : null,
+    courseTitle: pickNullableString(raw.courseTitle, raw.course_title),
   }
 }
 
@@ -438,4 +441,13 @@ export async function createCourseReview(
 ): Promise<CourseReview> {
   const data = await http.post<CourseReviewDTO>(`/api/courses/${courseId}/reviews`, payload, { auth: true })
   return toCourseReview(data)
+}
+
+/** 최신 리뷰 조회 (글로벌) — GET /api/reviews/latest */
+export async function getLatestReviews(limit = 5): Promise<CourseReview[]> {
+  const data = await http.get<CourseReviewDTO[]>('/api/reviews/latest', {
+    query: { limit },
+    auth: false,
+  })
+  return (data ?? []).map(toCourseReview)
 }

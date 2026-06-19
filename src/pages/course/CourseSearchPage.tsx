@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
 import Pagination from '../../components/common/Pagination.tsx'
@@ -24,10 +24,34 @@ function buildInitialFilterValues(): Record<string, string> {
 
 export default function CourseSearchPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
-  const [keyword, setKeyword] = useState('')
-  const [searchKeyword, setSearchKeyword] = useState('')
-  const [filterValues, setFilterValues] = useState(buildInitialFilterValues)
+  const [keyword, setKeyword] = useState(() => {
+    return searchParams.get('q') || searchParams.get('keyword') || ''
+  })
+  const [searchKeyword, setSearchKeyword] = useState(() => {
+    return searchParams.get('q') || searchParams.get('keyword') || ''
+  })
+  const [filterValues, setFilterValues] = useState(() => {
+    const initial = buildInitialFilterValues()
+    const categoryParam = searchParams.get('category')
+    if (categoryParam) {
+      let resolvedCategory = categoryParam
+      if (categoryParam === 'sw') resolvedCategory = 'APP_SW'
+      else if (categoryParam === 'uiux') resolvedCategory = 'UI_UX'
+      else if (categoryParam === 'data') resolvedCategory = 'BIG_DATA'
+      else if (categoryParam === 'ai') resolvedCategory = 'AI'
+      else if (categoryParam === 'cloud') resolvedCategory = 'CLOUD'
+      else if (categoryParam === 'security') resolvedCategory = 'SECURITY'
+      else if (categoryParam === 'vr') resolvedCategory = 'VR'
+
+      const validCategories = ['AI', 'SECURITY', 'BIG_DATA', 'CLOUD', 'UI_UX', 'VR', 'APP_SW', 'OTHERS']
+      if (validCategories.includes(resolvedCategory.toUpperCase())) {
+        initial['category'] = resolvedCategory.toUpperCase()
+      }
+    }
+    return initial
+  })
   const [sortKey, setSortKey] = useState<CourseSortKey>('latest')
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -45,6 +69,37 @@ export default function CourseSearchPage() {
     removeFromCompare,
   } = useCompareCourses()
   const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
+
+  // Sync state when URL query parameters change (e.g. from back/forward navigation or clicking header)
+  useEffect(() => {
+    const q = searchParams.get('q') || searchParams.get('keyword') || ''
+    setKeyword(q)
+    setSearchKeyword(q)
+
+    const categoryParam = searchParams.get('category') || ''
+    let resolvedCategory = 'all'
+    if (categoryParam) {
+      if (categoryParam === 'sw') resolvedCategory = 'APP_SW'
+      else if (categoryParam === 'uiux') resolvedCategory = 'UI_UX'
+      else if (categoryParam === 'data') resolvedCategory = 'BIG_DATA'
+      else if (categoryParam === 'ai') resolvedCategory = 'AI'
+      else if (categoryParam === 'cloud') resolvedCategory = 'CLOUD'
+      else if (categoryParam === 'security') resolvedCategory = 'SECURITY'
+      else if (categoryParam === 'vr') resolvedCategory = 'VR'
+      else {
+        const validCategories = ['AI', 'SECURITY', 'BIG_DATA', 'CLOUD', 'UI_UX', 'VR', 'APP_SW', 'OTHERS']
+        if (validCategories.includes(categoryParam.toUpperCase())) {
+          resolvedCategory = categoryParam.toUpperCase()
+        }
+      }
+    }
+
+    setFilterValues((prev) => ({
+      ...prev,
+      category: resolvedCategory,
+    }))
+    setCurrentPage(1)
+  }, [searchParams])
 
   useEffect(() => {
     const params = toCourseListParams(filterValues, searchKeyword, currentPage)
