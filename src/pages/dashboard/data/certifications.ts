@@ -1,38 +1,19 @@
-import { mockBookmarkCourses, recentCourses } from './courses'
-
 export type UserCertificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 export type CertifiableCourse = {
-  id: number
+  courseId: number
+  courseSessionId: number
   title: string
   academy: string
 }
-
-function buildCertifiableCourses(): CertifiableCourse[] {
-  const courseMap = new Map<number, CertifiableCourse>()
-
-  for (const course of mockBookmarkCourses) {
-    courseMap.set(course.id, { id: course.id, title: course.title, academy: course.academy })
-  }
-
-  for (const course of recentCourses) {
-    if (!courseMap.has(course.id)) {
-      courseMap.set(course.id, { id: course.id, title: course.title, academy: course.academy })
-    }
-  }
-
-  return Array.from(courseMap.values())
-}
-
-/** API 연동 후 제거 예정 — 인증 가능 과정 목록 */
-export const certifiableCourses = buildCertifiableCourses()
 
 export type CertificationDocumentType = 'TRAINING_HISTORY' | 'ONLINE_APPLICATION'
 
 export type CourseCertificationSubmitPayload = {
   courseId: number
-  courseName: string
-  files: Record<CertificationDocumentType, File>
+  courseSessionId: number
+  jobTrainingHistoryFile: File
+  onlineCourseApplicationFile: File
 }
 
 export type CertificationDocument = {

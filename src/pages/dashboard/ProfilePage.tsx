@@ -1,17 +1,15 @@
-import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Toast from '../../components/common/Toast'
 import { ApiError } from '../../services/ApiError'
 import { clearAuthSession, updateStoredUserProfile } from '../../services/auth'
 import { changePassword, deleteMyAccount, getMyProfile, updateMyProfile, type UserProfile } from '../../services/user'
+import { getMyVerifications, submitVerification } from '../../services/verification'
 import {
-  myCertificationRequests,
-  type CertificationDocumentType,
   type CourseCertificationSubmitPayload,
   type UserCertificationRequest,
 } from './data/certifications'
 import { getProfileEmailDisplay } from './data/profile'
-import { toScheduleDateKey } from './data/schedule'
 import CertificationRequestRowCard from './components/CertificationRequestRowCard'
 import DashboardActionButton from './components/DashboardActionButton'
 import DashboardCard from './components/DashboardCard'
@@ -155,13 +153,22 @@ function ProfileSummarySkeleton() {
   )
 }
 
-function toRequestId(requests: UserCertificationRequest[]) {
-  return requests.length ? Math.max(...requests.map((request) => request.id)) + 1 : 1
-}
-
-function toDocumentId(requests: UserCertificationRequest[]) {
-  const allDocuments = requests.flatMap((request) => request.documents)
-  return allDocuments.length ? Math.max(...allDocuments.map((doc) => doc.id)) + 1 : 1
+function CertificationRequestListSkeleton() {
+  return (
+    <ul className="flex flex-col gap-3" aria-hidden="true">
+      {[0, 1].map((item) => (
+        <li key={item} className="animate-pulse rounded-xl border border-mistSkyBlue/35 bg-white/55 p-4 sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-4 w-4/5 rounded bg-mistSkyBlue/30" />
+              <div className="h-3 w-40 rounded bg-mistSkyBlue/25" />
+            </div>
+            <div className="h-6 w-16 rounded-full bg-mistSkyBlue/30" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
 }
 
 // 내 정보 페이지 (프로필·과정 인증)
@@ -175,12 +182,12 @@ export default function ProfilePage() {
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const [certificationOpen, setCertificationOpen] = useState(false)
-  const [documentsRequest, setDocumentsRequest] = useState<UserCertificationRequest | null>(null)
+  const [documentsVerificationId, setDocumentsVerificationId] = useState<number | null>(null)
 
   // --- 프로필·인증 데이터 ---
-  const [certificationRequests, setCertificationRequests] = useState<UserCertificationRequest[]>(
-    () => [...myCertificationRequests],
-  )
+  const [certificationRequests, setCertificationRequests] = useState<UserCertificationRequest[]>([])
+  const [isCertificationsLoading, setIsCertificationsLoading] = useState(true)
+  const [certificationsError, setCertificationsError] = useState<string | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
@@ -198,6 +205,23 @@ export default function ProfilePage() {
   const isLocalAccount = profile?.provider === 'LOCAL'
   const emailDisplay = profile ? getProfileEmailDisplay(profile.provider, profile.email) : null
 
+  const loadCertificationRequests = useCallback(() => {
+    setIsCertificationsLoading(true)
+    setCertificationsError(null)
+
+    getMyVerifications()
+      .then((data) => {
+        setCertificationRequests(data.content)
+      })
+      .catch((err: unknown) => {
+        setCertificationRequests([])
+        setCertificationsError(
+          err instanceof ApiError ? err.message : '인증 현황을 불러오는 중 오류가 발생했습니다.',
+        )
+      })
+      .finally(() => setIsCertificationsLoading(false))
+  }, [])
+
   useEffect(() => {
     setIsLoading(true)
     setFetchError(null)
@@ -212,6 +236,10 @@ export default function ProfilePage() {
       })
       .finally(() => setIsLoading(false))
   }, [])
+
+  useEffect(() => {
+    loadCertificationRequests()
+  }, [loadCertificationRequests])
 
   useEffect(() => {
     return () => revokeBlobUrl(form.imageUrl)
@@ -351,33 +379,11 @@ export default function ProfilePage() {
     }
   }
 
-  const handleCertificationSubmit = ({ courseName, files }: CourseCertificationSubmitPayload) => {
-    const today = toScheduleDateKey(new Date())
-    const nextRequestId = toRequestId(certificationRequests)
-    let nextDocumentId = toDocumentId(certificationRequests)
-
-    const documents = (Object.entries(files) as [CertificationDocumentType, File][]).map(([type, file]) => {
-      const document = {
-        id: nextDocumentId,
-        name: file.name,
-        type,
-        uploadedAt: today,
-      }
-      nextDocumentId += 1
-      return document
-    })
-
-    const newRequest: UserCertificationRequest = {
-      id: nextRequestId,
-      courseName,
-      requestedAt: today,
-      status: 'PENDING',
-      documents,
-    }
-
-    setCertificationRequests((current) => [newRequest, ...current])
+  const handleCertificationSubmit = async (payload: CourseCertificationSubmitPayload) => {
+    await submitVerification(payload)
     setCertificationOpen(false)
     showToast('과정 인증을 제출했어요.')
+    loadCertificationRequests()
   }
 
   return (
@@ -419,11 +425,26 @@ export default function ProfilePage() {
             />
           }
         >
-          {certificationRequests.length > 0 ? (
+          {isCertificationsLoading ? (
+            <CertificationRequestListSkeleton />
+          ) : certificationsError ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-mistSkyBlue/45 bg-foamWhite/30 px-6 py-10 text-center">
+              <p className="font-pretendard text-sm font-semibold text-red-600">{certificationsError}</p>
+              <DashboardActionButton
+                label="다시 시도"
+                variant="secondary"
+                onClick={loadCertificationRequests}
+                className="mt-4 !rounded-full !px-4 !py-2"
+              />
+            </div>
+          ) : certificationRequests.length > 0 ? (
             <ul className="flex flex-col gap-3">
               {certificationRequests.map((request) => (
                 <li key={request.id}>
-                  <CertificationRequestRowCard request={request} onViewDocuments={setDocumentsRequest} />
+                  <CertificationRequestRowCard
+                    request={request}
+                    onViewDocuments={(item) => setDocumentsVerificationId(item.id)}
+                  />
                 </li>
               ))}
             </ul>
@@ -523,11 +544,17 @@ export default function ProfilePage() {
       ) : null}
 
       {certificationOpen ? (
-        <CourseCertificationModal onClose={() => setCertificationOpen(false)} onSubmit={handleCertificationSubmit} />
+        <CourseCertificationModal
+          onClose={() => setCertificationOpen(false)}
+          onSubmit={handleCertificationSubmit}
+        />
       ) : null}
 
-      {documentsRequest ? (
-        <CertificationDocumentsModal request={documentsRequest} onClose={() => setDocumentsRequest(null)} />
+      {documentsVerificationId ? (
+        <CertificationDocumentsModal
+          verificationId={documentsVerificationId}
+          onClose={() => setDocumentsVerificationId(null)}
+        />
       ) : null}
 
       {toast ? <Toast message={toast} onClose={() => setToast('')} /> : null}
