@@ -1,17 +1,40 @@
-import { useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CERTIFICATION_ACCEPTED_EXTENSIONS,
   CERTIFICATION_MAX_FILE_SIZE,
   CERTIFICATION_SUBMISSION_GUIDE,
   CERTIFICATION_UPLOAD_SLOTS,
-  certifiableCourses,
   type CertifiableCourse,
   type CertificationDocumentType,
   type CourseCertificationSubmitPayload,
 } from '../../data/certifications'
+import { getCourses, type Course } from '../../../../services/course'
+import { ApiError } from '../../../../services/ApiError'
 import DashboardActionButton from '../DashboardActionButton'
 import DashboardModal from './DashboardModal'
 import { scheduleInputClassName } from '../ScheduleEventForm'
+
+const COURSE_SEARCH_DEBOUNCE_MS = 300
+const COURSE_SEARCH_PAGE_SIZE = 50
+
+function toCertifiableCourse(course: Course): CertifiableCourse | null {
+  const courseSessionId = course.courseSessionId
+  if (!courseSessionId) return null
+
+  return {
+    courseId: Number(course.id),
+    courseSessionId,
+    title: course.title,
+    academy: course.company,
+  }
+}
+
+function mapSearchResults(courses: Course[]) {
+  return courses
+    .map(toCertifiableCourse)
+    .filter((course): course is CertifiableCourse => course !== null)
+}
 
 type UploadSlotState = {
   file: File | null
@@ -20,7 +43,7 @@ type UploadSlotState = {
 
 type CourseCertificationModalProps = {
   onClose: () => void
-  onSubmit: (payload: CourseCertificationSubmitPayload) => void
+  onSubmit: (payload: CourseCertificationSubmitPayload) => Promise<void>
 }
 
 const initialUploads = (): Record<CertificationDocumentType, UploadSlotState> => ({
@@ -91,26 +114,69 @@ function validateFile(file: File) {
 }
 
 export default function CourseCertificationModal({ onClose, onSubmit }: CourseCertificationModalProps) {
+  const navigate = useNavigate()
   const [uploads, setUploads] = useState(initialUploads)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<CertifiableCourse[]>([])
+  const [searchPage, setSearchPage] = useState(0)
+  const [hasMoreSearchResults, setHasMoreSearchResults] = useState(false)
+  const [totalSearchElements, setTotalSearchElements] = useState(0)
+  const [isSearching, setIsSearching] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const [selectedCourse, setSelectedCourse] = useState<CertifiableCourse | null>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const guideRef = useRef<HTMLDivElement>(null)
   const courseSearchRef = useRef<HTMLDivElement>(null)
   const inputRefs = useRef<Record<CertificationDocumentType, HTMLInputElement | null>>({
     TRAINING_HISTORY: null,
     ONLINE_APPLICATION: null,
   })
 
-  const filteredCourses = useMemo(() => {
-    const keyword = searchQuery.trim().toLowerCase()
-    if (!keyword) return []
+  useEffect(() => {
+    const keyword = searchQuery.trim()
+    if (!keyword) {
+      setSearchResults([])
+      setSearchPage(0)
+      setHasMoreSearchResults(false)
+      setTotalSearchElements(0)
+      setSearchError(null)
+      setIsSearching(false)
+      setIsLoadingMore(false)
+      return
+    }
 
-    return certifiableCourses.filter(
-      (course) =>
-        course.title.toLowerCase().includes(keyword) || course.academy.toLowerCase().includes(keyword),
-    )
+    let cancelled = false
+    setIsSearching(true)
+    setSearchError(null)
+    setSearchPage(0)
+    setHasMoreSearchResults(false)
+    setTotalSearchElements(0)
+
+    const timer = window.setTimeout(() => {
+      getCourses({ keyword, page: 0, size: COURSE_SEARCH_PAGE_SIZE })
+        .then((data) => {
+          if (cancelled) return
+          setSearchResults(mapSearchResults(data.content))
+          setSearchPage(0)
+          setHasMoreSearchResults(data.hasNext)
+          setTotalSearchElements(data.totalElements)
+        })
+        .catch((err: unknown) => {
+          if (cancelled) return
+          setSearchResults([])
+          setSearchError(err instanceof Error ? err.message : '과정 검색 중 오류가 발생했습니다.')
+        })
+        .finally(() => {
+          if (!cancelled) setIsSearching(false)
+        })
+    }, COURSE_SEARCH_DEBOUNCE_MS)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
   }, [searchQuery])
 
   const showDropdown = isDropdownOpen && searchQuery.trim().length > 0
@@ -147,7 +213,34 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
     setError('')
   }
 
-  const handleSubmit = () => {
+  const handleLoadMoreResults = () => {
+    const keyword = searchQuery.trim()
+    if (!keyword || isLoadingMore || !hasMoreSearchResults) return
+
+    const nextPage = searchPage + 1
+    setIsLoadingMore(true)
+    setSearchError(null)
+
+    getCourses({ keyword, page: nextPage, size: COURSE_SEARCH_PAGE_SIZE })
+      .then((data) => {
+        setSearchResults((current) => {
+          const seen = new Set(current.map((course) => course.courseSessionId))
+          const appended = mapSearchResults(data.content).filter((course) => !seen.has(course.courseSessionId))
+          return [...current, ...appended]
+        })
+        setSearchPage(nextPage)
+        setHasMoreSearchResults(data.hasNext)
+        setTotalSearchElements(data.totalElements)
+      })
+      .catch((err: unknown) => {
+        setSearchError(err instanceof Error ? err.message : '과정 검색 중 오류가 발생했습니다.')
+      })
+      .finally(() => {
+        setIsLoadingMore(false)
+      })
+  }
+
+  const handleSubmit = async () => {
     if (!selectedCourse) {
       setError('검색 결과 목록에서 인증할 과정을 선택해주세요.')
       return
@@ -159,18 +252,28 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
       return
     }
 
-    onSubmit({
-      courseId: selectedCourse.id,
-      courseName: selectedCourse.title,
-      files: {
-        TRAINING_HISTORY: uploads.TRAINING_HISTORY.file!,
-        ONLINE_APPLICATION: uploads.ONLINE_APPLICATION.file!,
-      },
-    })
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      await onSubmit({
+        courseId: selectedCourse.courseId,
+        courseSessionId: selectedCourse.courseSessionId,
+        jobTrainingHistoryFile: uploads.TRAINING_HISTORY.file!,
+        onlineCourseApplicationFile: uploads.ONLINE_APPLICATION.file!,
+      })
+    } catch (err: unknown) {
+      setError(
+        err instanceof ApiError ? err.message : '과정 인증 제출에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const scrollToGuide = () => {
-    guideRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const handleOpenSubmissionGuide = () => {
+    onClose()
+    navigate('/support/certification')
   }
 
   return (
@@ -181,8 +284,12 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
       ariaLabelledBy="course-certification-modal-title"
       footer={
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
-          <DashboardActionButton label="제출 방법 확인" variant="secondary" onClick={scrollToGuide} />
-          <DashboardActionButton label="제출" onClick={handleSubmit} />
+          <DashboardActionButton label="제출 방법 확인" variant="secondary" onClick={handleOpenSubmissionGuide} />
+          <DashboardActionButton
+            label={isSubmitting ? '제출 중...' : '제출'}
+            onClick={() => void handleSubmit()}
+            disabled={isSubmitting}
+          />
         </div>
       }
     >
@@ -214,14 +321,30 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
               />
             </div>
 
-            {showDropdown && filteredCourses.length > 0 ? (
+            {showDropdown && isSearching ? (
+              <p className="absolute z-20 mt-2 w-full rounded-xl border border-mistSkyBlue/50 bg-white px-4 py-3 font-pretendard text-sm text-secondary shadow-[0_8px_24px_rgba(52,74,100,0.12)]">
+                과정을 검색하고 있어요...
+              </p>
+            ) : null}
+
+            {showDropdown && !isSearching && searchError ? (
+              <p className="absolute z-20 mt-2 w-full rounded-xl border border-mistSkyBlue/50 bg-white px-4 py-3 font-pretendard text-sm text-red-600 shadow-[0_8px_24px_rgba(52,74,100,0.12)]">
+                {searchError}
+              </p>
+            ) : null}
+
+            {showDropdown && !isSearching && !searchError && searchResults.length > 0 ? (
               <ul
                 id="certification-course-listbox"
                 role="listbox"
                 className="absolute z-20 mt-2 max-h-52 w-full overflow-y-auto rounded-xl border border-mistSkyBlue/50 bg-white py-1 shadow-[0_8px_24px_rgba(52,74,100,0.12)]"
               >
-                {filteredCourses.map((course) => (
-                  <li key={course.id} role="option" aria-selected={selectedCourse?.id === course.id}>
+                {searchResults.map((course) => (
+                  <li
+                    key={course.courseSessionId}
+                    role="option"
+                    aria-selected={selectedCourse?.courseSessionId === course.courseSessionId}
+                  >
                     <button
                       type="button"
                       onMouseDown={(event) => event.preventDefault()}
@@ -235,10 +358,25 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
                     </button>
                   </li>
                 ))}
+                {hasMoreSearchResults ? (
+                  <li className="border-t border-mistSkyBlue/25">
+                    <button
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={handleLoadMoreResults}
+                      disabled={isLoadingMore}
+                      className="w-full px-4 py-3 text-center font-pretendard text-sm font-semibold text-waterlineBlue transition-colors hover:bg-foamWhite disabled:cursor-not-allowed disabled:text-secondary"
+                    >
+                      {isLoadingMore
+                        ? '더 불러오는 중...'
+                        : `더 보기 (${searchResults.length.toLocaleString('ko-KR')}/${totalSearchElements.toLocaleString('ko-KR')})`}
+                    </button>
+                  </li>
+                ) : null}
               </ul>
             ) : null}
 
-            {showDropdown && filteredCourses.length === 0 ? (
+            {showDropdown && !isSearching && !searchError && searchResults.length === 0 ? (
               <p className="absolute z-20 mt-2 w-full rounded-xl border border-mistSkyBlue/50 bg-white px-4 py-3 font-pretendard text-sm text-secondary shadow-[0_8px_24px_rgba(52,74,100,0.12)]">
                 검색 결과가 없습니다.
               </p>
@@ -246,21 +384,20 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
           </div>
 
           {selectedCourse ? (
-            <div className="mt-3 rounded-xl border border-waterlineBlue/30 bg-softAquaBlue/10 px-4 py-3 sm:px-5">
-              <p className="inline-flex items-center gap-1.5 font-pretendard text-xs font-semibold text-waterlineBlue">
+            <div className="mt-3 rounded-xl border border-amber-200/80 bg-amber-50/90 px-4 py-3 sm:px-5">
+              <p className="inline-flex items-center gap-1.5 font-pretendard text-xs font-semibold text-amber-800">
                 <CheckIcon />
                 선택된 과정
               </p>
               <p className="mt-1 line-clamp-2 font-pretendard text-sm font-semibold text-deepOceanNavy">
                 {selectedCourse.title}
               </p>
-              <p className="mt-0.5 font-pretendard text-xs text-secondary">{selectedCourse.academy}</p>
+              <p className="mt-0.5 font-pretendard text-xs text-deepOceanNavy/70">{selectedCourse.academy}</p>
             </div>
           ) : null}
         </div>
 
         <div
-          ref={guideRef}
           className="scroll-mt-4 rounded-xl border border-mistSkyBlue/35 bg-foamWhite/55 px-4 py-4 sm:px-5 sm:py-5"
         >
           <p className="font-pretendard text-xs font-semibold text-secondary">제출 가이드</p>
@@ -294,7 +431,7 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
                       지원 형식: jpg, png, gif (최대 25MB)
                     </p>
                     {isUploaded ? (
-                      <p className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full bg-softAquaBlue/15 px-2.5 py-1 font-pretendard text-xs font-medium text-waterlineBlue">
+                      <p className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full bg-foamWhite/90 px-2.5 py-1 font-pretendard text-xs font-medium text-deepOceanNavy ring-1 ring-mistSkyBlue/50">
                         <CheckIcon />
                         <span className="truncate">{upload.fileName}</span>
                       </p>

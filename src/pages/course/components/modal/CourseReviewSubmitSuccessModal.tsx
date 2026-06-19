@@ -24,7 +24,7 @@ export default function CourseReviewSubmitSuccessModal({ isOpen, onClose }: Cour
       className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
-      aria-label="리뷰 작성 완료"
+      aria-label="후기 작성 완료"
       onClick={onClose}
     >
       <div
@@ -32,11 +32,11 @@ export default function CourseReviewSubmitSuccessModal({ isOpen, onClose }: Cour
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">리뷰 작성 완료</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 작성 완료</h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="리뷰 작성 완료 모달 닫기"
+            aria-label="후기 작성 완료 모달 닫기"
             className="rounded-lg p-2 text-secondary transition-colors hover:bg-white/80 hover:text-deepOceanNavy"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -49,7 +49,7 @@ export default function CourseReviewSubmitSuccessModal({ isOpen, onClose }: Cour
           <span className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-mistSkyBlue/35 text-3xl">
             🎉
           </span>
-          <p className="mt-4 text-lg font-semibold text-deepOceanNavy">리뷰 작성이 완료되었습니다.</p>
+          <p className="mt-4 text-lg font-semibold text-deepOceanNavy">후기 작성이 완료되었습니다.</p>
           <p className="mt-1 text-sm text-secondary">소중한 후기를 남겨주셔서 감사합니다.</p>
 
           <div className="mt-6 flex justify-center">

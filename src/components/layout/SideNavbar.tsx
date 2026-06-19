@@ -126,7 +126,6 @@ const dashboardItems: SideNavbarItem[] = [
 
 const adminItems: SideNavbarItem[] = [
   { label: '대시보드', href: '/admin', icon: 'grid' },
-  { label: '리뷰 관리', href: '/admin/reviews', icon: 'check' },
   { label: '인증 관리', href: '/admin/certifications', icon: 'badge' },
   { label: '문의 관리', href: '/admin/inquiries', icon: 'headset' },
   { label: '신고내역', href: '/admin/reports', icon: 'report' },

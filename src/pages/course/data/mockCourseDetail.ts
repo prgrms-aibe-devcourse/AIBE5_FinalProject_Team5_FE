@@ -44,8 +44,10 @@ const DEFAULT_DETAIL: Omit<CourseDetail, 'id'> = {
 
 /** 목록·상세 mock id 모두 동일 레이아웃으로 응답 */
 export function getMockCourseDetail(courseId: string): CourseDetail {
+  const parsedCourseId = Number(courseId)
   return {
     id: courseId,
+    courseId: Number.isNaN(parsedCourseId) ? 0 : parsedCourseId,
     ...DEFAULT_DETAIL,
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
 import Toast from '../../components/common/Toast.tsx'
@@ -9,33 +9,27 @@ import CourseDetailTabs, { type CourseDetailTab } from './components/CourseDetai
 import CourseDetailInfoSections from './components/CourseDetailInfoSections.tsx'
 import CourseDetailReviewsSection from './components/CourseDetailReviewsSection.tsx'
 import CourseDetailSidebar from './components/CourseDetailSidebar.tsx'
-import { getCourseDetail, type CourseDetail } from '../../services/course.ts'
+import { getCourseSessionDetail, type CourseDetail } from '../../services/course.ts'
 import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
 
 export default function CourseDetailPage() {
-  const { courseId } = useParams<{ courseId: string }>()
-  const [searchParams] = useSearchParams()
+  const { courseSessionId } = useParams<{ courseSessionId: string }>()
   const [activeTab, setActiveTab] = useState<CourseDetailTab>('info')
   const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
-
-  const sessionParam = searchParams.get('session')
-  const preferredSessionId = sessionParam ? Number(sessionParam) : undefined
-  const resolvedSessionId =
-    preferredSessionId != null && !Number.isNaN(preferredSessionId) ? preferredSessionId : undefined
 
   const [course, setCourse] = useState<CourseDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!courseId) {
-      setFetchError('과정 ID가 없습니다.')
+    if (!courseSessionId) {
+      setFetchError('과정 회차 ID가 없습니다.')
       setIsLoading(false)
       return
     }
-    const id = Number(courseId)
+    const id = Number(courseSessionId)
     if (isNaN(id)) {
-      setFetchError('잘못된 과정 ID입니다.')
+      setFetchError('잘못된 과정 회차 ID입니다.')
       setIsLoading(false)
       return
     }
@@ -43,13 +37,13 @@ export default function CourseDetailPage() {
     setIsLoading(true)
     setFetchError(null)
 
-    getCourseDetail(id, resolvedSessionId)
+    getCourseSessionDetail(id)
       .then(setCourse)
       .catch((err: unknown) => {
         setFetchError(err instanceof Error ? err.message : '과정 정보를 불러올 수 없습니다.')
       })
       .finally(() => setIsLoading(false))
-  }, [courseId, resolvedSessionId])
+  }, [courseSessionId])
 
   if (isLoading) {
     return (
@@ -102,7 +96,13 @@ export default function CourseDetailPage() {
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
             <div className="min-w-0 flex-1" role="tabpanel">
               {activeTab === 'info' ? <CourseDetailInfoSections course={course} /> : null}
-              {activeTab === 'reviews' ? <CourseDetailReviewsSection courseId={Number(courseId)} /> : null}
+              {activeTab === 'reviews' ? (
+                <CourseDetailReviewsSection
+                  courseId={course.courseId}
+                  courseSessionId={course.courseSessionId}
+                  onReviewSubmitted={() => setActiveTab('reviews')}
+                />
+              ) : null}
             </div>
 
             <CourseDetailSidebar course={course} />

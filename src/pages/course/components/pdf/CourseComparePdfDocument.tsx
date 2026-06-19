@@ -219,7 +219,7 @@ export default function CourseComparePdfDocument({ data }: CourseComparePdfDocum
                     <View key={`stats-${index}`} style={[styles.valueCol, { width: valueWidth }]}>
                       <View style={styles.statsCell}>
                         <Text style={styles.statsLine}>
-                          인증 리뷰 {stats.reviewCount}건 · 평균 {stats.averageRating.toFixed(1)}
+                          인증 후기 {stats.reviewCount}건 · 평균 {stats.averageRating.toFixed(1)}
                         </Text>
                         {stats.metrics.map((metric) => (
                           <Text key={metric.label} style={styles.statsLine}>

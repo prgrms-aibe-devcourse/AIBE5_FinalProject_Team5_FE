@@ -25,6 +25,7 @@ type CompareCoursesContextValue = {
   toggleCompareCourse: (course: Course) => void
   toggleCompareBookmark: (course: {
     id: number
+    courseSessionId: number
     title: string
     academy: string
     logoUrl?: string
@@ -70,13 +71,21 @@ export function CompareCoursesProvider({ children }: { children: ReactNode }) {
 
   const toggleCompareCourse = useCallback(
     (course: Course) => {
-      toggleItem(toCompareCourseItem(course))
+      const item = toCompareCourseItem(course)
+      if (!item) return
+      toggleItem(item)
     },
     [toggleItem],
   )
 
   const toggleCompareBookmark = useCallback(
-    (course: { id: number; title: string; academy: string; logoUrl?: string }) => {
+    (course: {
+      id: number
+      courseSessionId: number
+      title: string
+      academy: string
+      logoUrl?: string
+    }) => {
       toggleItem(toCompareCourseItemFromBookmark(course))
     },
     [toggleItem],

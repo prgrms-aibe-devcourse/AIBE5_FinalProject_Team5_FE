@@ -80,12 +80,59 @@ async function request<T>(path: string, init: RequestInit & RequestOptions = {})
   throw apiError
 }
 
+async function requestBlob(path: string, init: RequestInit & RequestOptions = {}): Promise<Blob> {
+  const { query, auth, ...fetchInit } = init
+  const url = BASE + path + (query ? buildQuery(query) : '')
+
+  const headers: Record<string, string> = {
+    ...(fetchInit.headers as Record<string, string> | undefined),
+  }
+
+  const sentAuthToken = Boolean(auth && getAccessToken())
+  if (auth) {
+    const token = getAccessToken()
+    if (token) {
+      headers.Authorization = `${getTokenType()} ${token}`
+    }
+  }
+
+  const res = await fetch(url, { ...fetchInit, method: 'GET', headers })
+
+  if (res.ok) {
+    return res.blob()
+  }
+
+  const contentType = res.headers.get('content-type') ?? ''
+  if (contentType.includes('application/json')) {
+    const json: ApiResponse<unknown> = await res.json()
+    const err = json.error
+    const apiError = new ApiError(
+      err?.code ?? 'UNKNOWN',
+      err?.message ?? '파일을 불러오는 중 오류가 발생했습니다.',
+      res.status,
+    )
+
+    if (sentAuthToken && isExpiredAuthTokenError(apiError)) {
+      void handleAuthSessionExpired()
+    }
+
+    throw apiError
+  }
+
+  throw new ApiError('UNKNOWN', '파일을 불러오는 중 오류가 발생했습니다.', res.status)
+}
+
 // HTTP 요청 메소드 모음
 export const http = {
   get: <T>(path: string, opts: RequestOptions = {}) =>
     request<T>(path, { method: 'GET', ...opts }),
+  getBlob: (path: string, opts: RequestOptions = {}) => requestBlob(path, opts),
   post: <T>(path: string, body: unknown, opts: RequestOptions = {}) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body), ...opts }),
+    request<T>(path, {
+      method: 'POST',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+      ...opts,
+    }),
   patch: <T>(path: string, body: unknown, opts: RequestOptions = {}) =>
     request<T>(path, {
       method: 'PATCH',

@@ -14,7 +14,7 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
       <div className="grid gap-3" style={{ gridTemplateColumns: layout.gridTemplateColumns }}>
         <div aria-hidden="true" />
         {courses.map((course) => (
-          <div key={course.id} className="flex justify-center px-1 sm:px-2">
+          <div key={course.courseSessionId ?? course.id} className="flex justify-center px-1 sm:px-2">
             <article
               className={`flex w-full flex-col overflow-hidden rounded-xl glass-panel shadow-sm ${layout.summaryCardMaxWidth}`}
             >
@@ -29,7 +29,11 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
                 </h2>
                 <p className="mt-2 text-xs text-secondary">{course.dateRange}</p>
                 <Link
-                  to={`/courses/${course.id}`}
+                  to={
+                    course.courseSessionId != null
+                      ? `/courses/${course.courseSessionId}`
+                      : `/courses/${course.id}`
+                  }
                   className="mt-2.5 text-xs font-semibold text-waterlineBlue underline underline-offset-2 hover:text-deepOceanNavy"
                 >
                   상세 보기

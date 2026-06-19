@@ -18,7 +18,6 @@ import AdminCertificationsPage from './pages/admin/AdminCertificationsPage'
 import AdminInquiriesPage from './pages/admin/AdminInquiriesPage'
 import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminNoticesPage from './pages/admin/AdminNoticesPage'
-import AdminReviewsPage from './pages/admin/AdminReviewsPage'
 import CommunityLayout from './pages/community/CommunityLayout'
 import CommunityArticlePage from './pages/community/CommunityArticlePage'
 import CommunityPostsPage from './pages/community/CommunityPostsPage'
@@ -48,7 +47,7 @@ function App() {
       {/* 과정 조회 */}
       <Route path="/courses" element={<CourseSearchPage />} />
       <Route path="/courses/compare" element={<CourseComparePage />} />
-      <Route path="/courses/:courseId" element={<CourseDetailPage />} />
+      <Route path="/courses/:courseSessionId" element={<CourseDetailPage />} />
 
       {/* 대시보드 (마이페이지) */}
       <Route path="/dashboard" element={<DashboardPage />} />
@@ -105,7 +104,6 @@ function App() {
       <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
       <Route path="/admin/reports" element={<AdminReportsPage />} />
       <Route path="/admin/notices" element={<AdminNoticesPage />} />
-      <Route path="/admin/reviews" element={<AdminReviewsPage />} />
     </Routes>
   )
 }

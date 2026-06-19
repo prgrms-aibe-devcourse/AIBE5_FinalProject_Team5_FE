@@ -166,9 +166,7 @@ export default function BookmarksPage() {
                       isBookmarked
                       onToggleCompare={() => toggleCompareBookmark(course)}
                       onToggleBookmark={() => void handleRemoveBookmark(course.courseSessionId)}
-                      onOpenDetail={() =>
-                        navigate(`/courses/${course.id}?session=${course.courseSessionId}`)
-                      }
+                      onOpenDetail={() => navigate(`/courses/${course.courseSessionId}`)}
                     />
                   </li>
                 ))}
