@@ -20,15 +20,11 @@ import AdminReportsPage from './pages/admin/AdminReportsPage'
 import AdminNoticesPage from './pages/admin/AdminNoticesPage'
 import CommunityLayout from './pages/community/CommunityLayout'
 import CommunityArticlePage from './pages/community/CommunityArticlePage'
-import CommunityPostsPage from './pages/community/CommunityPostsPage'
-import CommunityQnaPage from './pages/community/CommunityQnaPage'
-import CommunityRecruitPage from './pages/community/CommunityRecruitPage'
+import CommunityPostListPage from './pages/community/CommunityPostListPage'
 import CommunityWritePage from './pages/community/CommunityWritePage'
 import CommunityFormLayout from './pages/community/CommunityFormLayout'
 import CommunityDetailLayout from './pages/community/CommunityDetailLayout'
 import CommunityPostDetailPage from './pages/community/CommunityPostDetailPage'
-import CommunityQnaDetailPage from './pages/community/CommunityQnaDetailPage'
-import CommunityRecruitDetailPage from './pages/community/CommunityRecruitDetailPage'
 import SupportLayout from './pages/support/SupportLayout'
 import SupportNoticesPage from './pages/support/SupportNoticesPage'
 import SupportCertificationPage from './pages/support/SupportCertificationPage'
@@ -66,28 +62,23 @@ function App() {
           <Route index element={<Navigate to="posts" replace />} />
 
           {/* 커뮤니티 목록 페이지 */}
-          <Route path="posts" element={<CommunityPostsPage />} />
-          <Route path="qna" element={<CommunityQnaPage />} />
-          <Route path="recruit" element={<CommunityRecruitPage />} />
+          <Route path="posts" element={<CommunityPostListPage />} />
+          <Route path="qna" element={<CommunityPostListPage />} />
+          <Route path="recruit" element={<CommunityPostListPage />} />
           <Route path="article" element={<CommunityArticlePage />} />
         </Route>
 
         {/* 커뮤니티 작성/수정 (목록 레이아웃 분리) */}
         <Route element={<CommunityFormLayout />}>
           <Route path="posts/new" element={<CommunityWritePage />} />
-          <Route path="posts/edit/:postId" element={<CommunityWritePage />} />
           <Route path="qna/new" element={<CommunityWritePage />} />
-          
-          <Route path="qna/edit/:qnaId" element={<CommunityWritePage />} />
           <Route path="recruit/new" element={<CommunityWritePage />} />
-          <Route path="recruit/edit/:recruitId" element={<CommunityWritePage />} />
+          <Route path="posts/edit/:postId" element={<CommunityWritePage />} />
         </Route>
 
         {/* 커뮤니티 상세 (아티클 제외) */}
         <Route element={<CommunityDetailLayout />}>
           <Route path="posts/:postId" element={<CommunityPostDetailPage />} />
-          <Route path="qna/:qnaId" element={<CommunityQnaDetailPage />} />
-          <Route path="recruit/:recruitId" element={<CommunityRecruitDetailPage />} />
         </Route>
       </Route>
 
