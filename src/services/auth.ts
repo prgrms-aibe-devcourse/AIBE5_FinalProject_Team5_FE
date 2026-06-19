@@ -129,6 +129,12 @@ function saveStoredUser(user: AuthUser, fallbackEmail?: string): void {
   localStorage.setItem(AUTH_STORAGE_KEYS.provider, user.provider)
 }
 
+export function updateStoredUserProfile(updates: Partial<Pick<StoredUser, 'nickname'>>): void {
+  if (updates.nickname) {
+    localStorage.setItem(AUTH_STORAGE_KEYS.nickname, updates.nickname)
+  }
+}
+
 // 사용자 프로필 로컬 스토리지 조회 
 export function getStoredUser(): StoredUser | null {
   const email = localStorage.getItem(AUTH_STORAGE_KEYS.email)

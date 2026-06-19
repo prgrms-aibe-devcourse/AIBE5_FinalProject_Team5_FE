@@ -42,8 +42,9 @@ async function request<T>(path: string, init: RequestInit & RequestOptions = {})
   const url = BASE + path + (query ? buildQuery(query) : '')
   
   // 헤더 초기화
+  const isFormData = fetchInit.body instanceof FormData
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(fetchInit.headers as Record<string, string> | undefined),
   }
 
@@ -86,7 +87,11 @@ export const http = {
   post: <T>(path: string, body: unknown, opts: RequestOptions = {}) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body), ...opts }),
   patch: <T>(path: string, body: unknown, opts: RequestOptions = {}) =>
-    request<T>(path, { method: 'PATCH', body: JSON.stringify(body), ...opts }),
+    request<T>(path, {
+      method: 'PATCH',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+      ...opts,
+    }),
   delete: <T>(path: string, opts: RequestOptions = {}) =>
     request<T>(path, { method: 'DELETE', ...opts }),
 }
