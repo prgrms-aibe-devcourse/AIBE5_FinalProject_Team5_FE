@@ -1,5 +1,6 @@
 // 과정 비교 요약 패널
 import type { CourseDetail } from '../../../services/course.ts'
+import { isMissingDisplayValue } from '../../../services/course.ts'
 import type { CompareLayoutConfig } from './compareLayout.ts'
 
 interface CourseCompareOverviewPanelProps {
@@ -30,21 +31,36 @@ function StarRating({ value, max = 5 }: { value: number; max?: number }) {
   )
 }
 
-export default function CourseCompareOverviewPanel({ courses, layout }: CourseCompareOverviewPanelProps) {
-  const metrics = [
-    { label: '만족도', getValue: (c: CourseDetail) => c.satisfaction, type: 'stars' as const },
-    { label: '취업률', getValue: (c: CourseDetail) => c.employmentRate, type: 'bar' as const },
-    { label: '별점', getValue: (c: CourseDetail) => c.rating, type: 'bar' as const },
-  ]
+function MissingValue() {
+  return <p className="py-1 text-center text-xs font-semibold text-deepOceanNavy">-</p>
+}
 
+type MetricConfig =
+  | { label: '만족도'; type: 'stars' }
+  | { label: '취업률'; type: 'bar'; getValue: (c: CourseDetail) => string }
+
+const METRICS: MetricConfig[] = [
+  { label: '만족도', type: 'stars' },
+  { label: '취업률', type: 'bar', getValue: (c) => c.employmentRate },
+]
+
+export default function CourseCompareOverviewPanel({ courses, layout }: CourseCompareOverviewPanelProps) {
   return (
     <section className={`rounded-2xl border border-mistSkyBlue/35 bg-foamWhite/35 p-5 md:p-6 ${layout.containerClassName}`}>
       <h2 className="mb-4 text-base font-bold text-deepOceanNavy md:text-lg">비교 요약</h2>
       <div className="space-y-4">
-        {metrics.map((metric) => {
-          const values = courses.map((course) => metric.getValue(course))
-          const numeric = values.map((v) => parseFloat(v.replace(/[^\d.]/g, '')) || 0)
-          const max = Math.max(...numeric, 1)
+        {METRICS.map((metric) => {
+          const values =
+            metric.type === 'stars'
+              ? courses.map((c) => c.satisfactionOutOf5)
+              : courses.map((c) => metric.getValue(c))
+
+          const barNumerics =
+            metric.type === 'bar'
+              ? values.map((v) => (typeof v === 'string' ? parseFloat(v.replace(/[^\d.]/g, '')) || 0 : 0))
+              : []
+
+          const barMax = 100
 
           return (
             <div
@@ -54,21 +70,29 @@ export default function CourseCompareOverviewPanel({ courses, layout }: CourseCo
             >
               <p className="text-sm font-semibold text-deepOceanNavy">{metric.label}</p>
               {courses.map((course, index) => (
-                <div key={course.id} className="min-w-0 px-1 sm:px-2">
+                <div key={course.courseSessionId ?? course.id} className="min-w-0 px-1 sm:px-2">
                   {metric.type === 'stars' ? (
-                    <div className="py-1">
-                      <StarRating value={numeric[index]} max={5} />
-                    </div>
+                    values[index] != null ? (
+                      <div className="py-1">
+                        <StarRating value={values[index] as number} max={5} />
+                      </div>
+                    ) : (
+                      <MissingValue />
+                    )
+                  ) : isMissingDisplayValue(values[index] as string) ? (
+                    <MissingValue />
                   ) : (
                     <>
                       <div className="h-2 overflow-hidden rounded-full bg-mistSkyBlue/25">
                         <div
                           className="h-full rounded-full bg-waterlineBlue"
-                          style={{ width: `${(numeric[index] / max) * 100}%` }}
+                          style={{
+                            width: `${(Math.min(barNumerics[index], barMax) / barMax) * 100}%`,
+                          }}
                         />
                       </div>
                       <p className="mt-1 truncate text-center text-xs font-semibold text-deepOceanNavy">
-                        {values[index]}
+                        {values[index] as string}
                       </p>
                     </>
                   )}

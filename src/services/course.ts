@@ -1,5 +1,6 @@
 import { http } from './http'
 import type { PageResponse } from './apiTypes'
+import { toAbsoluteUrl } from '../utils/toAbsoluteUrl'
 
 // ──────────────────────────────────────────────
 // FE 뷰모델 — 컴포넌트가 소비하는 타입
@@ -25,6 +26,7 @@ export type CourseSortKey = 'latest' | 'mostReviews' | 'rating' | 'satisfaction'
 
 /** 과정 카드 뷰모델 */
 export interface Course {
+  /** 과정 ID — `/api/courses/{courseId}` 계열 API용 */
   id: string
   courseSessionId?: number
   title: string
@@ -51,6 +53,8 @@ export interface CourseContact {
 
 /** 과정 상세 뷰모델 */
 export interface CourseDetail extends Course {
+  /** 과정 ID (회차 ID `courseSessionId`와 구분) */
+  courseId: number
   batch: string
   recruitment: CourseRecruitment
   eligibility: string
@@ -60,6 +64,8 @@ export interface CourseDetail extends Course {
   contact: CourseContact
   titleLink: string | null
   homepageUrl: string | null
+  /** stdgScor → 5점 만점 환산 (비교 요약 별점용) */
+  satisfactionOutOf5?: number | null
 }
 
 // ──────────────────────────────────────────────
@@ -146,6 +152,45 @@ export interface CourseSession {
   selfPaymentAmount: number | null
   totalTrainingDays: number | null
   totalTrainingHours: number | null
+}
+
+/** GET /api/course-sessions/{courseSessionId} 응답 — 회차 + 과정 + 기관 통합 */
+export interface BECourseSessionDetail {
+  id: number
+  trprDegr: number
+  traStartDate: string
+  traEndDate: string
+  yardMan: number | null
+  regCourseMan: number | null
+  totParMks: number | null
+  finiCnt: number | null
+  eiEmplRate3: string | null
+  eiEmplRate6: string | null
+  wkendSe: string | null
+  selectedTraineeCount: number | null
+  recruitmentCount: number | null
+  confirmedTraineeCount: number | null
+  employmentRate: number | null
+  titleLink: string | null
+  courseId: number
+  trprId: string
+  title: string
+  subTitle: string | null
+  subTitleLink: string | null
+  ncsCd: string | null
+  ncsName: string | null
+  ncsYn: string | null
+  courseMan: number | null
+  selfPaymentAmount: number | null
+  stdgScor: number | null
+  totalTrainingDays: number | null
+  totalTrainingHours: number | null
+  trngAreaCd: string | null
+  trainingTargetRequirements: string | null
+  trainingGoal: string | null
+  createdAt: string
+  updatedAt: string
+  institution: InstitutionDetail | null
 }
 
 // ──────────────────────────────────────────────
@@ -324,6 +369,27 @@ export function isCourseStatPlaceholder(value: string): boolean {
   return value === COURSE_STAT_PLACEHOLDER
 }
 
+/** 화면 표시용 결측값 여부 (정보 없음, -, —, 0%) */
+export function isMissingDisplayValue(value: string | null | undefined): boolean {
+  if (!value) return true
+  const trimmed = value.trim()
+  if (trimmed === '-' || trimmed === '—' || trimmed === '정보 없음' || trimmed === COURSE_STAT_PLACEHOLDER) {
+    return true
+  }
+  if (trimmed.endsWith('%')) {
+    const numeric = parseFloat(trimmed.replace(/[^\d.]/g, ''))
+    if (Number.isNaN(numeric) || numeric === 0) return true
+  }
+  return false
+}
+
+/** 고용24 stdgScor(100점/%) → 5점 만점 환산. 5 이하 값은 이미 5점 척도로 간주 */
+export function stdgScorToFivePoint(score: number | null | undefined): number | null {
+  if (score == null || score === 0) return null
+  const outOf5 = score > 5 ? (score / 100) * 5 : score
+  return Math.min(5, Math.round(outOf5 * 10) / 10)
+}
+
 function isStatMissing(value: number | null | undefined): boolean {
   return value === null || value === undefined || value === 0
 }
@@ -343,6 +409,23 @@ function formatRating(rating: number | null | undefined): string {
   return String(rating)
 }
 
+function formatSessionEmploymentRate(
+  employmentRate: number | null | undefined,
+  eiEmplRate6: string | null | undefined,
+): string {
+  if (!isStatMissing(employmentRate)) {
+    return `${employmentRate}%`
+  }
+  const fallback = eiEmplRate6?.trim()
+  if (fallback) {
+    const parsed = parseFloat(fallback.replace(/[^\d.]/g, ''))
+    if (!Number.isNaN(parsed) && parsed !== 0) {
+      return fallback.endsWith('%') ? fallback : `${fallback}%`
+    }
+  }
+  return '-'
+}
+
 export function toCourseCardVM(item: CourseListItem): Course {
   return {
     id: String(item.courseId ?? item.id),
@@ -359,72 +442,79 @@ export function toCourseCardVM(item: CourseListItem): Course {
   }
 }
 
-export function toCourseDetailVM(
-  detail: BECourseDetail,
-  sessions: CourseSession[],
-  preferredSessionId?: number,
-): CourseDetail {
-  const latestSession = sessions.length > 0 ? sessions[sessions.length - 1] : null
-  const selectedSession =
-    preferredSessionId != null
-      ? sessions.find((session) => session.id === preferredSessionId) ?? latestSession
-      : latestSession
+/** 고용24 WKEND_SE: 1=주말, 2=주중·주말 혼합, 3=주중, 9=해당없음 */
+function formatWeekendLabel(wkendSe: string | null | undefined): string {
+  if (!wkendSe) return '평일 훈련'
 
-  const dateRange = selectedSession
-    ? `${selectedSession.traStartDate} ~ ${selectedSession.traEndDate}`
-    : '-'
+  const normalized = wkendSe.trim()
+  switch (normalized) {
+    case '1':
+      return '주말 훈련'
+    case '2':
+      return '주중·주말 혼합 훈련'
+    case '3':
+      return '평일 훈련'
+    case '9':
+      return ''
+    case 'Y':
+      return '주말 훈련 포함'
+    case 'N':
+      return '평일 훈련'
+    default:
+      if (/weekend/i.test(normalized)) return '주말 훈련 포함'
+      if (/weekday/i.test(normalized)) return '평일 훈련'
+      return normalized
+  }
+}
 
-  const batch = selectedSession ? `${selectedSession.trprDegr}기` : '-'
+export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): CourseDetail {
+  const inst = detail.institution
+  const dateRange = `${detail.traStartDate} ~ ${detail.traEndDate}`
+  const batch = `${detail.trprDegr}기`
 
   const recruitment: CourseRecruitment = {
-    capacity: selectedSession?.recruitmentCount ?? 0,
-    applicants: selectedSession?.selectedTraineeCount ?? 0,
-    confirmed: selectedSession?.confirmedTraineeCount ?? 0,
+    capacity: detail.recruitmentCount ?? 0,
+    applicants: detail.selectedTraineeCount ?? 0,
+    confirmed: detail.confirmedTraineeCount ?? 0,
   }
 
-  const employmentRate =
-    selectedSession?.eiEmplRate6
-      ? `${selectedSession.eiEmplRate6}%`
-      : selectedSession?.employmentRate !== null && selectedSession?.employmentRate !== undefined
-        ? `${selectedSession.employmentRate}%`
-        : '-'
+  const employmentRate = formatSessionEmploymentRate(detail.employmentRate, detail.eiEmplRate6)
 
-  const inst = detail.institution
-
-  const otherInfo = selectedSession
-    ? [
-        detail.totalTrainingDays ? `총 훈련 일수: ${detail.totalTrainingDays}일` : '',
-        detail.totalTrainingHours ? `총 훈련 시간: ${detail.totalTrainingHours}시간` : '',
-        selectedSession.wkendSe === 'Y' ? '주말 훈련 포함' : '평일 훈련',
-      ]
-        .filter(Boolean)
-        .join('\n') || '정보 없음'
-    : '정보 없음'
+  const otherInfo =
+    [
+      detail.totalTrainingDays ? `총 훈련 일수: ${detail.totalTrainingDays}일` : '',
+      detail.totalTrainingHours ? `총 훈련 시간: ${detail.totalTrainingHours}시간` : '',
+      formatWeekendLabel(detail.wkendSe),
+    ]
+      .filter(Boolean)
+      .join('\n') || '-'
 
   return {
-    id: String(detail.id),
-    courseSessionId: selectedSession?.id,
+    id: String(detail.courseId),
+    courseId: detail.courseId,
+    courseSessionId: detail.id,
     title: detail.title,
     company: inst?.institutionName ?? '-',
     location: formatAreaCode(detail.trngAreaCd),
-    price: formatCoursePrice(selectedSession?.selfPaymentAmount ?? detail.selfPaymentAmount),
+    price: formatCoursePrice(detail.selfPaymentAmount),
     dateRange,
     satisfaction: formatScore(detail.stdgScor),
+    satisfactionOutOf5: stdgScorToFivePoint(detail.stdgScor),
     employmentRate,
     rating: '-',
     logoUrl: inst?.profileImageUrl ?? undefined,
     batch,
     recruitment,
-    eligibility: detail.trainingTargetRequirements ?? '정보 없음',
-    goals: detail.trainingGoal ?? '정보 없음',
+    eligibility: detail.trainingTargetRequirements?.trim() || '-',
+    goals: detail.trainingGoal?.trim() || '-',
     otherInfo,
-    institutionInfo: inst?.introduction ?? '정보 없음',
+    institutionInfo: inst?.introduction?.trim() || '-',
     contact: {
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',
     },
-    titleLink: detail.titleLink ?? selectedSession?.titleLink ?? null,
-    homepageUrl: inst?.homepageUrl ?? null,
+    titleLink: detail.titleLink ? toAbsoluteUrl(detail.titleLink) : null,
+    homepageUrl: inst?.homepageUrl ? toAbsoluteUrl(inst.homepageUrl) : null,
   }
 }
 
@@ -441,16 +531,10 @@ export async function getCourses(params: CourseListParams): Promise<PageResponse
   return { ...page, content: page.content.map(toCourseCardVM) }
 }
 
-/** 과정 상세 + 세션을 병렬 조회해 뷰모델로 반환 */
-export async function getCourseDetail(id: number, preferredSessionId?: number): Promise<CourseDetail> {
-  const [detail, sessions] = await Promise.all([
-    http.get<BECourseDetail>(`/api/courses/${id}`, { auth: false }),
-    http.get<CourseSession[]>(`/api/courses/${id}/sessions`, { auth: false }),
-  ])
-  return toCourseDetailVM(detail, sessions, preferredSessionId)
-}
-
-/** 과정 회차 목록 (raw BE DTO) */
-export async function getCourseSessions(id: number): Promise<CourseSession[]> {
-  return http.get<CourseSession[]>(`/api/courses/${id}/sessions`, { auth: false })
+/** 과정 회차 상세 (회차 + 과정 + 기관 통합 조회) */
+export async function getCourseSessionDetail(courseSessionId: number): Promise<CourseDetail> {
+  const detail = await http.get<BECourseSessionDetail>(`/api/course-sessions/${courseSessionId}`, {
+    auth: false,
+  })
+  return toCourseDetailVMFromSession(detail)
 }

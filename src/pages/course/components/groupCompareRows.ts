@@ -4,12 +4,14 @@ import type { CompareTableRow } from '../data/mockCourseCompare.ts'
 export interface CompareFieldRow {
   label: string
   getValue: (course: CourseDetail) => string
+  multiline?: boolean
 }
 
 export interface CompareSectionGroup {
   label: string
   fields: CompareFieldRow[]
   includeStats?: boolean
+  contentOnly?: boolean
 }
 
 // 비교 표 항목 그룹화
@@ -19,7 +21,7 @@ export function groupCompareRows(rows: CompareTableRow[]): CompareSectionGroup[]
 
   for (const row of rows) {
     if (row.type === 'section') {
-      current = { label: row.label, fields: [] }
+      current = { label: row.label, fields: [], contentOnly: row.contentOnly }
       groups.push(current)
       continue
     }
@@ -30,7 +32,11 @@ export function groupCompareRows(rows: CompareTableRow[]): CompareSectionGroup[]
     }
 
     if (current) {
-      current.fields.push({ label: row.label, getValue: row.getValue })
+      current.fields.push({
+        label: row.label,
+        getValue: row.getValue,
+        multiline: row.multiline,
+      })
     }
   }
 
