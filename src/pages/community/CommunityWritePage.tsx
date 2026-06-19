@@ -8,6 +8,7 @@ import {
   communitySections,
   getCommunityDetailPath,
   getCommunitySectionFromPath,
+  POST_TYPE_TO_SECTION,
   type WritableCommunitySectionKey,
 } from './communitySections'
 
@@ -85,7 +86,7 @@ function FormSkeleton() {
 // 커뮤니티 작성/수정 페이지 (게시판, Q&A, 모집)
 export default function CommunityWritePage() {
   const { pathname } = useLocation()
-  const { postId, qnaId, recruitId } = useParams<{ postId?: string; qnaId?: string; recruitId?: string }>()
+  const { postId } = useParams<{ postId?: string }>()
   const navigate = useNavigate()
   const sectionKey = getCommunitySectionFromPath(pathname)
   const isEditMode = pathname.includes('/edit/')
@@ -97,12 +98,12 @@ export default function CommunityWritePage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingPost, setIsLoadingPost] = useState(false)
+  const [editSectionKey, setEditSectionKey] = useState<WritableCommunitySectionKey | null>(null)
 
-  const writableSectionKey =
+  const pathSectionKey =
     sectionKey && sectionKey !== 'article' ? (sectionKey as WritableCommunitySectionKey) : null
-  const rawTargetId =
-    writableSectionKey === 'posts' ? postId : writableSectionKey === 'qna' ? qnaId : recruitId
-  const targetPostId = rawTargetId ? Number(rawTargetId) : null
+  const writableSectionKey = isEditMode ? editSectionKey : pathSectionKey
+  const targetPostId = isEditMode && postId ? Number(postId) : null
 
   const pageCopy = useMemo(
     () => (writableSectionKey ? getPageCopy(writableSectionKey, isEditMode) : null),
@@ -120,6 +121,7 @@ export default function CommunityWritePage() {
       .then((post) => {
         setTitle(post.title)
         setContent(post.content)
+        setEditSectionKey(POST_TYPE_TO_SECTION[post.postType])
       })
       .catch((err: unknown) => {
         setSubmitError(err instanceof Error ? err.message : '게시글 정보를 불러올 수 없습니다.')
@@ -131,14 +133,26 @@ export default function CommunityWritePage() {
     return <Navigate to={`/login?redirect=${encodeURIComponent(pathname)}`} replace />
   }
 
-  if (!writableSectionKey || !pageCopy || !fieldCopy) return null
+  if (isEditMode && (!targetPostId || Number.isNaN(targetPostId))) {
+    return <Navigate to="/community/posts" replace />
+  }
+
+  if (!writableSectionKey || !pageCopy || !fieldCopy) {
+    if (isEditMode && isLoadingPost) {
+      return (
+        <div className="flex flex-col gap-6 md:gap-8">
+          <header className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight text-deepOceanNavy md:text-3xl">게시글 수정</h1>
+          </header>
+          <FormSkeleton />
+        </div>
+      )
+    }
+    return null
+  }
 
   const section = communitySections[writableSectionKey]
   if (!('writeLabel' in section) || !('writePath' in section)) return null
-
-  if (isEditMode && (!targetPostId || Number.isNaN(targetPostId))) {
-    return <Navigate to={section.listPath} replace />
-  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -185,7 +199,7 @@ export default function CommunityWritePage() {
               content: trimmedContent,
             })
 
-      navigate(getCommunityDetailPath(writableSectionKey, post.id), {
+      navigate(getCommunityDetailPath(POST_TYPE_TO_SECTION[post.postType], post.id), {
         state: { title: post.title },
       })
     } catch (err) {

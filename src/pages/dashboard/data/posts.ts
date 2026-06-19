@@ -41,8 +41,6 @@ export type UserActivityItem = {
 }
 
 export function getUserPostPath(post: Pick<UserPost, 'id' | 'board'>) {
-  if (post.board === 'Q&A') return `/community/qna/${post.id}`
-  if (post.board === '모집') return `/community/recruit/${post.id}`
   return `/community/posts/${post.id}`
 }
 
@@ -55,8 +53,6 @@ export function getUserActivityPath(item: UserActivityItem) {
 
 export function getUserActivityEditPath(item: UserActivityItem) {
   if (item.kind === 'comment') return getUserActivityPath(item)
-  if (item.board === 'Q&A') return `/community/qna/edit/${item.id}`
-  if (item.board === '모집') return `/community/recruit/edit/${item.id}`
   return `/community/posts/edit/${item.id}`
 }
 

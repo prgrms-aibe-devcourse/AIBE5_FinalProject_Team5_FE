@@ -4,8 +4,6 @@ import type { RecentPost } from '../data/posts'
 import DashboardCard from './DashboardCard'
 
 function getPostPath(post: RecentPost) {
-  if (post.board === 'Q&A') return `/community/qna/${post.id}`
-  if (post.board === '모집') return `/community/recruit/${post.id}`
   return `/community/posts/${post.id}`
 }
 
