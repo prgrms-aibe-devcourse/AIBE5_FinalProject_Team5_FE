@@ -60,12 +60,27 @@ export function getUserActivityEditPath(item: UserActivityItem): string | null {
   if (item.kind === 'comment') {
     return item.parentPostId != null ? getUserPostPath(item.parentPostId) : null
   }
+  if (item.board === '리뷰' && item.courseSessionId != null) {
+    return `/courses/${item.courseSessionId}`
+  }
   return `/community/posts/edit/${item.id}`
 }
 
 export function getCommentEditNavigationState(item: UserActivityItem) {
   if (item.kind !== 'comment') return undefined
   return { editCommentId: item.id }
+}
+
+export function getReviewEditNavigationState(item: UserActivityItem) {
+  if (item.board !== '리뷰') return undefined
+  return { editReviewId: item.id, openReviewsTab: true as const }
+}
+
+export function getUserActivityDetailNavigationState(item: UserActivityItem) {
+  if (item.board === '리뷰') {
+    return { openReviewsTab: true as const, title: item.title }
+  }
+  return { title: item.title }
 }
 
 function postToActivity(post: UserPost): UserActivityItem {

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
 import Toast from '../../components/common/Toast.tsx'
@@ -14,12 +14,44 @@ import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
 
 export default function CourseDetailPage() {
   const { courseSessionId } = useParams<{ courseSessionId: string }>()
-  const [activeTab, setActiveTab] = useState<CourseDetailTab>('info')
+  const location = useLocation()
+  const locationState = location.state as { editReviewId?: number; openReviewsTab?: boolean } | null
+  const [activeTab, setActiveTab] = useState<CourseDetailTab>(
+    locationState?.openReviewsTab ? 'reviews' : 'info',
+  )
   const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
 
   const [course, setCourse] = useState<CourseDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
+  const reviewsListAnchorRef = useRef<HTMLDivElement>(null)
+  const hasScrolledToReviews = useRef(false)
+
+  useEffect(() => {
+    hasScrolledToReviews.current = false
+  }, [courseSessionId, locationState?.openReviewsTab, locationState?.editReviewId])
+
+  useEffect(() => {
+    if (!locationState?.openReviewsTab || activeTab !== 'reviews' || !course || hasScrolledToReviews.current) {
+      return
+    }
+
+    hasScrolledToReviews.current = true
+
+    const scrollToReviews = () => {
+      reviewsListAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToReviews)
+    })
+  }, [activeTab, course, locationState?.openReviewsTab])
+
+  useEffect(() => {
+    if (locationState?.openReviewsTab) {
+      setActiveTab('reviews')
+    }
+  }, [locationState?.openReviewsTab, locationState?.editReviewId])
 
   useEffect(() => {
     if (!courseSessionId) {
@@ -100,6 +132,8 @@ export default function CourseDetailPage() {
                 <CourseDetailReviewsSection
                   courseId={course.courseId}
                   courseSessionId={course.courseSessionId ?? 0}
+                  editReviewId={locationState?.editReviewId}
+                  listSectionRef={reviewsListAnchorRef}
                   onReviewSubmitted={() => setActiveTab('reviews')}
                 />
               ) : null}

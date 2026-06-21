@@ -1,3 +1,4 @@
+import { ApiError } from './ApiError'
 import { http } from './http'
 
 export interface CrawledReview {
@@ -450,4 +451,238 @@ export async function getLatestReviews(limit = 5): Promise<CourseReview[]> {
     auth: false,
   })
   return (data ?? []).map(toCourseReview)
+}
+
+// ──────────────────────────────────────────────
+// 리뷰 상세·수정·삭제 /api/reviews/{reviewId}
+// ──────────────────────────────────────────────
+
+export interface ReviewDetail extends CourseReview {
+  courseId: number
+  courseSessionId: number
+}
+
+export interface UpdateGeneralReviewPayload {
+  overallRating?: number
+  content?: string
+}
+
+export interface UpdateVerifiedReviewPayload {
+  content?: string
+  verifiedDetail?: CreateVerifiedReviewDetailPayload
+}
+
+export type UpdateReviewPayload = UpdateGeneralReviewPayload | UpdateVerifiedReviewPayload
+
+export type VerifiedReviewFormDraft = {
+  step1?: {
+    priorKnowledgeLevel: string
+    age: string
+    learningGoal: string
+    attendanceType: string
+    cohort: string
+  }
+  step2?: {
+    courseDifficulty: string
+    progressSpeed: string
+    teamProjectDifficulty: string
+    avgSelfStudyHours: string
+  }
+  step3?: {
+    instructorDeliveryRating: number
+    curriculumRating: number
+    employmentSupportRating: number
+  }
+  step4?: {
+    projectCount: string
+    projectAchievementRating: number
+    toolSupportRating: number
+    mentoringSatisfactionRating: number
+  }
+  step5?: {
+    completionStatus: string
+    dropoutMajorReason: string
+    dropoutSubReason: string
+    collaborationComment: string
+    employmentStatus: string
+  }
+}
+
+function toReviewDetail(raw: CourseReviewDTO): ReviewDetail {
+  return {
+    ...toCourseReview(raw),
+    courseId: Number(raw.courseId) || 0,
+    courseSessionId: Number(raw.courseSessionId) || 0,
+  }
+}
+
+function mapLabelToCode(value: string, table: Record<string, string>, fallback: string): string {
+  return table[value] ?? (table[value.trim()] ?? fallback)
+}
+
+const PRIOR_KNOWLEDGE_TO_CODE: Record<string, string> = {
+  비전공: 'non_major',
+  non_major: 'non_major',
+  전공: 'major',
+  major: 'major',
+  현직: 'working',
+  working: 'working',
+}
+
+const LEARNING_GOAL_TO_CODE: Record<string, string> = {
+  취업: 'employment',
+  employment: 'employment',
+  이직: 'career_change',
+  career_change: 'career_change',
+  포트폴리오: 'portfolio',
+  portfolio: 'portfolio',
+  창업: 'startup',
+  startup: 'startup',
+  기타: 'etc',
+  etc: 'etc',
+}
+
+const ATTENDANCE_TYPE_TO_CODE: Record<string, string> = {
+  온라인: 'online',
+  online: 'online',
+  오프라인: 'offline',
+  offline: 'offline',
+  혼합: 'hybrid',
+  hybrid: 'hybrid',
+}
+
+const DIFFICULTY_TO_CODE: Record<string, string> = {
+  상: 'high',
+  high: 'high',
+  중: 'medium',
+  medium: 'medium',
+  하: 'low',
+  low: 'low',
+}
+
+const PROGRESS_SPEED_TO_CODE: Record<string, string> = {
+  느림: 'slow',
+  slow: 'slow',
+  적당: 'moderate',
+  moderate: 'moderate',
+  빠름: 'fast',
+  fast: 'fast',
+}
+
+const COMPLETION_STATUS_TO_CODE: Record<string, string> = {
+  수료: 'completed',
+  completed: 'completed',
+  '수강 중': 'ongoing',
+  ongoing: 'ongoing',
+  '중도 포기': 'dropout',
+  dropout: 'dropout',
+}
+
+const EMPLOYMENT_STATUS_TO_CODE: Record<string, string> = {
+  취업: 'employed',
+  employed: 'employed',
+  준비중: 'preparing',
+  preparing: 'preparing',
+}
+
+/** API 응답(한글 라벨) → 인증 후기 작성 폼 초기값 */
+export function verifiedDetailToFormDraft(
+  detail: CourseReviewVerifiedDetail,
+  content: string,
+): VerifiedReviewFormDraft {
+  return {
+    step1: {
+      priorKnowledgeLevel: mapLabelToCode(detail.priorKnowledgeLevel, PRIOR_KNOWLEDGE_TO_CODE, 'non_major'),
+      age: String(detail.age || ''),
+      learningGoal: mapLabelToCode(detail.learningGoal, LEARNING_GOAL_TO_CODE, 'etc'),
+      attendanceType: mapLabelToCode(detail.attendanceType, ATTENDANCE_TYPE_TO_CODE, 'online'),
+      cohort: String(detail.cohort || ''),
+    },
+    step2: {
+      courseDifficulty: mapLabelToCode(detail.courseDifficulty, DIFFICULTY_TO_CODE, 'medium'),
+      progressSpeed: mapLabelToCode(detail.progressSpeed, PROGRESS_SPEED_TO_CODE, 'moderate'),
+      teamProjectDifficulty: mapLabelToCode(detail.teamProjectDifficulty, DIFFICULTY_TO_CODE, 'medium'),
+      avgSelfStudyHours: String(detail.avgSelfStudyHours || ''),
+    },
+    step3: {
+      instructorDeliveryRating: detail.instructorDeliveryRating,
+      curriculumRating: detail.curriculumRating,
+      employmentSupportRating: detail.employmentSupportSatisfactionRating,
+    },
+    step4: {
+      projectCount: String(detail.projectCount || ''),
+      projectAchievementRating: detail.projectAchievementRating,
+      toolSupportRating: detail.toolSupportRating,
+      mentoringSatisfactionRating: detail.mentoringSatisfactionRating,
+    },
+    step5: {
+      completionStatus: mapLabelToCode(detail.completionStatus, COMPLETION_STATUS_TO_CODE, 'ongoing'),
+      dropoutMajorReason: detail.dropoutMajorReason ?? '',
+      dropoutSubReason: detail.dropoutSubReason ?? '',
+      collaborationComment: detail.freeReview || content,
+      employmentStatus: detail.employmentStatusIn6Months
+        ? mapLabelToCode(detail.employmentStatusIn6Months, EMPLOYMENT_STATUS_TO_CODE, 'preparing')
+        : 'preparing',
+    },
+  }
+}
+
+/** 과정 리뷰 목록에서 reviewId로 검색 */
+export async function findCourseReviewById(courseId: number, reviewId: number): Promise<CourseReview | null> {
+  let page = 0
+  let totalPages = 1
+
+  while (page < totalPages) {
+    const data = await getCourseReviews(courseId, { page, size: 50 })
+    totalPages = data.totalPages
+    const found = data.content.find((review) => review.reviewId === reviewId)
+    if (found) return found
+    page += 1
+  }
+
+  return null
+}
+
+/** 리뷰 상세 조회 */
+export async function getReview(reviewId: number): Promise<ReviewDetail> {
+  const data = await http.get<CourseReviewDTO>(`/api/reviews/${reviewId}`, { auth: true })
+  return toReviewDetail(data)
+}
+
+/** 수정용 리뷰 조회 — 단건 API 우선, 없으면 과정 리뷰 목록에서 검색 */
+export async function loadReviewForEdit(
+  courseId: number,
+  reviewId: number,
+  courseSessionId = 0,
+): Promise<ReviewDetail> {
+  try {
+    return await getReview(reviewId)
+  } catch (error) {
+    const isNotFound =
+      error instanceof ApiError && (error.code === 'REVIEW_NOT_FOUND' || error.status === 404)
+
+    if (!isNotFound) throw error
+
+    const found = await findCourseReviewById(courseId, reviewId)
+    if (!found) {
+      throw new ApiError('REVIEW_NOT_FOUND', '리뷰를 찾을 수 없습니다.', 404)
+    }
+
+    return {
+      ...found,
+      courseId,
+      courseSessionId,
+    }
+  }
+}
+
+/** 리뷰 수정 */
+export async function updateReview(reviewId: number, payload: UpdateReviewPayload): Promise<ReviewDetail> {
+  const data = await http.patch<CourseReviewDTO>(`/api/reviews/${reviewId}`, payload, { auth: true })
+  return toReviewDetail(data)
+}
+
+/** 리뷰 삭제 */
+export async function deleteReview(reviewId: number): Promise<void> {
+  await http.delete<void>(`/api/reviews/${reviewId}`, { auth: true })
 }

@@ -5,6 +5,8 @@ import Tabs from '../../components/common/Tabs'
 import {
   MY_POST_TABS,
   getCommentEditNavigationState,
+  getReviewEditNavigationState,
+  getUserActivityDetailNavigationState,
   getUserActivityEditPath,
   getUserActivityPath,
   type MyPostTab,
@@ -21,6 +23,7 @@ import {
 } from '../../services/mypage'
 import { deletePostComment } from '../../services/comment'
 import { deletePost } from '../../services/post'
+import { deleteReview } from '../../services/review'
 
 const PAGE_SIZE = 10
 
@@ -188,7 +191,12 @@ export default function MyPostsPage() {
       return
     }
     const path = getUserActivityEditPath(item)
-    if (path) navigate(path)
+    if (!path) return
+    if (item.board === '리뷰') {
+      navigate(path, { state: getReviewEditNavigationState(item) })
+      return
+    }
+    navigate(path)
   }
 
   const handleDeleteRequest = (item: UserActivityItem) => {
@@ -216,6 +224,16 @@ export default function MyPostsPage() {
         await deletePostComment(deleteTarget.id)
       } catch (err: unknown) {
         setActionError(err instanceof Error ? err.message : '댓글 삭제 중 오류가 발생했습니다.')
+        return
+      } finally {
+        setIsDeleting(false)
+      }
+    } else if (activeTab === 'REVIEW' && deleteTarget.kind === 'post') {
+      try {
+        setIsDeleting(true)
+        await deleteReview(deleteTarget.id)
+      } catch (err: unknown) {
+        setActionError(err instanceof Error ? err.message : '리뷰 삭제 중 오류가 발생했습니다.')
         return
       } finally {
         setIsDeleting(false)
@@ -292,10 +310,13 @@ export default function MyPostsPage() {
                   item={item}
                   onOpenDetail={
                     detailPath
-                      ? () => navigate(detailPath, { state: { title: item.title } })
+                      ? () =>
+                          navigate(detailPath, {
+                            state: getUserActivityDetailNavigationState(item),
+                          })
                       : undefined
                   }
-                  onEdit={activeTab === 'REVIEW' ? undefined : () => handleEdit(item)}
+                  onEdit={() => handleEdit(item)}
                   onDelete={() => handleDeleteRequest(item)}
                 />
               </li>
@@ -315,7 +336,9 @@ export default function MyPostsPage() {
       {deleteTarget ? (
         <DeleteConfirmModal
           targetTitle={deleteTarget.title}
-          targetLabel={deleteTarget.kind === 'comment' ? '댓글' : '글'}
+          targetLabel={
+            deleteTarget.kind === 'comment' ? '댓글' : deleteTarget.board === '리뷰' ? '리뷰' : '글'
+          }
           onClose={() => setDeleteTarget(null)}
           onConfirm={handleDeleteConfirm}
           isDeleting={isDeleting}
