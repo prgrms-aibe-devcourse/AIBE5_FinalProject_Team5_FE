@@ -13,6 +13,7 @@ import AiPortfolioPage from './pages/dashboard/AiPortfolioPage'
 import LoginPage from './pages/auth/LoginPage'
 import SignupPage from './pages/auth/SignupPage'
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage'
+import KakaoCallbackPage from './pages/auth/KakaoCallbackPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminCertificationsPage from './pages/admin/AdminCertificationsPage'
 import AdminInquiriesPage from './pages/admin/AdminInquiriesPage'
@@ -39,6 +40,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+      <Route path="/oauth/kakao/callback" element={<KakaoCallbackPage />} />
 
       {/* 과정 조회 */}
       <Route path="/courses" element={<CourseSearchPage />} />
