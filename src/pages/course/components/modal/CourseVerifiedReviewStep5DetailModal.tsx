@@ -5,6 +5,14 @@ import type { CourseFilterConfig } from '../../../../services/course.ts'
 
 interface CourseVerifiedReviewStep5DetailModalProps {
   isOpen: boolean
+  mode?: 'create' | 'edit'
+  initialValues?: {
+    completionStatus: string
+    dropoutMajorReason: string
+    dropoutSubReason: string
+    collaborationComment: string
+    employmentStatus: string
+  }
   onClose: () => void
   onBack?: () => void
   onSubmit?: (payload: {
@@ -79,6 +87,8 @@ function SegmentControl({
 
 export default function CourseVerifiedReviewStep5DetailModal({
   isOpen,
+  mode = 'create',
+  initialValues,
   onClose,
   onBack,
   onSubmit,
@@ -90,16 +100,31 @@ export default function CourseVerifiedReviewStep5DetailModal({
   const [dropoutSubReason, setDropoutSubReason] = useState('')
   const [collaborationComment, setCollaborationComment] = useState('')
   const [employmentStatus, setEmploymentStatus] = useState('employed')
+  const isEditMode = mode === 'edit'
 
   useEffect(() => {
     if (!isOpen) return
+
+    if (initialValues) {
+      setCompletionStatus(initialValues.completionStatus)
+      setDropoutMajorReason(initialValues.dropoutMajorReason)
+      setDropoutSubReason(initialValues.dropoutSubReason)
+      setCollaborationComment(initialValues.collaborationComment)
+      setEmploymentStatus(initialValues.employmentStatus)
+    } else {
+      setCompletionStatus('dropout')
+      setDropoutMajorReason('')
+      setDropoutSubReason('')
+      setCollaborationComment('')
+      setEmploymentStatus('employed')
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, initialValues])
 
   if (!isOpen) return null
 
@@ -119,7 +144,9 @@ export default function CourseVerifiedReviewStep5DetailModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 작성</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+            {isEditMode ? '후기 수정' : '후기 작성'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -249,7 +276,7 @@ export default function CourseVerifiedReviewStep5DetailModal({
               }
               className="inline-flex min-w-24 items-center justify-center rounded-lg bg-deepOceanNavy px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue disabled:cursor-not-allowed disabled:bg-secondary/50"
             >
-              {isSubmitting ? '제출 중...' : '제출'}
+              {isSubmitting ? '저장 중...' : isEditMode ? '저장' : '제출'}
             </button>
           </div>
         </div>

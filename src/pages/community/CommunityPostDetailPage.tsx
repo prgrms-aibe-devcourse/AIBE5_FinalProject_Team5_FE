@@ -5,6 +5,7 @@ import CommunityCommentsCard from './components/CommunityCommentsCard'
 import CommunityCommentsSection from './components/CommunityCommentsSection'
 import CommunityDetailBreadcrumb from './components/CommunityDetailBreadcrumb'
 import { formatCommunityDate } from '../../utils/formatRequestedDate'
+import { getStoredUser } from '../../services/auth'
 import ReportModal from '../../components/common/ReportModal'
 import { usePostDetail } from './hooks/usePostDetail'
 import {
@@ -49,12 +50,19 @@ const DEFAULT_TITLE_BY_TYPE = {
   PROJECT_RECRUIT: '모집 상세',
 } as const
 
+type CommunityPostDetailLocationState = {
+  title?: string
+  editCommentId?: number
+}
+
 // 게시판 · Q&A · 모집 통합 상세 페이지
 // API: services/post.getPost — GET /api/posts/{postId}
 export default function CommunityPostDetailPage() {
   const { postId } = useParams<{ postId: string }>()
   const location = useLocation()
-  const fallbackTitle = (location.state as { title?: string } | null)?.title?.trim()
+  const locationState = (location.state as CommunityPostDetailLocationState | null) ?? null
+  const fallbackTitle = locationState?.title?.trim()
+  const editCommentId = locationState?.editCommentId ?? null
   const { post, isLoading, fetchError } = usePostDetail(postId)
 
   const [reportOpen, setReportOpen] = useState(false)
@@ -88,6 +96,8 @@ export default function CommunityPostDetailPage() {
 
   const sectionKey = POST_TYPE_TO_SECTION[post.postType]
   const title = post.title || fallbackTitle || DEFAULT_TITLE_BY_TYPE[post.postType]
+  const storedUser = getStoredUser()
+  const isOwnPost = storedUser != null && post.author === storedUser.nickname
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
@@ -123,6 +133,7 @@ export default function CommunityPostDetailPage() {
           </span>,
         ]}
         actions={
+          isOwnPost ? undefined : (
           <button
             type="button"
             onClick={() => setReportOpen(true)}
@@ -139,6 +150,7 @@ export default function CommunityPostDetailPage() {
             </svg>
             신고하기
           </button>
+          )
         }
       >
         <section aria-label="본문">
@@ -147,7 +159,7 @@ export default function CommunityPostDetailPage() {
       </CommunityDetailCard>
 
       <CommunityCommentsCard>
-        <CommunityCommentsSection postId={post.id} />
+        <CommunityCommentsSection postId={post.id} initialEditCommentId={editCommentId} />
       </CommunityCommentsCard>
 
       {reportOpen ? (
