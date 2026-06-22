@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import ReportModal from '../../../components/common/ReportModal'
-import { getStoredUser, getStoredUserId } from '../../../services/auth'
-import { isAuthenticated } from '../../../services/authToken'
+import { getStoredUser, getStoredUserId, isAuthenticated } from '../../../services/auth'
 import {
   createPostComment,
   deletePostComment,
