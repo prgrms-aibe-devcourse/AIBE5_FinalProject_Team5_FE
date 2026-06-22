@@ -95,6 +95,58 @@ export async function logout(): Promise<void> {
   }
 }
 
+/** [비밀번호 찾기_요청]
+ * POST /api/auth/password/forgot */
+export interface PasswordForgotRequest {
+  email: string
+}
+
+export interface PasswordForgotResponse {
+  accepted: boolean
+  expiresInSeconds: number
+  resetToken?: string | null
+  resetUrl?: string | null
+}
+
+export async function forgotPassword(body: PasswordForgotRequest): Promise<PasswordForgotResponse> {
+  return http.post<PasswordForgotResponse>('/api/auth/password/forgot', body)
+}
+
+/** forgot 응답의 resetUrl / resetToken으로 SPA 이동 경로 생성 */
+export function getPasswordResetNavigationPath(result: PasswordForgotResponse): string | null {
+  const resetUrl = result.resetUrl?.trim()
+  if (resetUrl) {
+    try {
+      const url = new URL(resetUrl, window.location.origin)
+      return `${url.pathname}${url.search}${url.hash}`
+    } catch {
+      if (resetUrl.startsWith('/')) return resetUrl
+    }
+  }
+
+  const resetToken = result.resetToken?.trim()
+  if (resetToken) {
+    return `/reset-password?token=${encodeURIComponent(resetToken)}`
+  }
+
+  return null
+}
+
+/** [비밀번호 재설정_요청]
+ * POST /api/auth/password/reset */
+export interface PasswordResetRequest {
+  token: string
+  newPassword: string
+}
+
+export interface PasswordResetResponse {
+  completed: boolean
+}
+
+export async function resetPassword(body: PasswordResetRequest): Promise<PasswordResetResponse> {
+  return http.post<PasswordResetResponse>('/api/auth/password/reset', body)
+}
+
 export function clearAuthSession(): void {
   clearLegacyTokenStorage()
   clearStoredUser()

@@ -12,6 +12,8 @@ import MyPostsPage from './pages/dashboard/MyPostsPage'
 import AiPortfolioPage from './pages/dashboard/AiPortfolioPage'
 import LoginPage from './pages/auth/LoginPage'
 import SignupPage from './pages/auth/SignupPage'
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage'
 import KakaoCallbackPage from './pages/auth/KakaoCallbackPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
@@ -39,6 +41,8 @@ function App() {
       {/* 로그인, 회원가입 */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
       <Route path="/oauth/kakao/callback" element={<KakaoCallbackPage />} />
 
