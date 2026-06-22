@@ -80,6 +80,7 @@ export function toUserCertificationRequest(item: VerificationListItem): UserCert
   return {
     id: item.verificationId,
     courseName: item.courseTitle,
+    courseSessionId: item.courseSessionId,
     requestedAt: toDateOnly(item.createdAt),
     status: item.status,
     rejectReason: item.rejectReason ?? undefined,
