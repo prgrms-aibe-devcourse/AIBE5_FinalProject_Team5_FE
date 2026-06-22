@@ -1,6 +1,7 @@
 import googleIcon from '../../../assets/icons/Google.png'
 import kakaoIcon from '../../../assets/icons/kakao.png'
 import { redirectToGoogleLogin } from '../../../services/googleAuth'
+import { redirectToKakaoLogin } from '../../../services/kakaoAuth'
 
 const providers = [
   { name: 'Google', icon: googleIcon },
@@ -19,6 +20,9 @@ export default function AuthSocial({ variant = 'login' }: AuthSocialProps) {
   const handleProviderClick = (name: string) => {
     if (name === 'Google') {
       redirectToGoogleLogin()
+    }
+    if (name === 'Kakao') {
+      redirectToKakaoLogin()
     }
   }
 
