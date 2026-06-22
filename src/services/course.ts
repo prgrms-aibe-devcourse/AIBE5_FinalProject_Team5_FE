@@ -22,7 +22,7 @@ export interface CourseFilterConfig {
 }
 
 /** 정렬 키 (FE 전용 — BE 파라미터 없음) */
-export type CourseSortKey = 'latest' | 'mostReviews' | 'rating' | 'satisfaction'
+export type CourseSortKey = 'latest' | 'satisfaction' | 'employmentRate' | 'deadline'
 
 /** 과정 카드 뷰모델 */
 export interface Course {
@@ -318,6 +318,7 @@ export function toCourseListParams(
   filterValues: Record<string, string>,
   keyword: string,
   currentPage: number,
+  sortKey: CourseSortKey = 'latest',
   size = 9,
 ): CourseListParams {
   const category = filterValues.category
@@ -333,6 +334,7 @@ export function toCourseListParams(
     durationFilter: duration && duration !== FILTER_ALL ? (duration as DurationFilter) : undefined,
     page: currentPage - 1,
     size,
+    sort: sortKey,
   }
 }
 
