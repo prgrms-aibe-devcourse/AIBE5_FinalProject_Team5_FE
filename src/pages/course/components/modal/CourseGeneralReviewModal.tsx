@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 
 interface CourseGeneralReviewModalProps {
   isOpen: boolean
+  mode?: 'create' | 'edit'
+  initialValues?: { overallRating: number; content: string }
   onClose: () => void
   onBack?: () => void
   onSubmit?: (payload: { overallRating: number; content: string }) => void
@@ -34,6 +36,8 @@ function StarButton({
 
 export default function CourseGeneralReviewModal({
   isOpen,
+  mode = 'create',
+  initialValues,
   onClose,
   onBack,
   onSubmit,
@@ -42,18 +46,25 @@ export default function CourseGeneralReviewModal({
 }: CourseGeneralReviewModalProps) {
   const [overallRating, setOverallRating] = useState(0)
   const [content, setContent] = useState('')
+  const isEditMode = mode === 'edit'
 
   useEffect(() => {
     if (!isOpen) return
-    setOverallRating(0)
-    setContent('')
+
+    if (initialValues) {
+      setOverallRating(initialValues.overallRating)
+      setContent(initialValues.content)
+    } else {
+      setOverallRating(0)
+      setContent('')
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, initialValues])
 
   if (!isOpen) return null
 
@@ -64,7 +75,7 @@ export default function CourseGeneralReviewModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
-      aria-label="일반 후기 작성"
+      aria-label={isEditMode ? '일반 후기 수정' : '일반 후기 작성'}
       onClick={onClose}
     >
       <div
@@ -72,7 +83,9 @@ export default function CourseGeneralReviewModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">일반 후기 작성</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+            {isEditMode ? '일반 후기 수정' : '일반 후기 작성'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -127,21 +140,23 @@ export default function CourseGeneralReviewModal({
 
         <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
           <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onBack}
-              disabled={isSubmitting}
-              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              이전
-            </button>
+            {onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                disabled={isSubmitting}
+                className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                이전
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={!isSubmitEnabled || isSubmitting}
               onClick={() => onSubmit?.({ overallRating, content: content.trim() })}
               className="inline-flex min-w-24 items-center justify-center rounded-lg bg-deepOceanNavy px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue disabled:cursor-not-allowed disabled:bg-secondary/50"
             >
-              {isSubmitting ? '제출 중...' : '제출'}
+              {isSubmitting ? '저장 중...' : isEditMode ? '저장' : '제출'}
             </button>
           </div>
         </div>

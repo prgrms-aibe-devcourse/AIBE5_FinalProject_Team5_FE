@@ -5,6 +5,14 @@ import type { CourseFilterConfig } from '../../../../services/course.ts'
 
 interface CourseVerifiedReviewStep1InfoModalProps {
   isOpen: boolean
+  mode?: 'create' | 'edit'
+  initialValues?: {
+    priorKnowledgeLevel: string
+    age: string
+    learningGoal: string
+    attendanceType: string
+    cohort: string
+  }
   onClose: () => void
   onBack?: () => void
   onNext?: (payload: {
@@ -70,6 +78,8 @@ function SegmentField({
 
 export default function CourseVerifiedReviewStep1InfoModal({
   isOpen,
+  mode = 'create',
+  initialValues,
   onClose,
   onBack,
   onNext,
@@ -79,9 +89,24 @@ export default function CourseVerifiedReviewStep1InfoModal({
   const [learningGoal, setLearningGoal] = useState('')
   const [attendanceType, setAttendanceType] = useState('online')
   const [cohort, setCohort] = useState('')
+  const isEditMode = mode === 'edit'
 
   useEffect(() => {
     if (!isOpen) return
+
+    if (initialValues) {
+      setPriorKnowledgeLevel(initialValues.priorKnowledgeLevel)
+      setAge(initialValues.age)
+      setLearningGoal(initialValues.learningGoal)
+      setAttendanceType(initialValues.attendanceType)
+      setCohort(initialValues.cohort)
+    } else {
+      setPriorKnowledgeLevel('non_major')
+      setAge('')
+      setLearningGoal('')
+      setAttendanceType('online')
+      setCohort('')
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
@@ -89,7 +114,7 @@ export default function CourseVerifiedReviewStep1InfoModal({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, initialValues])
 
   if (!isOpen) return null
 
@@ -98,7 +123,7 @@ export default function CourseVerifiedReviewStep1InfoModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
       role="dialog"
       aria-modal="true"
-      aria-label="인증 후기 작성 1단계"
+      aria-label={isEditMode ? '인증 후기 수정 1단계' : '인증 후기 작성 1단계'}
       onClick={onClose}
     >
       <div
@@ -106,7 +131,9 @@ export default function CourseVerifiedReviewStep1InfoModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 작성</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+            {isEditMode ? '후기 수정' : '후기 작성'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -186,13 +213,15 @@ export default function CourseVerifiedReviewStep1InfoModal({
 
         <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
           <div className="flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60"
-            >
-              이전
-            </button>
+            {onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="inline-flex min-w-24 items-center justify-center rounded-lg border border-mistSkyBlue/60 bg-white px-5 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-foamWhite/60"
+              >
+                이전
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={

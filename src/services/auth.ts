@@ -115,6 +115,7 @@ function saveStoredUser(user: AuthUser, fallbackEmail?: string): void {
   if (!email) return
 
   localStorage.setItem(AUTH_STORAGE_KEYS.email, email)
+  localStorage.setItem(AUTH_STORAGE_KEYS.userId, String(user.userId))
   localStorage.setItem(AUTH_STORAGE_KEYS.nickname, user.nickname)
   localStorage.setItem(AUTH_STORAGE_KEYS.role, user.role)
   localStorage.setItem(AUTH_STORAGE_KEYS.provider, user.provider)
@@ -131,12 +132,20 @@ export function getStoredUser(): StoredUser | null {
   const nickname = localStorage.getItem(AUTH_STORAGE_KEYS.nickname)
   if (!email || !nickname) return null
 
+  const userIdRaw = localStorage.getItem(AUTH_STORAGE_KEYS.userId)
+  const parsedUserId = userIdRaw ? Number(userIdRaw) : NaN
+
   return {
+    userId: Number.isNaN(parsedUserId) ? undefined : parsedUserId,
     email,
     nickname,
     role: (localStorage.getItem(AUTH_STORAGE_KEYS.role) ?? 'USER') as UserRole,
     provider: localStorage.getItem(AUTH_STORAGE_KEYS.provider) ?? 'LOCAL',
   }
+}
+
+export function getStoredUserId(): number | null {
+  return getStoredUser()?.userId ?? null
 }
 
 export function isAuthenticated(): boolean {
@@ -159,6 +168,7 @@ export interface AuthUser {
 }
 
 export interface StoredUser {
+  userId?: number
   email: string
   nickname: string
   role: UserRole
@@ -170,6 +180,7 @@ export type AuthSession = {
 }
 
 export const AUTH_STORAGE_KEYS = {
+  userId: 'userId',
   email: 'email',
   nickname: 'nickname',
   role: 'role',
@@ -181,4 +192,3 @@ const ALL_AUTH_STORAGE_KEYS = Object.values(AUTH_STORAGE_KEYS)
 export function isAdminRole(role: string | undefined | null): boolean {
   return role?.toUpperCase() === 'ADMIN'
 }
-
