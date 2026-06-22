@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { Briefcase, Star, ThumbsUp } from 'lucide-react'
-import { isCourseStatPlaceholder } from '../../../services/course'
+import { Star, ThumbsUp } from 'lucide-react'
 import type { Course } from '../data/courses'
 
 const iconClass = 'shrink-0 text-softAquaBlue'
@@ -64,24 +63,8 @@ export function CourseRatingBadge({
   className = '',
   variant = 'rating',
 }: CourseRatingBadgeProps) {
-  return <CourseStatBadge value={rating} variant={variant} className={className} />
-}
-
-type CourseStatBadgeVariant = 'satisfaction' | 'employment' | 'rating'
-
-type CourseStatBadgeProps = {
-  value: string
-  variant: CourseStatBadgeVariant
-  className?: string
-}
-
-function isStatUnavailable(value: string): boolean {
-  return isCourseStatPlaceholder(value) || value.trim() === '-'
-}
-
-export function CourseStatBadge({ value, variant, className = '' }: CourseStatBadgeProps) {
-  const unavailable = isStatUnavailable(value)
-  const Icon = variant === 'satisfaction' ? ThumbsUp : variant === 'employment' ? Briefcase : Star
+  const unavailable = rating === '-'
+  const Icon = variant === 'satisfaction' ? ThumbsUp : Star
   const toneClass = unavailable
     ? 'bg-mistSkyBlue/20 font-medium text-secondary'
     : 'bg-waterlineBlue/12 text-waterlineBlue'
@@ -91,7 +74,7 @@ export function CourseStatBadge({ value, variant, className = '' }: CourseStatBa
       <span className="flex size-[11px] shrink-0 items-center justify-center">
         <Icon className={badgeIconClass} strokeWidth={2} aria-hidden="true" />
       </span>
-      <span className="tabular-nums">{value}</span>
+      <span className="tabular-nums">{rating}</span>
     </span>
   )
 }

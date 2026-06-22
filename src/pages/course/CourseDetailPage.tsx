@@ -10,8 +10,6 @@ import CourseDetailInfoSections from './components/CourseDetailInfoSections.tsx'
 import CourseDetailReviewsSection from './components/CourseDetailReviewsSection.tsx'
 import CourseDetailSidebar from './components/CourseDetailSidebar.tsx'
 import { getCourseSessionDetail, type CourseDetail } from '../../services/course.ts'
-import { isAuthenticated } from '../../services/auth.ts'
-import { addRecentViewedCourse } from '../../services/recentViewedCourses.ts'
 import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
 
 export default function CourseDetailPage() {
@@ -78,11 +76,6 @@ export default function CourseDetailPage() {
       })
       .finally(() => setIsLoading(false))
   }, [courseSessionId])
-
-  useEffect(() => {
-    if (!course || !isAuthenticated()) return
-    addRecentViewedCourse(course)
-  }, [course])
 
   if (isLoading) {
     return (

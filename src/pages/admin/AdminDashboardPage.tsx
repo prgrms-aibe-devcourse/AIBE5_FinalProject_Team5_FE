@@ -1,54 +1,61 @@
-import { useEffect, useState } from 'react'
-import { ApiError } from '../../services/ApiError'
+import { useMemo } from 'react'
 import { getStoredUser } from '../../services/auth'
-import { getAdminDashboardSummary, type AdminDashboardSummary } from '../../services/admin'
 import AdminShell from './components/AdminShell'
 import AdminPageHeader from './components/AdminPageHeader'
 import AdminDashboardStatCards from './components/dashboard/AdminDashboardStatCards'
-import AdminDashboardHrdSection from './components/dashboard/AdminDashboardHrdSection'
+import MonthlySignupChartSection from './components/dashboard/MonthlySignupChartSection'
+import WeeklyVisitorsChartSection from './components/dashboard/WeeklyVisitorsChartSection'
+import {
+  buildMonthlySignupData,
+  buildWeeklyVisitorData,
+  formatMonthOverMonth,
+} from './data/adminDashboardData'
 
+// 관리자 대시보드 페이지
 export default function AdminDashboardPage() {
   const nickname = getStoredUser()?.nickname ?? '관리자'
-  const [summary, setSummary] = useState<AdminDashboardSummary | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [fetchError, setFetchError] = useState<string | null>(null)
 
-  useEffect(() => {
-    setIsLoading(true)
-    setFetchError(null)
+  const monthlySignupData = useMemo(() => buildMonthlySignupData(), [])
+  const thisMonthSignups = monthlySignupData[monthlySignupData.length - 1]?.value ?? 0
+  const lastMonthSignups = monthlySignupData[monthlySignupData.length - 2]?.value ?? 0
+  const sixMonthHigh = Math.max(...monthlySignupData.map((item) => item.value))
+  const monthOverMonth = formatMonthOverMonth(thisMonthSignups, lastMonthSignups)
+  const chartYearLabel = new Date().getFullYear()
 
-    getAdminDashboardSummary()
-      .then(setSummary)
-      .catch((err: unknown) => {
-        setSummary(null)
-        setFetchError(
-          err instanceof ApiError ? err.message : '대시보드 요약을 불러올 수 없습니다.',
-        )
-      })
-      .finally(() => setIsLoading(false))
-  }, [])
+  const weeklyVisitorData = useMemo(() => buildWeeklyVisitorData(), [])
+  const weeklyVisitorAverage = Math.round(
+    weeklyVisitorData.reduce((sum, item) => sum + item.v, 0) / weeklyVisitorData.length,
+  )
+  const todayVisitors = weeklyVisitorData[weeklyVisitorData.length - 1]?.v ?? 0
 
   return (
     <AdminShell>
-      <AdminPageHeader title={`${nickname}님, 안녕하세요!`} />
+      {/* 관리자 대시보드 헤더 */}
+      <AdminPageHeader
+        title={`${nickname}님, 안녕하세요!`}
+        description="오늘 처리가 필요한 요청을 한눈에 확인하세요."
+      />
+      
+      {/* 관리자 대시보드 통계 카드 */}
+      <AdminDashboardStatCards />
 
-      {isLoading ? (
-        <p className="py-20 text-center font-pretendard text-sm text-secondary">
-          대시보드 요약을 불러오는 중…
-        </p>
-      ) : fetchError ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-mistSkyBlue/35 bg-white/60 px-6 py-20 text-center shadow-[0_8px_32px_rgba(30,58,95,0.12)] backdrop-blur-md">
-          <p className="font-pretendard text-sm font-semibold text-deepOceanNavy">{fetchError}</p>
-        </div>
-      ) : summary ? (
-        <>
-          <AdminDashboardStatCards summary={summary} />
-          <AdminDashboardHrdSection
-            lastHrdCollectedAt={summary.lastHrdCollectedAt}
-            lastHrdRefinedAt={summary.lastHrdRefinedAt}
-          />
-        </>
-      ) : null}
+      {/* 관리자 대시보드 차트 */}
+      <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(280px,2fr)]">
+        {/* 관리자 대시보드 월별 가입자 수 차트 */}
+        <MonthlySignupChartSection
+          data={monthlySignupData}
+          chartYearLabel={chartYearLabel}
+          thisMonthSignups={thisMonthSignups}
+          monthOverMonth={monthOverMonth}
+          sixMonthHigh={sixMonthHigh}
+        />
+        {/* 관리자 대시보드 주별 방문자 수 차트 */}
+        <WeeklyVisitorsChartSection
+          data={weeklyVisitorData}
+          todayVisitors={todayVisitors}
+          weeklyVisitorAverage={weeklyVisitorAverage}
+        />
+      </div>
     </AdminShell>
   )
 }
