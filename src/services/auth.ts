@@ -1,5 +1,6 @@
 import { http } from './http'
 import { clearLegacyTokenStorage } from './authToken'
+import { clearRecentViewedCourses } from './recentViewedCourses'
 
 clearLegacyTokenStorage()
 
@@ -47,6 +48,7 @@ export interface LoginResponse {
 
 export async function login(body: LoginRequest): Promise<LoginResponse> {
   const response = await http.post<LoginResponse>('/api/auth/login', body)
+  clearRecentViewedCourses()
   saveAuthSession(response, body.email)
   return response
 }
@@ -59,6 +61,7 @@ export interface GoogleLoginRequest {
 
 export async function googleLogin(body: GoogleLoginRequest): Promise<LoginResponse> {
   const response = await http.post<LoginResponse>('/api/auth/google/login', body)
+  clearRecentViewedCourses()
   saveAuthSession(response)
   return response
 }
@@ -150,6 +153,7 @@ export async function resetPassword(body: PasswordResetRequest): Promise<Passwor
 export function clearAuthSession(): void {
   clearLegacyTokenStorage()
   clearStoredUser()
+  clearRecentViewedCourses()
 }
 
 export function saveAuthSession(response: LoginResponse, fallbackEmail?: string): void {
