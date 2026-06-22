@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import AuthInput from './components/AuthInput.tsx'
 import AuthPasswordInput from './components/AuthPasswordInput.tsx'
 import AuthButton from './components/AuthButton.tsx'
@@ -13,6 +13,7 @@ import { login } from '../../services/auth.ts'
 export default function LoginPage() {
   const [searchParams] = useSearchParams()
   const redirectTo = searchParams.get('redirect') ?? '/'
+  const passwordResetSuccess = searchParams.get('reset') === 'success'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -88,13 +89,20 @@ export default function LoginPage() {
                     }}
                   />
                   <div className="flex justify-end">
-                    <a href="/forgot-password"
+                    <Link
+                      to="/forgot-password"
                       className="text-sm text-waterlineBlue underline underline-offset-2 transition-colors hover:text-deepOceanNavy"
                     >
-                      비밀번호 찾기
-                    </a>
+                      비밀번호를 잊어버리셨나요?
+                    </Link>
                   </div>
                 </div>
+
+                {passwordResetSuccess && (
+                  <p className="text-sm text-waterlineBlue font-pretendard" role="status">
+                    비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.
+                  </p>
+                )}
 
                 {loginError && (
                   <p className="text-sm text-red-500 font-pretendard" role="alert">
