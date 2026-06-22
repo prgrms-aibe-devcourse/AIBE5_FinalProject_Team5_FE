@@ -5,6 +5,13 @@ import {
   CERTIFICATION_UPLOAD_SLOTS,
   type CertificationDocumentType,
 } from '../../dashboard/data/certifications'
+import jobTrainingHistoryGuide from '../../../assets/verificationGuide/job_training_history.png'
+import onlineCourseRegistrationHistoryGuide from '../../../assets/verificationGuide/online_course_registration_history.png'
+
+const certificationGuideImages: Record<CertificationDocumentType, string> = {
+  TRAINING_HISTORY: jobTrainingHistoryGuide,
+  ONLINE_APPLICATION: onlineCourseRegistrationHistoryGuide,
+}
 
 // 과정 인증 가이드 절차
 const certificationSteps = [
@@ -106,24 +113,13 @@ export default function SupportCertificationGuide() {
                 </div>
               </div>
 
-              <div
-                className="mt-auto flex aspect-[16/10] items-center justify-center border-t border-dashed border-mistSkyBlue/35 bg-white/70"
-                aria-label={`${slot.title} 예시 이미지 영역`}
-              >
-                <div className="text-center">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="mx-auto text-mistSkyBlue"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                    <circle cx="9" cy="10" r="1.5" fill="currentColor" />
-                    <path d="M3 16l5-4 4 3 4-5 5 6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                  </svg>
-                  <p className="mt-2 font-pretendard text-xs text-secondary">예시 이미지 영역</p>
+              <div className="mt-auto border-t border-mistSkyBlue/35 bg-white/70 p-3 sm:p-4">
+                <div className="flex h-[280px] items-center justify-center overflow-hidden rounded-lg border border-mistSkyBlue/25 bg-white sm:h-[320px]">
+                  <img
+                    src={certificationGuideImages[slot.type]}
+                    alt={`${slot.title} 발급 화면 예시`}
+                    className="h-full w-full object-contain object-center"
+                  />
                 </div>
               </div>
             </li>
