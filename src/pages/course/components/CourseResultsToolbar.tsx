@@ -3,9 +3,9 @@ import type { CourseSortKey } from '../../../services/course.ts'
 
 const SORT_OPTIONS: { key: CourseSortKey; label: string }[] = [
   { key: 'latest', label: '최신순' },
-  { key: 'mostReviews', label: '후기 많은 순' },
-  { key: 'rating', label: '후기 평점순' },
   { key: 'satisfaction', label: '만족도순' },
+  { key: 'employmentRate', label: '취업률순' },
+  { key: 'deadline', label: '마감임박순' },
 ]
 
 interface CourseResultsToolbarProps {

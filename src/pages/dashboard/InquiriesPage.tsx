@@ -5,7 +5,6 @@ import Tabs from '../../components/common/Tabs'
 import {
   USER_INQUIRY_STATUS_TABS,
   faqItems,
-  userInquiries,
   type UserInquiry,
   type UserInquiryStatusTab,
 } from './data/inquiries'
@@ -15,29 +14,42 @@ import DashboardShell from './components/DashboardShell'
 import InquiryFaqPanel from './components/InquiryFaqPanel'
 import InquiryRowCard from './components/InquiryRowCard'
 import InquiryWriteModal, { type InquiryWritePayload } from './components/modal/InquiryWriteModal'
+import { createInquiry, getMyInquiries } from '../../services/inquiry'
+import { ApiError } from '../../services/ApiError'
 
 const PAGE_SIZE = 10
-
-function formatInquiryDate(date: Date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}.${month}.${day}`
-}
-
-function toInquiryId(inquiries: UserInquiry[]) {
-  return inquiries.length ? Math.max(...inquiries.map((item) => item.id)) + 1 : 1
-}
 
 // 문의 페이지 (나의 문의 내역·자주 하는 문의)
 export default function InquiriesPage() {
   // --- 탭·페이지·모달 ---
-  const [inquiries, setInquiries] = useState<UserInquiry[]>(() => [...userInquiries])
+  const [inquiries, setInquiries] = useState<UserInquiry[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
   const [statusTab, setStatusTab] = useState<UserInquiryStatusTab>('ALL')
   const [currentPage, setCurrentPage] = useState(1)
   const [openInquiryId, setOpenInquiryId] = useState<number | null>(null)
   const [writeOpen, setWriteOpen] = useState(false)
   const [toast, setToast] = useState('')
+
+  useEffect(() => {
+    setIsLoading(true)
+    getMyInquiries(0, 1000)
+      .then((data) => {
+        const mapped = data.content.map((item) => ({
+          id: item.inquiryId,
+          title: item.title,
+          content: item.content,
+          requestedAt: item.requestedAt ? item.requestedAt.replace(/-/g, '.') : '',
+          status: item.status,
+          adminReply: item.adminReply || undefined,
+        }))
+        setInquiries(mapped)
+      })
+      .catch((err: unknown) => {
+        showToast(err instanceof ApiError ? err.message : '문의 내역을 불러오지 못했습니다.')
+      })
+      .finally(() => setIsLoading(false))
+  }, [refreshKey])
 
   const filteredInquiries = useMemo(() => {
     if (statusTab === 'ALL') return inquiries
@@ -67,20 +79,17 @@ export default function InquiriesPage() {
     window.setTimeout(() => setToast(''), 2200)
   }
 
-  const handleWriteSubmit = ({ title, content }: InquiryWritePayload) => {
-    const newInquiry: UserInquiry = {
-      id: toInquiryId(inquiries),
-      title,
-      content,
-      requestedAt: formatInquiryDate(new Date()),
-      status: 'PENDING',
+  const handleWriteSubmit = async ({ title, content }: InquiryWritePayload) => {
+    try {
+      await createInquiry({ title, content })
+      setWriteOpen(false)
+      setStatusTab('ALL')
+      setCurrentPage(1)
+      setRefreshKey((prev) => prev + 1)
+      showToast('문의를 등록했어요.')
+    } catch (err: unknown) {
+      showToast(err instanceof ApiError ? err.message : '문의 등록에 실패했습니다.')
     }
-
-    setInquiries((current) => [newInquiry, ...current])
-    setWriteOpen(false)
-    setStatusTab('ALL')
-    setCurrentPage(1)
-    showToast('문의를 등록했어요.')
   }
 
   useEffect(() => {
@@ -117,7 +126,11 @@ export default function InquiriesPage() {
             />
           </div>
 
-          {filteredInquiries.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="font-pretendard text-sm text-secondary">문의 내역을 불러오는 중…</p>
+            </div>
+          ) : filteredInquiries.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-mistSkyBlue/45 bg-foamWhite/30 px-6 py-12 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-foamWhite text-waterlineBlue ring-1 ring-mistSkyBlue/50">
                 <svg width={24} height={24} viewBox="0 0 24 24" fill="none" aria-hidden="true">
