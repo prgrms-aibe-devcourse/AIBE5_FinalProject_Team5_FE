@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ReportModal from '../../../components/common/ReportModal'
-import { isAuthenticated } from '../../../services/authToken'
+import { isAuthenticated } from '../../../services/auth'
 import { createPostComment, getPostComments, type PostComment } from '../../../services/comment'
 
 // ISO 형식의 날짜를 `방금`, `분 전`, `시간 전`, `일 전` 형태로 표시하기 위한 유틸

@@ -12,7 +12,7 @@ import CourseVerifiedReviewStep3QualityModal from './modal/CourseVerifiedReviewS
 import CourseVerifiedReviewStep4ProjectModal from './modal/CourseVerifiedReviewStep4ProjectModal.tsx'
 import CourseVerifiedReviewStep5DetailModal from './modal/CourseVerifiedReviewStep5DetailModal.tsx'
 import { ApiError } from '../../../services/ApiError.ts'
-import { isAuthenticated } from '../../../services/authToken.ts'
+import { isAuthenticated } from '../../../services/auth'
 import {
   createCourseReview,
   type CreateVerifiedReviewDetailPayload,
