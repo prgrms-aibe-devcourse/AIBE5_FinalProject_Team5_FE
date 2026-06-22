@@ -1,44 +1,69 @@
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { getStoredUser } from '../../services/auth'
-import { mockBookmarkCourses, recentCourses, recentPosts } from './data'
+import { getBookmarkPreview, type BookmarkCourseVM } from '../../services/bookmark'
+import { loadRecentViewedCourses, type RecentViewedCourse } from '../../services/recentViewedCourses'
+import { getMyVerifications } from '../../services/verification'
+import type { UserCertificationRequest } from './data/certifications'
+import DashboardCertificationHistoryCard from './components/DashboardCertificationHistoryCard'
 import DashboardCalendarCard from './components/DashboardCalendarCard'
 import DashboardCourseListCard from './components/DashboardCourseListCard'
 import DashboardRecentCoursesCard from './components/DashboardRecentCoursesCard'
-import DashboardRecentPostsCard from './components/DashboardRecentPostsCard'
 import DashboardShell from './components/DashboardShell'
 
-// 대시보드 메인 페이지 (일정·최근 글·스크랩·최근 본 과정)
 const DASHBOARD_PREVIEW_LIMIT = 5
 
 export default function DashboardPage() {
+  const location = useLocation()
   const nickname = useMemo(() => getStoredUser()?.nickname ?? '회원', [])
 
-  const previewBookmarkCourses = useMemo(
-    () => mockBookmarkCourses.slice(0, DASHBOARD_PREVIEW_LIMIT),
-    [],
-  )
+  const [bookmarkCourses, setBookmarkCourses] = useState<BookmarkCourseVM[]>([])
+  const [isBookmarksLoading, setIsBookmarksLoading] = useState(true)
+  const [certificationRequests, setCertificationRequests] = useState<UserCertificationRequest[]>([])
+  const [isCertificationsLoading, setIsCertificationsLoading] = useState(true)
+  const [recentCourses, setRecentCourses] = useState<RecentViewedCourse[]>(() => loadRecentViewedCourses())
 
-  const previewRecentPosts = useMemo(
-    () => recentPosts.slice(0, DASHBOARD_PREVIEW_LIMIT),
-    [],
-  )
+  const refreshRecentCourses = useCallback(() => {
+    setRecentCourses(loadRecentViewedCourses())
+  }, [])
 
-  const previewRecentCourses = useMemo(
-    () => recentCourses.slice(0, DASHBOARD_PREVIEW_LIMIT),
-    [],
-  )
+  useEffect(() => {
+    refreshRecentCourses()
+  }, [location.pathname, refreshRecentCourses])
+
+  useEffect(() => {
+    window.addEventListener('focus', refreshRecentCourses)
+    return () => window.removeEventListener('focus', refreshRecentCourses)
+  }, [refreshRecentCourses])
+  useEffect(() => {
+    setIsBookmarksLoading(true)
+
+    getBookmarkPreview(DASHBOARD_PREVIEW_LIMIT)
+      .then(setBookmarkCourses)
+      .catch(() => setBookmarkCourses([]))
+      .finally(() => setIsBookmarksLoading(false))
+  }, [])
+
+  useEffect(() => {
+    setIsCertificationsLoading(true)
+
+    getMyVerifications({ page: 0, size: DASHBOARD_PREVIEW_LIMIT })
+      .then((data) => setCertificationRequests(data.content))
+      .catch(() => setCertificationRequests([]))
+      .finally(() => setIsCertificationsLoading(false))
+  }, [])
 
   return (
     <DashboardShell title={`${nickname}님 안녕하세요!`}>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
-        {/* 일정·최근 글 */}
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)] xl:items-stretch">
         <DashboardCalendarCard />
-        <DashboardRecentPostsCard posts={previewRecentPosts} />
-        {/* 스크랩·최근 본 과정 */}
-        <DashboardCourseListCard courses={previewBookmarkCourses} />
-        <DashboardRecentCoursesCard courses={previewRecentCourses} />
+        <DashboardRecentCoursesCard courses={recentCourses} />
+        <DashboardCourseListCard courses={bookmarkCourses} isLoading={isBookmarksLoading} />
+        <DashboardCertificationHistoryCard
+          requests={certificationRequests}
+          isLoading={isCertificationsLoading}
+        />
       </div>
-
     </DashboardShell>
   )
 }
