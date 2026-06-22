@@ -472,31 +472,6 @@ html.home-snap {
   }
 }
 
-/* 과정 비교 — PDF(인쇄) 출력 */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-
-  body {
-    background: #fff !important;
-  }
-
-  .course-compare-main {
-    padding: 0 !important;
-  }
-
-  #course-compare-print {
-    gap: 1rem !important;
-  }
-
-  #course-compare-print section,
-  #course-compare-print article {
-    break-inside: avoid;
-    box-shadow: none !important;
-  }
-}
-
 /* ================================================================
    Glass tokens — BootSignal deepOceanNavy 계열
    deepOceanNavy: #344A64, waterlineBlue: #5484B7, mistSkyBlue: #BBD3E0
