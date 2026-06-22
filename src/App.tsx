@@ -4,7 +4,6 @@ import CourseSearchPage from './pages/course/CourseSearchPage'
 import CourseComparePage from './pages/course/CourseComparePage'
 import CourseDetailPage from './pages/course/CourseDetailPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
-import SchedulePage from './pages/dashboard/SchedulePage'
 import ProfilePage from './pages/dashboard/ProfilePage'
 import InquiriesPage from './pages/dashboard/InquiriesPage'
 import BookmarksPage from './pages/dashboard/BookmarksPage'
@@ -53,7 +52,7 @@ function App() {
 
       {/* 대시보드 (마이페이지) */}
       <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/dashboard/schedule" element={<SchedulePage />} />
+      <Route path="/dashboard/schedule" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard/profile" element={<ProfilePage />} />
       <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
       <Route path="/dashboard/bookmarks" element={<BookmarksPage />} />
