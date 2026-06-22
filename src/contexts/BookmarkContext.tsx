@@ -10,7 +10,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../services/ApiError'
 import { createBookmark, fetchBookmarkedSessionIds, removeBookmark } from '../services/bookmark'
-import { isAuthenticated } from '../services/authToken'
+import { isAuthenticated } from '../services/auth'
 
 type BookmarkContextValue = {
   isLoaded: boolean

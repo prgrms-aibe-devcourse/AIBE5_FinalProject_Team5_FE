@@ -1,13 +1,13 @@
-import { useMemo, useState, type ReactNode } from 'react'
-import { scheduleEvents, type ScheduleEvent, weekdayLabels } from '../data/schedule'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { type ScheduleEvent, weekdayLabels } from '../data/schedule'
 import DashboardCard from './DashboardCard'
 
 type ScheduleCalendarPanelProps = {
   events?: ScheduleEvent[]
   title?: string
-  showAddButton?: boolean
-  onAddSchedule?: () => void
+  isLoadingEvents?: boolean
   onEventClick?: (event: ScheduleEvent) => void
+  onMonthChange?: (year: number, month: number) => void
   selectedEventId?: number | null
   selectedDate?: string
   onSelectedDateChange?: (dateKey: string) => void
@@ -69,11 +69,11 @@ function MonthNavButton({
 }
 
 export default function ScheduleCalendarPanel({
-  events = scheduleEvents,
+  events = [],
   title,
-  showAddButton = false,
-  onAddSchedule,
+  isLoadingEvents = false,
   onEventClick,
+  onMonthChange,
   selectedEventId = null,
   selectedDate: controlledSelectedDate,
   onSelectedDateChange,
@@ -83,6 +83,10 @@ export default function ScheduleCalendarPanel({
   const today = new Date()
   const [currentMonth, setCurrentMonth] = useState(() => new Date())
   const [internalSelectedDate, setInternalSelectedDate] = useState(() => getInitialSelectedDate(today, events))
+
+  useEffect(() => {
+    onMonthChange?.(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
+  }, [currentMonth, onMonthChange])
 
   const isDateControlled = controlledSelectedDate !== undefined && onSelectedDateChange !== undefined
   const selectedDate = isDateControlled ? controlledSelectedDate : internalSelectedDate
@@ -242,24 +246,15 @@ export default function ScheduleCalendarPanel({
         </div>
 
         <div className="flex min-h-full min-w-0 flex-col">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <h3 className="font-pretendard text-base font-semibold text-deepOceanNavy">리마인더</h3>
-              <p className="mt-0.5 font-pretendard text-xs text-secondary">{selectedLabel}</p>
-            </div>
-            {showAddButton ? (
-              <button
-                type="button"
-                onClick={onAddSchedule}
-                className="shrink-0 rounded-full bg-deepOceanNavy px-4 py-2 font-pretendard text-sm font-semibold text-white transition-colors hover:bg-waterlineBlue"
-              >
-                + 일정 추가
-              </button>
-            ) : null}
+          <div className="mb-4">
+            <h3 className="font-pretendard text-base font-semibold text-deepOceanNavy">리마인더</h3>
+            <p className="mt-0.5 font-pretendard text-xs text-secondary">{selectedLabel}</p>
           </div>
 
           <div className="flex-1">
-            {selectedEvents.length > 0 ? (
+            {isLoadingEvents ? (
+              <p className="py-6 text-center font-pretendard text-sm text-secondary">일정을 불러오는 중...</p>
+            ) : selectedEvents.length > 0 ? (
               <ul className="divide-y divide-mistSkyBlue/25">
                 {selectedEvents.map((event) => {
                   const isActive = selectedEventId === event.id

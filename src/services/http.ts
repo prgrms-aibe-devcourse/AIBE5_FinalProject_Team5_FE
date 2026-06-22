@@ -1,8 +1,11 @@
 import { ApiError, isExpiredAuthTokenError } from './ApiError'
 import { setTokenExpiredLogoutFlash } from './authFlash'
-import { getAccessToken, getTokenType } from './authToken'
 import type { ApiResponse } from './apiTypes'
+
 const BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
+const CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
 let isHandlingAuthSessionExpired = false
 
@@ -22,7 +25,11 @@ async function handleAuthSessionExpired(): Promise<void> {
   window.location.replace('/')
 }
 
-// 쿼리 파라미터 빌드
+function getCsrfToken(): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
+}
+
 function buildQuery(params: Record<string, unknown>): string {
   const entries = Object.entries(params).filter(
     ([, v]) => v !== undefined && v !== null && v !== '',
@@ -34,30 +41,43 @@ function buildQuery(params: Record<string, unknown>): string {
 interface RequestOptions {
   query?: Record<string, unknown>
   auth?: boolean
+  skipAuthRetry?: boolean
 }
 
-// HTTP 요청 함수
-async function request<T>(path: string, init: RequestInit & RequestOptions = {}): Promise<T> {
-  const { query, auth, ...fetchInit } = init
-  const url = BASE + path + (query ? buildQuery(query) : '')
-  
-  // 헤더 초기화
+function buildHeaders(
+  fetchInit: RequestInit,
+  method: string,
+): Record<string, string> {
   const isFormData = fetchInit.body instanceof FormData
   const headers: Record<string, string> = {
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(fetchInit.headers as Record<string, string> | undefined),
   }
 
-  // 인증 헤더 추가
-  const sentAuthToken = Boolean(auth && getAccessToken())
-  if (auth) {
-    const token = getAccessToken()
-    if (token) {
-      headers.Authorization = `${getTokenType()} ${token}`
+  if (UNSAFE_METHODS.has(method)) {
+    const csrfToken = getCsrfToken()
+    if (csrfToken) {
+      headers[CSRF_HEADER_NAME] = csrfToken
     }
   }
 
-  const res = await fetch(url, { ...fetchInit, headers })
+  return headers
+}
+
+async function request<T>(
+  path: string,
+  init: RequestInit & RequestOptions = {},
+): Promise<T> {
+  const { query, auth, skipAuthRetry, ...fetchInit } = init
+  const method = (fetchInit.method ?? 'GET').toUpperCase()
+  const url = BASE + path + (query ? buildQuery(query) : '')
+  const headers = buildHeaders(fetchInit, method)
+
+  const res = await fetch(url, {
+    ...fetchInit,
+    headers,
+    credentials: 'include',
+  })
 
   if (res.status === 204) return undefined as T
 
@@ -72,31 +92,31 @@ async function request<T>(path: string, init: RequestInit & RequestOptions = {})
     res.status,
   )
 
-  // auth: true 요청에서 만료된 access token 응답 시 로그아웃
-  if (sentAuthToken && isExpiredAuthTokenError(apiError)) {
-    void handleAuthSessionExpired()
+  if (auth && !skipAuthRetry && isExpiredAuthTokenError(apiError)) {
+    try {
+      const { refreshAuthSession } = await import('./auth')
+      await refreshAuthSession()
+      return request<T>(path, { ...init, skipAuthRetry: true })
+    } catch {
+      void handleAuthSessionExpired()
+    }
   }
 
   throw apiError
 }
 
 async function requestBlob(path: string, init: RequestInit & RequestOptions = {}): Promise<Blob> {
-  const { query, auth, ...fetchInit } = init
+  const { query, auth, skipAuthRetry, ...fetchInit } = init
   const url = BASE + path + (query ? buildQuery(query) : '')
+  const method = 'GET'
+  const headers = buildHeaders(fetchInit, method)
 
-  const headers: Record<string, string> = {
-    ...(fetchInit.headers as Record<string, string> | undefined),
-  }
-
-  const sentAuthToken = Boolean(auth && getAccessToken())
-  if (auth) {
-    const token = getAccessToken()
-    if (token) {
-      headers.Authorization = `${getTokenType()} ${token}`
-    }
-  }
-
-  const res = await fetch(url, { ...fetchInit, method: 'GET', headers })
+  const res = await fetch(url, {
+    ...fetchInit,
+    method,
+    headers,
+    credentials: 'include',
+  })
 
   if (res.ok) {
     return res.blob()
@@ -112,8 +132,14 @@ async function requestBlob(path: string, init: RequestInit & RequestOptions = {}
       res.status,
     )
 
-    if (sentAuthToken && isExpiredAuthTokenError(apiError)) {
-      void handleAuthSessionExpired()
+    if (auth && !skipAuthRetry && isExpiredAuthTokenError(apiError)) {
+      try {
+        const { refreshAuthSession } = await import('./auth')
+        await refreshAuthSession()
+        return requestBlob(path, { ...init, skipAuthRetry: true })
+      } catch {
+        void handleAuthSessionExpired()
+      }
     }
 
     throw apiError
@@ -122,15 +148,19 @@ async function requestBlob(path: string, init: RequestInit & RequestOptions = {}
   throw new ApiError('UNKNOWN', '파일을 불러오는 중 오류가 발생했습니다.', res.status)
 }
 
-// HTTP 요청 메소드 모음
 export const http = {
   get: <T>(path: string, opts: RequestOptions = {}) =>
     request<T>(path, { method: 'GET', ...opts }),
   getBlob: (path: string, opts: RequestOptions = {}) => requestBlob(path, opts),
-  post: <T>(path: string, body: unknown, opts: RequestOptions = {}) =>
+  post: <T>(path: string, body?: unknown, opts: RequestOptions = {}) =>
     request<T>(path, {
       method: 'POST',
-      body: body instanceof FormData ? body : JSON.stringify(body),
+      body:
+        body === undefined
+          ? undefined
+          : body instanceof FormData
+            ? body
+            : JSON.stringify(body),
       ...opts,
     }),
   patch: <T>(path: string, body: unknown, opts: RequestOptions = {}) =>

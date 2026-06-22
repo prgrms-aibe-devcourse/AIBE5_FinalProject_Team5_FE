@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../../../services/ApiError.ts'
 import { createReviewSummary, type ReviewSummary } from '../../../services/ai.ts'
-import { isAuthenticated } from '../../../services/authToken.ts'
+import { isAuthenticated } from '../../../services/auth'
 import { getCrawledReviews } from '../../../services/review.ts'
 
 const MIN_GOYO_REVIEWS_FOR_SUMMARY = 6
