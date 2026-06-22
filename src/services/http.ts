@@ -1,4 +1,5 @@
 import { ApiError, isExpiredAuthTokenError } from './ApiError'
+import { getErrorPagePath } from '../utils/apiErrorNavigation'
 import { setTokenExpiredLogoutFlash } from './authFlash'
 import type { ApiResponse } from './apiTypes'
 
@@ -42,6 +43,69 @@ interface RequestOptions {
   query?: Record<string, unknown>
   auth?: boolean
   skipAuthRetry?: boolean
+  /** GET 상세 조회 등 — 404·403·5xx 시 에러 페이지로 이동 */
+  redirectOnError?: boolean
+}
+
+function maybeRedirectForApiError(
+  apiError: ApiError,
+  path: string,
+  method: string,
+  redirectOnError?: boolean,
+): void {
+  let errorPath: string | null = null
+
+  if (path.startsWith('/api/admin') && apiError.status === 403) {
+    errorPath = '/403'
+  } else if (redirectOnError && method === 'GET') {
+    errorPath = getErrorPagePath(apiError)
+  } else if (path.startsWith('/api/admin') && method === 'GET' && apiError.status >= 500) {
+    errorPath = '/error'
+  } else if (
+    method === 'GET' &&
+    (apiError.code === 'INVALID_RESPONSE' || apiError.code === 'NETWORK_ERROR')
+  ) {
+    errorPath = '/error'
+  }
+
+  if (errorPath) {
+    window.location.replace(errorPath)
+  }
+}
+
+const SERVER_RESPONSE_ERROR_MESSAGE = '서버 응답을 처리할 수 없습니다.'
+
+function resolveResponseStatus(res: Response): number {
+  return res.status >= 400 ? res.status : 500
+}
+
+async function readApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
+  let text: string
+
+  try {
+    text = await res.text()
+  } catch {
+    throw new ApiError('INVALID_RESPONSE', SERVER_RESPONSE_ERROR_MESSAGE, resolveResponseStatus(res))
+  }
+
+  if (!text.trim()) {
+    throw new ApiError('INVALID_RESPONSE', SERVER_RESPONSE_ERROR_MESSAGE, resolveResponseStatus(res))
+  }
+
+  try {
+    const json = JSON.parse(text) as ApiResponse<T>
+    if (typeof json?.success !== 'boolean') {
+      throw new ApiError('INVALID_RESPONSE', SERVER_RESPONSE_ERROR_MESSAGE, resolveResponseStatus(res))
+    }
+    return json
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    throw new ApiError('INVALID_RESPONSE', SERVER_RESPONSE_ERROR_MESSAGE, resolveResponseStatus(res))
+  }
+}
+
+function toNetworkApiError(): ApiError {
+  return new ApiError('NETWORK_ERROR', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 500)
 }
 
 function buildHeaders(
@@ -68,20 +132,37 @@ async function request<T>(
   path: string,
   init: RequestInit & RequestOptions = {},
 ): Promise<T> {
-  const { query, auth, skipAuthRetry, ...fetchInit } = init
+  const { query, auth, skipAuthRetry, redirectOnError, ...fetchInit } = init
   const method = (fetchInit.method ?? 'GET').toUpperCase()
   const url = BASE + path + (query ? buildQuery(query) : '')
   const headers = buildHeaders(fetchInit, method)
 
-  const res = await fetch(url, {
-    ...fetchInit,
-    headers,
-    credentials: 'include',
-  })
+  let res: Response
+
+  try {
+    res = await fetch(url, {
+      ...fetchInit,
+      headers,
+      credentials: 'include',
+    })
+  } catch {
+    const apiError = toNetworkApiError()
+    maybeRedirectForApiError(apiError, path, method, redirectOnError)
+    throw apiError
+  }
 
   if (res.status === 204) return undefined as T
 
-  const json: ApiResponse<T> = await res.json()
+  let json: ApiResponse<T>
+
+  try {
+    json = await readApiResponse<T>(res)
+  } catch (error) {
+    const apiError =
+      error instanceof ApiError ? error : new ApiError('INVALID_RESPONSE', SERVER_RESPONSE_ERROR_MESSAGE, 500)
+    maybeRedirectForApiError(apiError, path, method, redirectOnError)
+    throw apiError
+  }
 
   if (json.success) return json.data
 
@@ -102,21 +183,31 @@ async function request<T>(
     }
   }
 
+  maybeRedirectForApiError(apiError, path, method, redirectOnError)
+
   throw apiError
 }
 
 async function requestBlob(path: string, init: RequestInit & RequestOptions = {}): Promise<Blob> {
-  const { query, auth, skipAuthRetry, ...fetchInit } = init
+  const { query, auth, skipAuthRetry, redirectOnError, ...fetchInit } = init
   const url = BASE + path + (query ? buildQuery(query) : '')
   const method = 'GET'
   const headers = buildHeaders(fetchInit, method)
 
-  const res = await fetch(url, {
-    ...fetchInit,
-    method,
-    headers,
-    credentials: 'include',
-  })
+  let res: Response
+
+  try {
+    res = await fetch(url, {
+      ...fetchInit,
+      method,
+      headers,
+      credentials: 'include',
+    })
+  } catch {
+    const apiError = toNetworkApiError()
+    maybeRedirectForApiError(apiError, path, method, redirectOnError)
+    throw apiError
+  }
 
   if (res.ok) {
     return res.blob()
@@ -124,7 +215,19 @@ async function requestBlob(path: string, init: RequestInit & RequestOptions = {}
 
   const contentType = res.headers.get('content-type') ?? ''
   if (contentType.includes('application/json')) {
-    const json: ApiResponse<unknown> = await res.json()
+    let json: ApiResponse<unknown>
+
+    try {
+      json = await readApiResponse<unknown>(res)
+    } catch (error) {
+      const apiError =
+        error instanceof ApiError
+          ? error
+          : new ApiError('INVALID_RESPONSE', '파일을 불러오는 중 오류가 발생했습니다.', resolveResponseStatus(res))
+      maybeRedirectForApiError(apiError, path, method, redirectOnError)
+      throw apiError
+    }
+
     const err = json.error
     const apiError = new ApiError(
       err?.code ?? 'UNKNOWN',
@@ -142,10 +245,18 @@ async function requestBlob(path: string, init: RequestInit & RequestOptions = {}
       }
     }
 
+    maybeRedirectForApiError(apiError, path, method, redirectOnError)
+
     throw apiError
   }
 
-  throw new ApiError('UNKNOWN', '파일을 불러오는 중 오류가 발생했습니다.', res.status)
+  const apiError = new ApiError(
+    'INVALID_RESPONSE',
+    '파일을 불러오는 중 오류가 발생했습니다.',
+    resolveResponseStatus(res),
+  )
+  maybeRedirectForApiError(apiError, path, method, redirectOnError)
+  throw apiError
 }
 
 export const http = {

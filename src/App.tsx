@@ -30,6 +30,11 @@ import CommunityPostDetailPage from './pages/community/CommunityPostDetailPage'
 import SupportLayout from './pages/support/SupportLayout'
 import SupportNoticesPage from './pages/support/SupportNoticesPage'
 import SupportCertificationPage from './pages/support/SupportCertificationPage'
+import NotFoundPage from './pages/error/NotFoundPage'
+import ForbiddenPage from './pages/error/ForbiddenPage'
+import ServerErrorPage from './pages/error/ServerErrorPage'
+import AdminRoute from './components/routing/AdminRoute'
+import DashboardRoute from './components/routing/DashboardRoute'
 
 function App() {
   return (
@@ -51,13 +56,15 @@ function App() {
       <Route path="/courses/:courseSessionId" element={<CourseDetailPage />} />
 
       {/* 대시보드 (마이페이지) */}
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/dashboard/schedule" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard/profile" element={<ProfilePage />} />
-      <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
-      <Route path="/dashboard/bookmarks" element={<BookmarksPage />} />
-      <Route path="/dashboard/posts" element={<MyPostsPage />} />
-      <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
+      <Route element={<DashboardRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard/schedule" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard/profile" element={<ProfilePage />} />
+        <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
+        <Route path="/dashboard/bookmarks" element={<BookmarksPage />} />
+        <Route path="/dashboard/posts" element={<MyPostsPage />} />
+        <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
+      </Route>
       
       {/* 커뮤니티 */}
       <Route path="/community" element={<Outlet />}>
@@ -94,12 +101,21 @@ function App() {
         <Route path="certification" element={<SupportCertificationPage />} />
       </Route>
 
-      {/* 관리자*/}
-      <Route path="/admin" element={<AdminDashboardPage />} />
-      <Route path="/admin/certifications" element={<AdminCertificationsPage />} />
-      <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
-      <Route path="/admin/reports" element={<AdminReportsPage />} />
-      <Route path="/admin/notices" element={<AdminNoticesPage />} />
+      {/* 관리자 */}
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/certifications" element={<AdminCertificationsPage />} />
+        <Route path="/admin/inquiries" element={<AdminInquiriesPage />} />
+        <Route path="/admin/reports" element={<AdminReportsPage />} />
+        <Route path="/admin/notices" element={<AdminNoticesPage />} />
+      </Route>
+
+      {/* 에러 페이지 */}
+      <Route path="/404" element={<NotFoundPage />} />
+      <Route path="/403" element={<ForbiddenPage />} />
+      <Route path="/500" element={<ServerErrorPage />} />
+      <Route path="/error" element={<ServerErrorPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

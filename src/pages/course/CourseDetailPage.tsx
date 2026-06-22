@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
 import Toast from '../../components/common/Toast.tsx'
@@ -13,8 +13,11 @@ import { getCourseSessionDetail, type CourseDetail } from '../../services/course
 import { isAuthenticated } from '../../services/auth.ts'
 import { addRecentViewedCourse } from '../../services/recentViewedCourses.ts'
 import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
+import { getErrorPagePath } from '../../utils/apiErrorNavigation.ts'
+import { ApiError } from '../../services/ApiError.ts'
 
 export default function CourseDetailPage() {
+  const navigate = useNavigate()
   const { courseSessionId } = useParams<{ courseSessionId: string }>()
   const location = useLocation()
   const locationState = location.state as { editReviewId?: number; openReviewsTab?: boolean } | null
@@ -57,14 +60,12 @@ export default function CourseDetailPage() {
 
   useEffect(() => {
     if (!courseSessionId) {
-      setFetchError('과정 회차 ID가 없습니다.')
-      setIsLoading(false)
+      navigate('/404', { replace: true })
       return
     }
     const id = Number(courseSessionId)
     if (isNaN(id)) {
-      setFetchError('잘못된 과정 회차 ID입니다.')
-      setIsLoading(false)
+      navigate('/404', { replace: true })
       return
     }
 
@@ -74,10 +75,11 @@ export default function CourseDetailPage() {
     getCourseSessionDetail(id)
       .then(setCourse)
       .catch((err: unknown) => {
+        if (err instanceof ApiError && getErrorPagePath(err)) return
         setFetchError(err instanceof Error ? err.message : '과정 정보를 불러올 수 없습니다.')
       })
       .finally(() => setIsLoading(false))
-  }, [courseSessionId])
+  }, [courseSessionId, navigate])
 
   useEffect(() => {
     if (!course || !isAuthenticated()) return

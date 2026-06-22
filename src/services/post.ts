@@ -96,7 +96,7 @@ export async function getPosts(params: PostListParams = {}): Promise<PageRespons
 
 /** 게시글 상세 (뷰모델로 변환해 반환) */
 export async function getPost(postId: number): Promise<Post> {
-  const item = await http.get<PostListItem>(`/api/posts/${postId}`, { auth: false })
+  const item = await http.get<PostListItem>(`/api/posts/${postId}`, { auth: false, redirectOnError: true })
   return toPostVM(item)
 }
 
