@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
-import type { Notice } from '../../AdminNoticesPage'
+import type { AdminNoticeResponse } from '../../../../services/notice'
 import { formatRequestedDate } from '../../../../utils/formatRequestedDate'
 
 type NoticeDetailModalProps = {
-  notice: Notice
+  notice: AdminNoticeResponse
   onClose: () => void
+  onDelete?: (id: number) => void
 }
 
-export default function NoticeDetailModal({ notice, onClose }: NoticeDetailModalProps) {
+export default function NoticeDetailModal({ notice, onClose, onDelete }: NoticeDetailModalProps) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
@@ -16,6 +17,12 @@ export default function NoticeDetailModal({ notice, onClose }: NoticeDetailModal
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  const handleDelete = () => {
+    if (window.confirm('정말로 이 공지를 삭제하시겠습니까?')) {
+      onDelete?.(notice.id)
+    }
+  }
 
   return (
     <div
@@ -44,7 +51,7 @@ export default function NoticeDetailModal({ notice, onClose }: NoticeDetailModal
                 <span className="hidden text-mistSkyBlue sm:inline" aria-hidden="true">
                   ·
                 </span>
-                <span>발송자 {notice.sentBy}</span>
+                <span>발송자 {notice.senderNickname || notice.sentBy}</span>
               </div>
             </div>
             <button
@@ -77,7 +84,18 @@ export default function NoticeDetailModal({ notice, onClose }: NoticeDetailModal
         </div>
 
         <div className="shrink-0 border-t border-mistSkyBlue/45 bg-white px-6 py-4 md:px-7">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            {onDelete ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="inline-flex items-center justify-center rounded border border-rose-200 bg-rose-50 px-5 py-2.5 font-pretendard text-sm font-semibold text-rose-600 transition-colors hover:border-rose-300 hover:bg-rose-100 hover:text-rose-700"
+              >
+                삭제
+              </button>
+            ) : (
+              <div />
+            )}
             <button
               type="button"
               onClick={onClose}

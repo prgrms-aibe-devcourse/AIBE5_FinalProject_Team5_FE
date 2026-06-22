@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type Ref } from 'react'
 import Pagination from '../../../components/common/Pagination.tsx'
 import {
   getCourseReviews,
@@ -23,6 +23,7 @@ interface CourseReviewListPanelProps {
   courseId: number
   refreshKey?: number
   onClickWriteReview?: () => void
+  listSectionRef?: Ref<HTMLDivElement>
 }
 
 function ReviewIcon() {
@@ -404,7 +405,12 @@ function SiteReviewCard({ review, expanded, onToggle }: {
   )
 }
 
-export default function CourseReviewListPanel({ courseId, refreshKey = 0, onClickWriteReview }: CourseReviewListPanelProps) {
+export default function CourseReviewListPanel({
+  courseId,
+  refreshKey = 0,
+  onClickWriteReview,
+  listSectionRef,
+}: CourseReviewListPanelProps) {
   const [reviewSource, setReviewSource] = useState<ReviewSource>('site')
   const [siteFilter, setSiteFilter] = useState<SiteFilter>('all')
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
@@ -510,7 +516,7 @@ export default function CourseReviewListPanel({ courseId, refreshKey = 0, onClic
 
   return (
     <div>
-      <div className="mb-2 px-1">
+      <div ref={listSectionRef} className="mb-2 scroll-mt-6 px-1">
         <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
           <span className="flex h-6 w-6 items-center justify-center text-waterlineBlue">
             <ReviewIcon />

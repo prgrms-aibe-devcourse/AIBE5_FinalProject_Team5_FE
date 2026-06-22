@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
-import type { SupportNotice } from '../../data/supportData'
+import type { NoticeResponse } from '../../../../services/notice'
 
 type SupportNoticeDetailModalProps = {
-  notice: SupportNotice
+  notice: NoticeResponse
   onClose: () => void
 }
 

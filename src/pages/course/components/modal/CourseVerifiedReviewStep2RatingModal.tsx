@@ -3,6 +3,13 @@ import CourseReviewStepProgress from './CourseReviewStepProgress.tsx'
 
 interface CourseVerifiedReviewStep2RatingModalProps {
   isOpen: boolean
+  mode?: 'create' | 'edit'
+  initialValues?: {
+    courseDifficulty: string
+    progressSpeed: string
+    teamProjectDifficulty: string
+    avgSelfStudyHours: string
+  }
   onClose: () => void
   onBack?: () => void
   onNext?: (payload: {
@@ -55,6 +62,8 @@ function SegmentField({
 
 export default function CourseVerifiedReviewStep2RatingModal({
   isOpen,
+  mode = 'create',
+  initialValues,
   onClose,
   onBack,
   onNext,
@@ -63,16 +72,29 @@ export default function CourseVerifiedReviewStep2RatingModal({
   const [progressSpeed, setProgressSpeed] = useState('')
   const [teamProjectDifficulty, setTeamProjectDifficulty] = useState('')
   const [avgSelfStudyHours, setAvgSelfStudyHours] = useState('')
+  const isEditMode = mode === 'edit'
 
   useEffect(() => {
     if (!isOpen) return
+
+    if (initialValues) {
+      setCourseDifficulty(initialValues.courseDifficulty)
+      setProgressSpeed(initialValues.progressSpeed)
+      setTeamProjectDifficulty(initialValues.teamProjectDifficulty)
+      setAvgSelfStudyHours(initialValues.avgSelfStudyHours)
+    } else {
+      setCourseDifficulty('')
+      setProgressSpeed('')
+      setTeamProjectDifficulty('')
+      setAvgSelfStudyHours('')
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, initialValues])
 
   const isNextEnabled = useMemo(() => {
     return (
@@ -99,7 +121,9 @@ export default function CourseVerifiedReviewStep2RatingModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 작성</h2>
+          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+            {isEditMode ? '후기 수정' : '후기 작성'}
+          </h2>
           <button
             type="button"
             onClick={onClose}
