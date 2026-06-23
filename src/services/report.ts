@@ -1,4 +1,9 @@
+import { http } from './http'
+import type { PageResponse } from './apiTypes'
+
 export type ReportTargetType = 'REVIEW' | 'POST' | 'COMMENT'
+export type ReportStatus = 'PENDING' | 'COMPLETED'
+export type ReportAction = 'HIDE' | 'INVALID_REASON'
 
 /** POST /api/reports - Request */
 export interface ReportCreateRequest {
@@ -8,17 +13,39 @@ export interface ReportCreateRequest {
   detail: string
 }
 
-/** POST /api/reports - Response 201 */
-export interface ReportCreateResponse {
-  success: boolean
-  data: {
-    reportId: number
-    targetType: ReportTargetType
-    targetId: number
-    status: 'PENDING'
-    createdAt: string
-  }
-  error: null
+/** POST /api/reports - Response */
+export interface ReportResponse {
+  reportId: number
+  targetType: ReportTargetType
+  targetId: number
+  status: ReportStatus
+  createdAt: string
+}
+
+export interface AdminReportResponse {
+  id: number
+  reportId: number
+  reporterId: number
+  reporterName: string
+  reporterNickname: string
+  profileImageUrl?: string
+  reportedAt: string
+  type: ReportTargetType
+  targetType: ReportTargetType
+  targetId: number
+  targetLabel: string
+  reasonCategory: string
+  reasonDetail: string
+  reason: string
+  detail: string
+  contentBody: string
+  contentUrl: string
+  status: ReportStatus
+  contentAction?: ReportAction
+  action?: ReportAction
+  processReason?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export const REPORT_REASON_OPTIONS = [
@@ -33,30 +60,46 @@ export const REPORT_REASON_OPTIONS = [
 export type ReportReason = (typeof REPORT_REASON_OPTIONS)[number]
 
 /** POST /api/reports */
-export async function createReport(body: ReportCreateRequest): Promise<ReportCreateResponse> {
-  // TODO: 실제 API 연동
-  // const token = getAuthSession()
-  // const res = await fetch('/api/reports', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${token}`,
-  //   },
-  //   body: JSON.stringify(body),
-  // })
-  // if (!res.ok) throw new Error('신고 제출에 실패했습니다.')
-  // return (await res.json()) as ReportCreateResponse
+export async function createReport(body: ReportCreateRequest): Promise<ReportResponse> {
+  return http.post<ReportResponse>('/api/reports', body, { auth: true })
+}
 
-  void body
-  return {
-    success: true,
-    data: {
-      reportId: 1,
-      targetType: body.targetType,
-      targetId: body.targetId,
-      status: 'PENDING',
-      createdAt: new Date().toISOString(),
+/** GET /api/admin/reports */
+export async function getAdminReports(params: {
+  status?: ReportStatus | 'ALL'
+  targetType?: ReportTargetType
+  page?: number
+  size?: number
+}): Promise<PageResponse<AdminReportResponse>> {
+  const { status, targetType, page = 0, size = 10 } = params
+  return http.get<PageResponse<AdminReportResponse>>('/api/admin/reports', {
+    query: {
+      ...(status && status !== 'ALL' ? { status } : {}),
+      ...(targetType ? { targetType } : {}),
+      page,
+      size,
     },
-    error: null,
-  }
+    auth: true,
+  })
+}
+
+/** GET /api/admin/reports/{reportId} */
+export async function getAdminReport(reportId: number): Promise<AdminReportResponse> {
+  return http.get<AdminReportResponse>(`/api/admin/reports/${reportId}`, {
+    auth: true,
+  })
+}
+
+/** PATCH /api/admin/reports/{reportId} */
+export async function processReport(
+  reportId: number,
+  body: {
+    status: ReportStatus
+    action: ReportAction
+    reason?: string
+  },
+): Promise<AdminReportResponse> {
+  return http.patch<AdminReportResponse>(`/api/admin/reports/${reportId}`, body, {
+    auth: true,
+  })
 }
