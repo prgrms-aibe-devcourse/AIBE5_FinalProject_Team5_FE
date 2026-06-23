@@ -61,6 +61,8 @@ export interface CourseDetail extends Course {
   goals: string
   otherInfo: string
   institutionInfo: string
+  /** institution.address — 기관 주소 */
+  institutionAddress: string
   contact: CourseContact
   titleLink: string | null
   homepageUrl: string | null
@@ -512,6 +514,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
     goals: detail.trainingGoal?.trim() || '-',
     otherInfo,
     institutionInfo: inst?.introduction?.trim() || '-',
+    institutionAddress: inst?.address?.trim() || '-',
     contact: {
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',
@@ -538,6 +541,7 @@ export async function getCourses(params: CourseListParams): Promise<PageResponse
 export async function getCourseSessionDetail(courseSessionId: number): Promise<CourseDetail> {
   const detail = await http.get<BECourseSessionDetail>(`/api/course-sessions/${courseSessionId}`, {
     auth: false,
+    redirectOnError: true,
   })
   return toCourseDetailVMFromSession(detail)
 }

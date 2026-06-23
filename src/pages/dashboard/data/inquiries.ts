@@ -73,7 +73,7 @@ export const faqItems: FaqItem[] = [
   {
     id: 2,
     question: '수강 신청 후 일정은 어디서 보나요?',
-    answer: '대시보드 일정 메뉴에서 수강 일정과 알림을 확인할 수 있습니다.',
+    answer: '대시보드에서 수강 일정과 알림을 확인할 수 있습니다.',
   },
   {
     id: 3,

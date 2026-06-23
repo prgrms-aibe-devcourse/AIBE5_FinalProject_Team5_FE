@@ -75,7 +75,7 @@ export default function CourseDetailHeader({
             {/* 과정 카드 */}
             <div className="space-y-2 rounded-xl glass-panel p-4 md:p-5">
               <InfoRow label="기수" value={course.batch} />
-              <InfoRow label="진행 지역" value={course.location} />
+              <InfoRow label="기관 위치" value={course.institutionAddress} />
               <InfoRow label="부담 비용" value={course.price} />
               <InfoRow label="진행 기간" value={course.dateRange} />
             </div>

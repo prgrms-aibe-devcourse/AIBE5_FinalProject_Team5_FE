@@ -30,7 +30,6 @@ import { ApiError } from '../../services/ApiError.ts'
 export default function SignupPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -46,7 +45,6 @@ export default function SignupPage() {
 
   const canSubmit = isSignupFormValid(
     email,
-    name,
     nickname,
     password,
     confirmPassword,
@@ -161,11 +159,12 @@ export default function SignupPage() {
 
     // 회원가입 요청 전송
     try {
+      const trimmedNickname = nickname.trim()
       await signup({
         email: email.trim(),
         password,
-        name: name.trim(),
-        nickname: nickname.trim(),
+        name: trimmedNickname, // 이름은 닉네임과 동일하게 사용
+        nickname: trimmedNickname,
       })
       navigate('/login')
     } catch (err) {
@@ -222,15 +221,6 @@ export default function SignupPage() {
                 buttonDisabled={!email.trim() || isEmailChecking}
                 error={emailError ?? undefined}
                 success={isEmailVerified ? EMAIL_AVAILABLE_MESSAGE : undefined}
-              />
-
-              <AuthInput
-                label="이름"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="홍길동"
-                autoComplete="name"
               />
 
               <AuthInput
