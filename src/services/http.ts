@@ -8,6 +8,9 @@ const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 const CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
+// 쿠키 도메인 불일치 시 서버에서 직접 읽어온 CSRF 토큰을 메모리에 캐시한다.
+let cachedCsrfToken: string | null = null
+
 let isHandlingAuthSessionExpired = false
 
 async function handleAuthSessionExpired(): Promise<void> {
@@ -27,8 +30,22 @@ async function handleAuthSessionExpired(): Promise<void> {
 }
 
 function getCsrfToken(): string | null {
+  if (cachedCsrfToken) return cachedCsrfToken
   const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`))
   return match ? decodeURIComponent(match[1]) : null
+}
+
+async function fetchAndCacheCsrfToken(): Promise<string | null> {
+  try {
+    const res = await fetch(`${BASE}/api/auth/csrf-token`, { credentials: 'include' })
+    if (!res.ok) return null
+    const json = await res.json()
+    const token: string | null = json?.data ?? null
+    if (token) cachedCsrfToken = token
+    return token
+  } catch {
+    return null
+  }
 }
 
 function buildQuery(params: Record<string, unknown>): string {
@@ -180,6 +197,14 @@ async function request<T>(
       return request<T>(path, { ...init, skipAuthRetry: true })
     } catch {
       void handleAuthSessionExpired()
+    }
+  }
+
+  // 쿠키 도메인 불일치로 CSRF 헤더가 누락된 경우: 서버에서 토큰을 직접 받아 한 번 재시도한다.
+  if (apiError.code === 'CSRF_TOKEN_INVALID' && !init.skipAuthRetry) {
+    const token = await fetchAndCacheCsrfToken()
+    if (token) {
+      return request<T>(path, { ...init, skipAuthRetry: true })
     }
   }
 
