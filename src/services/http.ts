@@ -60,6 +60,7 @@ interface RequestOptions {
   query?: Record<string, unknown>
   auth?: boolean
   skipAuthRetry?: boolean
+  skipCsrfRetry?: boolean
   /** GET 상세 조회 등 — 404·403·5xx 시 에러 페이지로 이동 */
   redirectOnError?: boolean
 }
@@ -149,7 +150,7 @@ async function request<T>(
   path: string,
   init: RequestInit & RequestOptions = {},
 ): Promise<T> {
-  const { query, auth, skipAuthRetry, redirectOnError, ...fetchInit } = init
+  const { query, auth, skipAuthRetry, skipCsrfRetry, redirectOnError, ...fetchInit } = init
   const method = (fetchInit.method ?? 'GET').toUpperCase()
   const url = BASE + path + (query ? buildQuery(query) : '')
   const headers = buildHeaders(fetchInit, method)
@@ -201,10 +202,10 @@ async function request<T>(
   }
 
   // 쿠키 도메인 불일치로 CSRF 헤더가 누락된 경우: 서버에서 토큰을 직접 받아 한 번 재시도한다.
-  if (apiError.code === 'CSRF_TOKEN_INVALID' && !init.skipAuthRetry) {
+  if (apiError.code === 'CSRF_TOKEN_INVALID' && !skipCsrfRetry) {
     const token = await fetchAndCacheCsrfToken()
     if (token) {
-      return request<T>(path, { ...init, skipAuthRetry: true })
+      return request<T>(path, { ...init, skipCsrfRetry: true })
     }
   }
 
