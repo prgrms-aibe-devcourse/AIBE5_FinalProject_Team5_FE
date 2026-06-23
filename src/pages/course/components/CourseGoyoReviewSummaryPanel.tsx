@@ -154,7 +154,16 @@ export default function CourseGoyoReviewSummaryPanel({
           return
         }
 
-        setViewState('ready')
+        if (!isAuthenticated()) {
+          setViewState('login_required')
+          return
+        }
+
+        setViewState('fetching')
+        const data = await createReviewSummary(courseId)
+        if (cancelled) return
+        setSummary(data)
+        setViewState('success')
       } catch (error) {
         if (cancelled) return
         setErrorMessage(getSummaryErrorMessage(error))
@@ -212,7 +221,7 @@ export default function CourseGoyoReviewSummaryPanel({
             </div>
           ) : null}
 
-          {viewState === 'ready' || viewState === 'login_required' || viewState === 'error' ? (
+          {viewState === 'login_required' || viewState === 'error' ? (
             <div className="flex flex-col items-center gap-3 py-10">
               {viewState === 'login_required' ? (
                 <InfoNotice>
@@ -238,11 +247,8 @@ export default function CourseGoyoReviewSummaryPanel({
                 onClick={() => void handleFetchSummary()}
                 className="inline-flex items-center justify-center rounded-lg border border-dashed border-waterlineBlue/50 bg-waterlineBlue/8 px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:bg-waterlineBlue/12"
               >
-                AI 요약 불러오기 (배포 전 테스트)
+                AI 요약 불러오기
               </button>
-              <p className="text-center text-xs text-secondary">
-                버튼을 눌렀을 때만 AI 요약 API가 호출됩니다.
-              </p>
             </div>
           ) : null}
 
@@ -252,7 +258,7 @@ export default function CourseGoyoReviewSummaryPanel({
                 className="h-8 w-8 animate-spin rounded-full border-[3px] border-mistSkyBlue/35 border-t-waterlineBlue"
                 aria-hidden="true"
               />
-              <p className="text-sm text-secondary">고용 24 리뷰 요약을 생성하는 중...</p>
+              <p className="text-sm text-secondary">고용 24 리뷰 요약을 불러오는 중...</p>
             </div>
           ) : null}
 
