@@ -111,30 +111,193 @@ function ExpandToggleButton({
   )
 }
 
-function CompareStatsCell({ stats }: { stats: VerifiedReviewStatistics }) {
-  const topMetrics = stats.qualityMetrics.slice(0, 3)
+function CompareStatsInfoTooltip({ text }: { text: string }) {
+  return (
+    <span className="group/info relative inline-flex">
+      <button
+        type="button"
+        className="inline-flex items-center justify-center rounded-sm text-waterlineBlue/80 transition-colors hover:text-waterlineBlue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waterlineBlue/30"
+        aria-label="안내 보기"
+      >
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M12 11v5M12 8h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-max whitespace-nowrap rounded-lg border border-mistSkyBlue/45 bg-white px-3 py-2 text-left text-xs leading-none text-deepOceanNavy/85 opacity-0 shadow-[0_8px_24px_rgba(52,74,100,0.12)] transition-opacity duration-150 group-hover/info:opacity-100 group-focus-within/info:opacity-100"
+      >
+        {text}
+      </span>
+    </span>
+  )
+}
+
+function getMetricValue(stats: VerifiedReviewStatistics, label: string): number {
+  return stats.qualityMetrics.find((item) => item.label === label)?.value ?? 0
+}
+
+function averageMetricLabels(stats: VerifiedReviewStatistics, labels: string[]): number {
+  if (labels.length === 0) return 0
+  const sum = labels.reduce((total, label) => total + getMetricValue(stats, label), 0)
+  return sum / labels.length
+}
+
+const COURSE_QUALITY_LABELS = ['강사 전달력', '커리큘럼', '취업 지원'] as const
+const PROJECT_EXPERIENCE_LABELS = ['프로젝트 성취도', '툴 지원', '멘토링'] as const
+
+type MetricGroupKey = 'course-quality' | 'project-experience'
+
+const METRIC_GROUP_KEYS: MetricGroupKey[] = ['course-quality', 'project-experience']
+
+const METRIC_GROUP_CONFIG: Record<
+  MetricGroupKey,
+  { title: string; labels: readonly string[] }
+> = {
+  'course-quality': { title: '과정 품질', labels: COURSE_QUALITY_LABELS },
+  'project-experience': { title: '프로젝트 경험', labels: PROJECT_EXPERIENCE_LABELS },
+}
+
+function PriorKnowledgeSummary({ stats }: { stats: VerifiedReviewStatistics }) {
+  const total = stats.priorKnowledgeDistribution.reduce((sum, item) => sum + item.count, 0)
+  if (total === 0) return null
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-mistSkyBlue/35 bg-foamWhite/60 px-3 py-2.5">
-        <div>
-          <p className="text-[0.7rem] font-medium text-secondary">인증 후기</p>
-          <p className="text-lg font-bold text-deepOceanNavy">{stats.reviewCount}건</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[0.7rem] font-medium text-secondary">평균</p>
-          <p className="text-2xl font-bold leading-none text-waterlineBlue">{stats.averageRating.toFixed(1)}</p>
-        </div>
+    <div className="space-y-2 rounded-lg border border-mistSkyBlue/25 bg-foamWhite/40 px-3 py-2.5">
+      <p className="text-[0.7rem] font-medium text-secondary">선수 지식</p>
+      <div className="flex h-1.5 overflow-hidden rounded-full bg-mistSkyBlue/20">
+        {stats.priorKnowledgeDistribution
+          .filter((item) => item.count > 0)
+          .map((item) => (
+            <div
+              key={item.level}
+              className="h-full"
+              style={{
+                width: `${(item.count / total) * 100}%`,
+                backgroundColor: item.color,
+              }}
+            />
+          ))}
       </div>
-      <ul className="space-y-2">
-        {topMetrics.map((item) => (
-          <li key={item.label} className="flex items-center justify-between gap-2 text-sm">
-            <span className="text-secondary">{item.label}</span>
-            <span className="font-bold tabular-nums text-deepOceanNavy">{item.value.toFixed(1)}</span>
-          </li>
+      <div className="flex flex-wrap justify-center gap-x-2 gap-y-1 text-[0.65rem] text-deepOceanNavy/80">
+        {stats.priorKnowledgeDistribution.map((item) => (
+          <span key={item.level} className="inline-flex items-center gap-1">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: item.color }}
+              aria-hidden="true"
+            />
+            {item.level} {item.count}
+          </span>
         ))}
-      </ul>
-      <p className="text-xs text-softAquaBlue">* 5점 만점</p>
+      </div>
+    </div>
+  )
+}
+
+function MetricGroupSummary({
+  groupKey,
+  title,
+  labels,
+  stats,
+  expanded,
+  onToggle,
+}: {
+  groupKey: MetricGroupKey
+  title: string
+  labels: readonly string[]
+  stats: VerifiedReviewStatistics
+  expanded: boolean
+  onToggle: (key: MetricGroupKey) => void
+}) {
+  const average = averageMetricLabels(stats, [...labels])
+
+  return (
+    <div className="rounded-lg border border-mistSkyBlue/25 bg-foamWhite/40 px-3 py-2.5">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-label={expanded ? `${title} 상세 접기` : `${title} 상세 펼치기`}
+        onClick={() => onToggle(groupKey)}
+        className="flex w-full items-center justify-between gap-2 text-left"
+      >
+        <span className="flex min-w-0 items-center gap-1.5">
+          <p className="text-sm font-medium text-secondary">{title}</p>
+          <svg
+            className={`h-3.5 w-3.5 shrink-0 text-waterlineBlue transition-transform ${expanded ? 'rotate-180' : ''}`}
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M6 10l6 6 6-6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <p className="shrink-0 text-sm font-bold tabular-nums text-deepOceanNavy">{average.toFixed(1)}</p>
+      </button>
+      {expanded ? (
+        <ul className="mt-2 space-y-1 border-t border-mistSkyBlue/20 pt-2">
+          {labels.map((label) => (
+            <li key={label} className="flex items-center justify-between gap-2 text-[0.7rem] text-deepOceanNavy/75">
+              <span>{label}</span>
+              <span className="font-semibold tabular-nums">{getMetricValue(stats, label).toFixed(1)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
+}
+
+function CompareStatsCell({
+  stats,
+  expandedMetricGroups,
+  onToggleMetricGroup,
+}: {
+  stats: VerifiedReviewStatistics
+  expandedMetricGroups: Set<MetricGroupKey>
+  onToggleMetricGroup: (key: MetricGroupKey) => void
+}) {
+  const hasReviews = stats.reviewCount > 0
+  const priorKnowledgeTotal = stats.priorKnowledgeDistribution.reduce((sum, item) => sum + item.count, 0)
+
+  return (
+    <div className="flex h-full w-full flex-col gap-3">
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-mistSkyBlue/35 bg-foamWhite/60 px-3 py-2.5">
+        <p className="text-lg font-bold text-deepOceanNavy">{stats.reviewCount}건</p>
+        <p className="text-2xl font-bold leading-none text-waterlineBlue">
+          {hasReviews ? stats.averageRating.toFixed(1) : '-'}
+        </p>
+      </div>
+      {hasReviews ? (
+        <div className="space-y-2">
+          {priorKnowledgeTotal > 0 ? <PriorKnowledgeSummary stats={stats} /> : null}
+          {METRIC_GROUP_KEYS.map((groupKey) => {
+            const { title, labels } = METRIC_GROUP_CONFIG[groupKey]
+            return (
+              <MetricGroupSummary
+                key={groupKey}
+                groupKey={groupKey}
+                title={title}
+                labels={labels}
+                stats={stats}
+                expanded={expandedMetricGroups.has(groupKey)}
+                onToggle={onToggleMetricGroup}
+              />
+            )
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-1 items-center justify-center px-2 py-6 text-center">
+          <p className="text-sm text-secondary">인증 후기가 없습니다</p>
+        </div>
+      )}
     </div>
   )
 }
@@ -142,6 +305,7 @@ function CompareStatsCell({ stats }: { stats: VerifiedReviewStatistics }) {
 export default function CourseCompareTable({ courses, statsByColumn, layout }: CourseCompareTableProps) {
   const sections = groupCompareRows(COMPARE_TABLE_ROWS)
   const [expandedRows, setExpandedRows] = useState<Set<string>>(() => new Set())
+  const [expandedMetricGroups, setExpandedMetricGroups] = useState<Set<MetricGroupKey>>(() => new Set())
 
   const toggleRow = (rowKey: string) => {
     setExpandedRows((prev) => {
@@ -152,13 +316,17 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
     })
   }
 
+  const toggleMetricGroup = (key: MetricGroupKey) => {
+    setExpandedMetricGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
   return (
     <section className={layout.containerClassName}>
-      <div className="mb-5">
-        <h2 className="text-base font-bold text-deepOceanNavy md:text-lg">항목별 상세 비교</h2>
-        <p className="mt-1 text-sm text-secondary">카테고리별로 항목을 묶어 비교했습니다.</p>
-      </div>
-
       <div className="space-y-10">
         {sections.map((section) => {
           const contentField = section.contentOnly ? section.fields[0] : null
@@ -169,11 +337,14 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
 
           return (
           <div key={section.label}>
-            <div className="mb-2 px-1">
+            <div className="mb-2 flex items-center gap-2 px-1">
               <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
                 <CompareSectionIcon label={section.label} />
                 <h3 className="text-sm font-bold tracking-tight text-deepOceanNavy">{section.label}</h3>
               </div>
+              {section.includeStats ? (
+                <CompareStatsInfoTooltip text="표기된 평점은 모두 5점 만점을 기준으로 표기된 수치값입니다." />
+              ) : null}
             </div>
             <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
 
@@ -185,7 +356,7 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
                 style={{ gridTemplateColumns: layout.gridTemplateColumns }}
               >
                 <div
-                  className="bg-foamWhite/50 px-4 py-5 md:px-5"
+                  className="bg-foamWhite/50 px-3 py-5 md:px-3.5"
                   aria-hidden="true"
                 />
                 {courses.map((course) => (
@@ -219,7 +390,7 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
                   className="grid items-stretch"
                   style={{ gridTemplateColumns: layout.gridTemplateColumns }}
                 >
-                  <div className="flex items-center justify-center bg-foamWhite/50 px-4 py-5 text-sm font-medium text-secondary md:px-5">
+                  <div className="flex items-center justify-center bg-foamWhite/50 px-3 py-5 text-sm font-medium text-secondary md:px-3.5">
                     {field.label}
                   </div>
                   {courses.map((course) => (
@@ -240,15 +411,20 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
                   className="grid items-stretch bg-foamWhite/35"
                   style={{ gridTemplateColumns: layout.gridTemplateColumns }}
                 >
-                  <div className="flex items-start bg-foamWhite/50 px-4 py-4 text-sm font-medium text-secondary md:px-5">
-                    통계 비교
-                  </div>
+                  <div
+                    className="bg-foamWhite/50 px-3 py-4 md:px-3.5"
+                    aria-hidden="true"
+                  />
                   {statsByColumn.map((stats, index) => (
                     <div
                       key={`stats-${courses[index]?.courseSessionId ?? courses[index]?.id ?? index}`}
-                      className="border-l border-mistSkyBlue/30 bg-transparent px-4 py-4 md:px-5"
+                      className="flex h-full border-l border-mistSkyBlue/30 bg-transparent px-4 py-4 md:px-5"
                     >
-                      <CompareStatsCell stats={stats} />
+                      <CompareStatsCell
+                        stats={stats}
+                        expandedMetricGroups={expandedMetricGroups}
+                        onToggleMetricGroup={toggleMetricGroup}
+                      />
                     </div>
                   ))}
                 </div>

@@ -2,10 +2,53 @@
 import { Link } from 'react-router-dom'
 import type { CourseDetail } from '../../../services/course.ts'
 import type { CompareLayoutConfig } from './compareLayout.ts'
+import CourseThumbnail from './CourseThumbnail.tsx'
 
 interface CourseCompareSummaryCardsProps {
   courses: CourseDetail[]
   layout: CompareLayoutConfig
+}
+
+function BuildingIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0 text-softAquaBlue"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 21V7l8-4 8 4v14M4 21h16M9 21v-6h6v6M9 9h.01M15 9h.01"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="shrink-0"
+      aria-hidden="true"
+    >
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
 export default function CourseCompareSummaryCards({ courses, layout }: CourseCompareSummaryCardsProps) {
@@ -13,35 +56,47 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
     <div className={layout.containerClassName}>
       <div className="grid gap-3" style={{ gridTemplateColumns: layout.gridTemplateColumns }}>
         <div aria-hidden="true" />
-        {courses.map((course) => (
-          <div key={course.courseSessionId ?? course.id} className="flex justify-center px-1 sm:px-2">
-            <article
-              className={`flex w-full flex-col overflow-hidden rounded-xl glass-panel shadow-sm ${layout.summaryCardMaxWidth}`}
-            >
-              <div className="aspect-[16/10] w-full bg-foamWhite">
-                {course.logoUrl ? (
-                  <img src={course.logoUrl} alt="" className="h-full w-full object-cover" />
-                ) : null}
-              </div>
-              <div className="flex flex-1 flex-col items-center px-4 py-4 text-center">
-                <h2 className="line-clamp-2 text-sm font-bold leading-snug text-deepOceanNavy">
-                  {course.title}
-                </h2>
-                <p className="mt-2 text-xs text-secondary">{course.dateRange}</p>
-                <Link
-                  to={
-                    course.courseSessionId != null
-                      ? `/courses/${course.courseSessionId}`
-                      : `/courses/${course.id}`
-                  }
-                  className="mt-2.5 text-xs font-semibold text-waterlineBlue underline underline-offset-2 hover:text-deepOceanNavy"
-                >
-                  상세 보기
-                </Link>
-              </div>
-            </article>
-          </div>
-        ))}
+        {courses.map((course) => {
+          const detailPath =
+            course.courseSessionId != null
+              ? `/courses/${course.courseSessionId}`
+              : `/courses/${course.id}`
+
+          return (
+            <div key={course.courseSessionId ?? course.id} className="flex justify-center px-1 sm:px-2">
+              <article
+                className={`group flex w-full flex-col overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)] ring-1 ring-mistSkyBlue/25 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(52,74,100,0.12)] hover:ring-waterlineBlue/35 ${layout.summaryCardMaxWidth}`}
+              >
+                <div className="overflow-hidden border-b border-mistSkyBlue/20">
+                  <CourseThumbnail
+                    imageUrl={course.logoUrl}
+                    alt={`${course.title} 대표 이미지`}
+                    className="rounded-none transition-transform duration-300 ease-out group-hover:scale-[1.02]"
+                  />
+                </div>
+
+                <div className="flex flex-1 flex-col items-center gap-2.5 px-4 py-4 text-center">
+                  <h2 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-deepOceanNavy">
+                    {course.title}
+                  </h2>
+
+                  <p className="flex w-full items-center justify-center gap-1.5 text-xs text-secondary">
+                    <BuildingIcon />
+                    <span className="line-clamp-1">{course.company}</span>
+                  </p>
+
+                  <Link
+                    to={detailPath}
+                    className="mt-1 inline-flex items-center gap-1 rounded-lg border border-waterlineBlue/25 bg-waterlineBlue/[0.06] px-3.5 py-1.5 text-xs font-semibold text-waterlineBlue transition-colors hover:border-waterlineBlue/45 hover:bg-waterlineBlue/10 hover:text-deepOceanNavy"
+                  >
+                    상세 보기
+                    <ArrowRightIcon />
+                  </Link>
+                </div>
+              </article>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

@@ -34,6 +34,7 @@ const DEFAULT_DETAIL: Omit<CourseDetail, 'id' | 'courseId'> = {
     '수료 후 취업 연계 프로그램 제공',
   institutionInfo:
     '그렙은 실무 중심의 IT 교육을 제공하는 기업으로, K-Digital Training 등 다양한 국비지원 과정을 운영하고 있습니다.',
+  institutionAddress: '서울특별시 강남구 테헤란로 123',
   contact: {
     phone: '02-1234-5678',
     email: 'contact@grepp.co',

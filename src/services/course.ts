@@ -61,6 +61,8 @@ export interface CourseDetail extends Course {
   goals: string
   otherInfo: string
   institutionInfo: string
+  /** institution.address — 기관 주소 */
+  institutionAddress: string
   contact: CourseContact
   titleLink: string | null
   homepageUrl: string | null
@@ -512,6 +514,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
     goals: detail.trainingGoal?.trim() || '-',
     otherInfo,
     institutionInfo: inst?.introduction?.trim() || '-',
+    institutionAddress: inst?.address?.trim() || '-',
     contact: {
       phone: inst?.managerTel ?? '-',
       email: inst?.managerEmail ?? '-',
