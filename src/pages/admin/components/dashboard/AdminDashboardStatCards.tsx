@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { adminStatCards, type AdminStatCardIcon } from '../../data/adminDashboardData'
+import type { AdminDashboardSummary } from '../../../../services/admin'
 
 const dashboardIconProps = {
   width: 20,
@@ -13,8 +13,9 @@ const dashboardIconProps = {
   strokeLinejoin: 'round' as const,
 }
 
-// 관리자 통계 카드 아이콘
-function StatCardIcon({ icon }: { icon: AdminStatCardIcon }) {
+type StatCardIconName = 'users' | 'course' | 'auth' | 'review' | 'report'
+
+function StatCardIcon({ icon }: { icon: StatCardIconName }) {
   switch (icon) {
     case 'users':
       return (
@@ -25,6 +26,13 @@ function StatCardIcon({ icon }: { icon: AdminStatCardIcon }) {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       )
+    case 'course':
+      return (
+        <svg {...dashboardIconProps} aria-hidden="true">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      )
     case 'auth':
       return (
         <svg {...dashboardIconProps} aria-hidden="true">
@@ -33,10 +41,10 @@ function StatCardIcon({ icon }: { icon: AdminStatCardIcon }) {
           <path d="M8 18v-1a4 4 0 0 1 8 0v1" />
         </svg>
       )
-    case 'inquiry':
+    case 'review':
       return (
         <svg {...dashboardIconProps} aria-hidden="true">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.3L12 14.8 6.2 17l.9-5.3L3.2 7.7l5.4-.8z" />
         </svg>
       )
     case 'report':
@@ -49,32 +57,37 @@ function StatCardIcon({ icon }: { icon: AdminStatCardIcon }) {
 }
 
 type StatCardProps = {
-  label: string // 통계 카드 라벨
-  value: string // 통계 카드 값
-  icon: ReactNode // 통계 카드 아이콘
-  iconWrapClass: string // 통계 카드 아이콘 랩 클래스
-  to?: string // 통계 카드 링크
+  label: string
+  value: string
+  icon: ReactNode
+  iconWrapClass: string
+  to?: string
 }
 
-// 관리자 통계 카드
 function StatCard({ label, value, icon, iconWrapClass, to }: StatCardProps) {
   const body = (
-    <article className="glass-panel flex h-full flex-col rounded-2xl p-5">
+    <article className="glass-panel group flex h-full flex-col rounded-2xl p-5 transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(30,58,95,0.12)] hover:ring-1 hover:ring-waterlineBlue/30">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-pretendard text-sm font-semibold text-[#64748b]">{label}</p>
-          <p className="mt-2 font-pretendard text-3xl font-bold tracking-tight text-deepOceanNavy">{value}</p>
+          <p className="font-pretendard text-sm font-semibold text-[#64748b] transition-colors duration-200 group-hover:text-deepOceanNavy">
+            {label}
+          </p>
+          <p className="mt-2 font-pretendard text-3xl font-bold tracking-tight text-deepOceanNavy transition-colors duration-200 group-hover:text-waterlineBlue">
+            {value}
+          </p>
         </div>
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconWrapClass}`}>
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 ${iconWrapClass}`}
+        >
           {icon}
         </div>
       </div>
     </article>
   )
 
-  if (to) { // 통계 카드 링크가 있으면 링크로 감싸기
+  if (to) {
     return (
-      <Link to={to} className="block flex-1">
+      <Link to={to} className="block flex-1 active:scale-[0.99]">
         {body}
       </Link>
     )
@@ -83,15 +96,65 @@ function StatCard({ label, value, icon, iconWrapClass, to }: StatCardProps) {
   return <div className="flex-1">{body}</div>
 }
 
-// 관리자 대시보드 통계 카드 영역
-export default function AdminDashboardStatCards() {
+type StatCardConfig = {
+  label: string
+  value: number
+  iconWrapClass: string
+  icon: StatCardIconName
+  to?: string
+}
+
+function buildStatCards(summary: AdminDashboardSummary): StatCardConfig[] {
+  return [
+    {
+      label: '전체 회원',
+      value: summary.userCount,
+      iconWrapClass: 'bg-foamWhite text-deepOceanNavy',
+      icon: 'users',
+    },
+    {
+      label: '전체 과정',
+      value: summary.courseCount,
+      iconWrapClass: 'bg-[#eef4fa] text-waterlineBlue',
+      icon: 'course',
+    },
+    {
+      label: '전체 리뷰',
+      value: summary.reviewCount,
+      iconWrapClass: 'bg-[#fef9ec] text-[#d97706]',
+      icon: 'review',
+    },
+    {
+      label: '대기 수료 인증',
+      value: summary.pendingVerificationCount,
+      iconWrapClass: 'bg-[#fff1eb] text-[#ea580c]',
+      icon: 'auth',
+      to: '/admin/certifications',
+    },
+    {
+      label: '신고 건수',
+      value: summary.reportCount,
+      iconWrapClass: 'bg-[#fef2f2] text-[#dc2626]',
+      icon: 'report',
+      to: '/admin/reports',
+    },
+  ]
+}
+
+type AdminDashboardStatCardsProps = {
+  summary: AdminDashboardSummary
+}
+
+export default function AdminDashboardStatCards({ summary }: AdminDashboardStatCardsProps) {
+  const cards = buildStatCards(summary)
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {adminStatCards.map((card) => ( // 관리자 통계 카드 데이터를 순회하며 통계 카드 컴포넌트 생성
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {cards.map((card) => (
         <StatCard
           key={card.label}
           label={card.label}
-          value={card.value}
+          value={card.value.toLocaleString()}
           iconWrapClass={card.iconWrapClass}
           to={card.to}
           icon={<StatCardIcon icon={card.icon} />}

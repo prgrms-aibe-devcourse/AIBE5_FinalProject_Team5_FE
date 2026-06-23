@@ -1,50 +1,74 @@
 import type { KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Course } from '../data/courses'
+import type { BookmarkCourseVM } from '../../../services/bookmark'
 import {
   CalendarIcon,
   CourseMetaItems,
+  CourseTitleBlock,
   EnrollmentIcon,
   LocationIcon,
   PriceIcon,
 } from './CourseListMeta'
 import DashboardCard from './DashboardCard'
+import DashboardCardEmptyState from './DashboardCardEmptyState'
+import DashboardCardMoreLink from './DashboardCardMoreLink'
+import type { Course } from '../data/courses'
 
 type DashboardCourseListCardProps = {
-  courses: Course[]
+  courses: BookmarkCourseVM[]
+  isLoading?: boolean
 }
 
-export default function DashboardCourseListCard({ courses }: DashboardCourseListCardProps) {
+function toCourseMeta(course: BookmarkCourseVM): Course {
+  return {
+    id: course.courseSessionId,
+    title: course.title,
+    academy: course.academy,
+    region: course.region,
+    subsidy: course.subsidy,
+    period: course.period,
+    rating: course.rating,
+    enrollment: course.enrollment,
+    logoUrl: course.logoUrl,
+  }
+}
+
+export default function DashboardCourseListCard({
+  courses,
+  isLoading = false,
+}: DashboardCourseListCardProps) {
   const navigate = useNavigate()
 
-  const goToCourse = (id: number) => navigate(`/courses/${id}`)
+  const goToCourse = (courseSessionId: number) => navigate(`/courses/${courseSessionId}`)
 
-  const handleKeyDown = (event: KeyboardEvent, id: number) => {
+  const handleKeyDown = (event: KeyboardEvent, courseSessionId: number) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      goToCourse(id)
+      goToCourse(courseSessionId)
     }
   }
 
   return (
-    <DashboardCard title="스크랩 목록">
-      {courses.length > 0 ? (
+    <DashboardCard
+      title="스크랩 목록"
+      className="h-full"
+      action={<DashboardCardMoreLink to="/dashboard/bookmarks" ariaLabel="스크랩 목록 전체 보기" />}
+    >
+      {isLoading ? (
+        <DashboardCardEmptyState message="스크랩 목록을 불러오는 중…" />
+      ) : courses.length > 0 ? (
         <>
           <ul className="flex flex-col gap-1 px-1 lg:hidden">
             {courses.map((course) => (
-              <li key={course.id}>
+              <li key={course.bookmarkId}>
                 <button
                   type="button"
-                  onClick={() => goToCourse(course.id)}
+                  onClick={() => goToCourse(course.courseSessionId)}
                   className="w-full cursor-pointer rounded-lg px-3 py-4 text-left transition-colors hover:bg-foamWhite/50"
                 >
-                  <p className="font-pretendard text-sm font-semibold text-deepOceanNavy">
-                    {course.title}
-                    <span className="ml-2 text-waterlineBlue">★ ({course.rating})</span>
-                  </p>
-                  <p className="mt-1 font-pretendard text-xs text-secondary">{course.academy}</p>
+                  <CourseTitleBlock course={toCourseMeta(course)} scoreVariant="satisfaction" />
                   <div className="mt-3 grid grid-cols-1 gap-2 font-pretendard text-xs sm:grid-cols-2">
-                    <CourseMetaItems course={course} />
+                    <CourseMetaItems course={toCourseMeta(course)} />
                   </div>
                 </button>
               </li>
@@ -56,19 +80,15 @@ export default function DashboardCourseListCard({ courses }: DashboardCourseList
               <tbody>
                 {courses.map((course) => (
                   <tr
-                    key={course.id}
+                    key={course.bookmarkId}
                     role="link"
                     tabIndex={0}
-                    onClick={() => goToCourse(course.id)}
-                    onKeyDown={(event) => handleKeyDown(event, course.id)}
+                    onClick={() => goToCourse(course.courseSessionId)}
+                    onKeyDown={(event) => handleKeyDown(event, course.courseSessionId)}
                     className="cursor-pointer border-b border-mistSkyBlue/20 transition-colors last:border-b-0 hover:bg-foamWhite/50 [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg"
                   >
                     <td className="px-3 py-4 pr-4">
-                      <p className="font-semibold text-deepOceanNavy">
-                        {course.title}
-                        <span className="ml-2 text-waterlineBlue">★ ({course.rating})</span>
-                      </p>
-                      <p className="mt-1 text-xs text-secondary">{course.academy}</p>
+                      <CourseTitleBlock course={toCourseMeta(course)} scoreVariant="satisfaction" />
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 pr-4 text-primary/90">
                       <span className="inline-flex items-center gap-1.5">
@@ -91,7 +111,7 @@ export default function DashboardCourseListCard({ courses }: DashboardCourseList
                     <td className="whitespace-nowrap px-3 py-4 text-center text-primary/90">
                       <span className="inline-flex items-center justify-center gap-1.5">
                         <EnrollmentIcon />
-                        {course.enrollment ?? '32/50'}
+                        {course.enrollment}
                       </span>
                     </td>
                   </tr>
@@ -101,7 +121,7 @@ export default function DashboardCourseListCard({ courses }: DashboardCourseList
           </div>
         </>
       ) : (
-        <p className="py-10 text-center font-pretendard text-sm text-secondary">스크랩한 과정이 없습니다.</p>
+        <DashboardCardEmptyState message="스크랩한 과정이 없습니다." />
       )}
     </DashboardCard>
   )
