@@ -101,7 +101,7 @@ function PopularCourseCard({ course, cardWidth }: { course: Course; cardWidth: n
       className="flex shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e7edf3] bg-white shadow-[0_2px_10px_rgba(52,74,100,0.05)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(52,74,100,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-waterlineBlue"
     >
       <div className="relative h-[7.25rem] shrink-0 overflow-hidden bg-foamWhite">
-        <CourseThumbnail imageUrl={course.logoUrl} />
+        <CourseThumbnail imageUrl={course.logoUrl} company={course.company} seed={course.id} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-3.5">

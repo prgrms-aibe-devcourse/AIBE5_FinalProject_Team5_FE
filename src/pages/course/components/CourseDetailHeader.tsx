@@ -37,6 +37,8 @@ export default function CourseDetailHeader({
           <div className="h-36 w-full overflow-hidden rounded-xl border border-mistSkyBlue/50 sm:h-44 md:h-52 lg:h-full lg:min-h-52">
             <CourseThumbnail
               imageUrl={course.logoUrl}
+              company={course.company}
+              seed={course.id}
               alt={`${course.title} 대표 이미지`}
               className="aspect-auto h-full w-full"
             />

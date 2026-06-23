@@ -8,7 +8,7 @@ interface CourseComparisonSidebarProps {
   onCompare: () => void
 }
 
-export default function CourseComparisonSidebar({  
+export default function CourseComparisonSidebar({
   selectedCourses,
   maxCount,
   onRemove,
@@ -46,7 +46,7 @@ export default function CourseComparisonSidebar({
               </button>
               {/* 과정 정보 */}
               <div className="flex items-center gap-3">
-                <CourseThumbnail variant="square" imageUrl={course.logoUrl} alt="" />
+                <CourseThumbnail variant="square" imageUrl={course.logoUrl} company={course.company} seed={course.id} alt="" />
                 {/* 과정 제목 + 기관명 */}
                 <div className="min-w-0 flex-1">
                   <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-deepOceanNavy">
