@@ -150,7 +150,7 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
             <PipeRow label="기수" value={course.batch} />
             
             
-            <PipeRow label="지역" value={course.location} />
+            <PipeRow label="기관 위치" value={course.institutionAddress} />
             <PipeRow label="부담 비용" value={course.price} />
             <PipeRow label="진행 기간" value={course.dateRange} />
           </div>

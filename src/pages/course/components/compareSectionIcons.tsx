@@ -9,6 +9,14 @@ function SectionIconBadge({ children }: { children: ReactNode }) {
   )
 }
 
+function SummaryIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 19h16M7 16V9m5 7V5m5 11v-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function BasicInfoIcon() {
   return (
     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -93,6 +101,7 @@ function GoalsIcon() {
 }
 
 const SECTION_ICON_MAP: Record<string, ReactNode> = {
+  '수치 요약': <SummaryIcon />,
   '기본 정보': <BasicInfoIcon />,
   '모집 현황': <RecruitmentIcon />,
   '평가 지표': <RatingIcon />,

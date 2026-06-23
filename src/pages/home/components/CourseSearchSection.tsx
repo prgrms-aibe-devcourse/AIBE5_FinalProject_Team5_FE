@@ -46,7 +46,7 @@ export default function CourseSearchSection() {
                 type="search"
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
-                placeholder="키워드, 과정명 등 입력"
+                placeholder="과정명, 기관명 키워드 등을 입력하세요"
                 aria-label="과정 검색"
                 className="h-17.5 w-full rounded-full border border-[#b9bec6] bg-white pl-6 pr-16 text-[15px] text-deepOceanNavy placeholder:text-[#8b94a3] shadow-[0_1px_3px_rgba(15,23,42,0.04)] outline-none transition-colors focus:border-waterlineBlue font-pretendard"
               />
@@ -68,8 +68,8 @@ export default function CourseSearchSection() {
           {categories.map((category) => (
             <li key={category.key} className="flex justify-center">
               <a href={`/courses?category=${category.key}`} className="group flex flex-col items-center">
-                <span className="grid h-28 w-28 place-items-center rounded-[14px] glass-panel shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_18px_rgba(52,74,100,0.08)] sm:h-32 sm:w-32 sm:rounded-2xl lg:h-37.5 lg:w-37.5 lg:rounded-[18px]">
-                  <img src={category.icon} alt="" aria-hidden="true" className="h-16 w-16 object-contain sm:h-20 sm:w-20 lg:h-22.5 lg:w-22.5" />
+                <span className="block h-28 w-28 rounded-[14px] p-2 glass-panel shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_18px_rgba(52,74,100,0.08)] sm:h-32 sm:w-32 sm:rounded-2xl sm:p-2.5 lg:h-37.5 lg:w-37.5 lg:rounded-[18px] lg:p-3">
+                  <img src={category.icon} alt="" aria-hidden="true" className="h-full w-full object-contain" />
                 </span>
                 <span className="mt-2.5 text-sm font-semibold tracking-[-0.01em] text-[#344A64] font-pretendard sm:mt-3 sm:text-[15px]">
                   {category.label}
