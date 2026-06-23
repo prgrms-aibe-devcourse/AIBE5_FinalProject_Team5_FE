@@ -164,7 +164,7 @@ export default function PopularCoursesSection() {
                 className="w-[260px] shrink-0 snap-start rounded-2xl border border-[#e4e8ee] bg-white/85 backdrop-blur-sm p-4 shadow-[0_2px_8px_rgba(15,23,42,0.05)] transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-md cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-waterlineBlue"
               >
                 <div className="relative h-24 w-full overflow-hidden rounded-xl bg-foamWhite">
-                  <CourseThumbnail imageUrl={course.logoUrl} />
+                  <CourseThumbnail imageUrl={course.logoUrl} company={course.company} seed={course.id} />
                 </div>
 
                 <h3 className="mt-4 line-clamp-2 min-h-[2.6rem] text-sm font-bold text-[#17202c] font-pretendard">

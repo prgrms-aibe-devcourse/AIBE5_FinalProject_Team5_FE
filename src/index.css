@@ -47,12 +47,10 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(42vw 42vw at 74% 20%, rgba(84, 132, 183, 0.32), transparent 60%),
-    radial-gradient(34vw 34vw at 22% 28%, rgba(246, 94, 164, 0.16), transparent 62%),
-    radial-gradient(36vw 36vw at 28% 80%, rgba(130, 110, 200, 0.16), transparent 62%),
-    radial-gradient(44vw 44vw at 84% 76%, rgba(176, 210, 230, 0.28), transparent 60%),
-    radial-gradient(62vw 52vw at 50% 42%, rgba(255, 255, 255, 0.45), transparent 70%),
-    linear-gradient(160deg, #f6f0e6 0%, #f1ece4 45%, #eef2f7 100%);
+    radial-gradient(38vw 38vw at 76% 18%, rgba(84, 132, 183, 0.50), transparent 55%),
+    radial-gradient(32vw 32vw at 20% 26%, rgba(246, 94, 164, 0.32), transparent 56%),
+    radial-gradient(34vw 34vw at 26% 82%, rgba(130, 110, 200, 0.34), transparent 56%),
+    radial-gradient(40vw 40vw at 86% 78%, rgba(120, 180, 220, 0.46), transparent 56%);
 }
 
 /* 실제 콘텐츠는 오브 레이어 위에 올라가도록 stacking context 지정 */
@@ -66,9 +64,7 @@ body::before {
   body::before {
     background:
       radial-gradient(60vw 60vw at 76% 18%, rgba(84, 132, 183, 0.16), transparent 62%),
-      radial-gradient(56vw 56vw at 22% 82%, rgba(176, 210, 230, 0.16), transparent 62%),
-      radial-gradient(80vw 70vw at 50% 40%, rgba(255, 255, 255, 0.55), transparent 72%),
-      linear-gradient(160deg, #f6f0e6 0%, #f1ece4 45%, #eef2f7 100%);
+      radial-gradient(56vw 56vw at 22% 82%, rgba(176, 210, 230, 0.16), transparent 62%);
   }
 }
 
@@ -512,6 +508,72 @@ html.home-snap {
     inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
 
+/* 과정 카드 전용 — 리퀴드 글래스 (Liquid Glass)
+   · 배경을 SVG 변위 필터(#liquid-glass)로 굴절시켜 렌즈처럼 일렁이게 함
+   · 엣지는 광원 하이라이트로 유리감(굴절은 엣지 처리에서 나온다)
+   · 몸체 fill은 위→아래로 짙어지는 translucent 화이트 "안정화 플레이트"로,
+     배경 오브의 밝은 핫스팟/진한 블루 위에서도 본문 텍스트 휘도를 일정하게 유지한다
+     (Liquid Glass 원칙: 텍스트는 raw blur가 아니라 안정화 플레이트 위에 올린다)
+   · 떠 있는 유리 슬랩 드롭 섀도우
+   · url() 미지원 브라우저(Safari 등)는 -webkit- 폴백으로 블러만 적용 */
+.glass-card {
+  background:
+    /* 좌상단 광원 반사 시트(specular sheen) — 배경 디테일과 무관하게 유리 광택을 만든다 */
+    linear-gradient(133deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.16) 24%, rgba(255, 255, 255, 0) 46%),
+    /* 본문 안정화 플레이트(위→아래로 짙어짐) */
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.28));
+  backdrop-filter: url(#liquid-glass) blur(1px) saturate(170%) brightness(1.08);
+  -webkit-backdrop-filter: blur(4px) saturate(170%) brightness(1.08);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    /* 떠 있는 유리 드롭 섀도우 (광원 위 → 아래로) */
+    0 18px 40px rgba(28, 40, 64, 0.24),
+    0 6px 14px rgba(28, 40, 64, 0.13),
+    /* 상단 엣지 광원 하이라이트 (강) */
+    inset 0 2.5px 1px rgba(255, 255, 255, 1),
+    inset 0 6px 10px rgba(255, 255, 255, 0.55),
+    /* 하단 엣지 굴절 글로우 (강) */
+    inset 0 -3px 6px rgba(255, 255, 255, 0.72),
+    /* 좌·우 굴절 림 */
+    inset 2px 0 4px rgba(255, 255, 255, 0.5),
+    inset -2px 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.glass-card:hover {
+  box-shadow:
+    0 24px 50px rgba(28, 40, 64, 0.28),
+    0 8px 18px rgba(28, 40, 64, 0.14),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.94),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.58),
+    inset 1.5px 0 2px rgba(255, 255, 255, 0.32),
+    inset -1.5px 0 2px rgba(255, 255, 255, 0.32);
+}
+
+/* 선택 상태는 색조 변화가 아니라 구조적 차이로 표현한다
+   (Liquid Glass 원칙: state는 tint shift가 아니라 구조 변화)
+   → waterlineBlue 림(외곽 2px) + 살짝 푸른 안정화 플레이트 */
+.glass-card--selected {
+  border-color: rgba(84, 132, 183, 1);
+  background: linear-gradient(180deg, rgba(214, 233, 250, 0.46), rgba(214, 233, 250, 0.58));
+  box-shadow:
+    0 0 0 3px rgba(84, 132, 183, 0.95),
+    0 0 18px rgba(84, 132, 183, 0.35),
+    0 20px 44px rgba(28, 40, 64, 0.26),
+    0 6px 14px rgba(28, 40, 64, 0.13),
+    inset 0 2px 2px rgba(255, 255, 255, 0.98),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.70);
+}
+
+.glass-card--selected:hover {
+  box-shadow:
+    0 0 0 3px rgba(84, 132, 183, 1),
+    0 0 22px rgba(84, 132, 183, 0.42),
+    0 24px 50px rgba(28, 40, 64, 0.28),
+    0 8px 18px rgba(28, 40, 64, 0.14),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.94),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.58);
+}
+
 .glass-sidebar {
   background: rgba(255, 255, 255, 0.60);
   backdrop-filter: blur(16px);
@@ -549,6 +611,7 @@ html.home-snap {
 /* 모바일: blur가 무거우므로 강도를 일괄 축소 */
 @media (max-width: 768px) {
   .glass-panel,
+  .glass-card,
   .glass-sidebar,
   .glass-topbar {
     backdrop-filter: blur(8px);
@@ -563,6 +626,43 @@ html.home-snap {
   .glass-floating {
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+/* ================================================================
+   Fallback surface recipe — backdrop-filter 미지원 환경
+   (Liquid Glass 원칙: 폴백은 다운그레이드가 아니라 동일 anatomy를
+    blur 없는 불투명 sibling surface로 일관되게 재현한다)
+   blur가 사라지면 투명 표면은 배경 오브가 그대로 비쳐 가독성이 깨지므로
+   각 토큰을 충분히 불투명한 단색 표면으로 승격한다.
+   ================================================================ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel {
+    background: rgba(247, 250, 253, 0.94);
+  }
+
+  .glass-card {
+    background: rgba(247, 250, 253, 0.92);
+  }
+
+  .glass-card--selected {
+    background: rgba(229, 241, 251, 0.95);
+  }
+
+  .glass-sidebar {
+    background: rgba(247, 250, 253, 0.96);
+  }
+
+  .glass-topbar {
+    background: rgba(250, 252, 254, 0.98);
+  }
+
+  .glass-modal {
+    background: rgba(252, 253, 255, 0.99);
+  }
+
+  .glass-floating {
+    background: rgba(252, 253, 255, 0.99);
   }
 }
 
