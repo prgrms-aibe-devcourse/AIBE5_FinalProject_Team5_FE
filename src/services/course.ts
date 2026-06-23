@@ -538,6 +538,7 @@ export async function getCourses(params: CourseListParams): Promise<PageResponse
 export async function getCourseSessionDetail(courseSessionId: number): Promise<CourseDetail> {
   const detail = await http.get<BECourseSessionDetail>(`/api/course-sessions/${courseSessionId}`, {
     auth: false,
+    redirectOnError: true,
   })
   return toCourseDetailVMFromSession(detail)
 }

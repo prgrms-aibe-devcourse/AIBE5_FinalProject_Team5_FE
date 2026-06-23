@@ -65,7 +65,6 @@ export function isLoginFormValid(email: string, password: string): boolean {
 /** 회원가입 제출 가능 여부 — 빈칸 없음 + 이메일 형식 + 비밀번호 확인 완료 */
 export function isSignupFormValid(
   email: string,
-  name: string,
   nickname: string,
   password: string,
   confirmPassword: string,
@@ -74,7 +73,6 @@ export function isSignupFormValid(
 ): boolean {
   return Boolean(
     email.trim() &&
-      name.trim() &&
       nickname.trim() &&
       password.trim() &&
       confirmPassword.trim() &&

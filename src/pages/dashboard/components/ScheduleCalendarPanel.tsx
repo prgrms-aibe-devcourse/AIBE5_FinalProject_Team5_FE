@@ -5,6 +5,7 @@ import DashboardCard from './DashboardCard'
 type ScheduleCalendarPanelProps = {
   events?: ScheduleEvent[]
   title?: string
+  action?: ReactNode
   isLoadingEvents?: boolean
   onEventClick?: (event: ScheduleEvent) => void
   onMonthChange?: (year: number, month: number) => void
@@ -71,6 +72,7 @@ function MonthNavButton({
 export default function ScheduleCalendarPanel({
   events = [],
   title,
+  action,
   isLoadingEvents = false,
   onEventClick,
   onMonthChange,
@@ -328,7 +330,7 @@ export default function ScheduleCalendarPanel({
 
   if (withCard) {
     return (
-      <DashboardCard title={title} className={className}>
+      <DashboardCard title={title} action={action} className={className}>
         {panelContent}
       </DashboardCard>
     )
