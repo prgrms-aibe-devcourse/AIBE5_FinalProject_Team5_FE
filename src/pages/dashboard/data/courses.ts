@@ -110,5 +110,58 @@ export const mockBookmarkCourses: Course[] = [
   },
 ]
 
+export type RecentCourse = {
+  id: number
+  title: string
+  academy: string
+  region: string
+  rating: string
+  viewedAt: string
+}
+
+/** API 연동 후 제거 예정 — 최근 조회 코스 더미 데이터 */
+export const recentCourses: RecentCourse[] = [
+  {
+    id: 101,
+    title: '[프로그래머스] 국비지원 프론트엔드 데브코스',
+    academy: '(주)그렙',
+    region: '서울',
+    rating: '4.5',
+    viewedAt: '2시간 전',
+  },
+  {
+    id: 102,
+    title: '[프로그래머스] 국비지원 백엔드 데브코스',
+    academy: '(주)그렙',
+    region: '서울',
+    rating: '4.3',
+    viewedAt: '어제',
+  },
+  {
+    id: 103,
+    title: '[프로그래머스] 국비지원 AI 데브코스',
+    academy: '(주)그렙',
+    region: '경기',
+    rating: '4.7',
+    viewedAt: '3일 전',
+  },
+  {
+    id: 104,
+    title: '[프로그래머스] 프론티스트 대비',
+    academy: '(주)그렙',
+    region: '서울',
+    rating: '4.1',
+    viewedAt: '5일 전',
+  },
+  {
+    id: 105,
+    title: '[이젠아카데미] 인테리어 스케치업 + 캐드',
+    academy: '이젠아카데미',
+    region: '부산',
+    rating: '4.0',
+    viewedAt: '1주 전',
+  },
+]
+
 export const COURSE_SORT_MODES = ['만족도순', '임박순'] as const
 export type CourseSortMode = (typeof COURSE_SORT_MODES)[number]

@@ -127,26 +127,6 @@ export async function getBookmarks(params: GetBookmarksParams = {}): Promise<Boo
   })
 }
 
-function parseBookmarkStartDate(startDate: string): number {
-  const parsed = new Date(startDate).getTime()
-  return Number.isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed
-}
-
-/** 시작일 기준 임박순 정렬 (가까운 개강일 우선) */
-export function sortBookmarksByImminent(items: BookmarkListItem[]): BookmarkListItem[] {
-  return [...items].sort(
-    (left, right) => parseBookmarkStartDate(left.startDate) - parseBookmarkStartDate(right.startDate),
-  )
-}
-
-/** 대시보드 미리보기용 — 임박순 상위 N건 */
-export async function getBookmarkPreview(limit = 5): Promise<BookmarkCourseVM[]> {
-  const data = await getBookmarks({ page: 0, size: 100, sort: 'latest' })
-  return sortBookmarksByImminent(data.content)
-    .slice(0, limit)
-    .map(toBookmarkCourseVM)
-}
-
 /** 로그인 사용자의 스크랩된 회차 ID 전체 조회 */
 export async function fetchBookmarkedSessionIds(): Promise<Set<number>> {
   const ids = new Set<number>()

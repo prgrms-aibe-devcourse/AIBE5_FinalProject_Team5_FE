@@ -188,12 +188,12 @@ export default function ScheduleCalendarPanel({
   )
 
   const panelContent = (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <>
       {!withCard && title ? (
         <h2 className="mb-5 font-pretendard text-lg font-bold text-deepOceanNavy">{title}</h2>
       ) : null}
 
-      <div className="grid flex-1 gap-6 xl:grid-cols-2 xl:items-stretch">
+      <div className="grid gap-6 xl:grid-cols-2 xl:items-stretch">
         <div className="min-w-0">
           {calendarToolbar}
 
@@ -205,9 +205,7 @@ export default function ScheduleCalendarPanel({
             ))}
 
             {calendarCells.map((cell) => {
-              const eventCount = cell.eventsForDay.length
-              const maxDots = 3
-              const dotCount = Math.min(eventCount, maxDots)
+              const dotCount = Math.min(cell.eventsForDay.length, 4)
 
               return (
                 <div key={cell.dateKey} className="flex min-w-0 items-center justify-center">
@@ -231,11 +229,11 @@ export default function ScheduleCalendarPanel({
                             className={`h-1 w-1 rounded-full ${getDotClassName(cell.eventsForDay.length, cell.isSelected)}`}
                           />
                         ))}
-                        {eventCount > maxDots ? (
+                        {cell.eventsForDay.length > 4 ? (
                           <span
                             className={`ml-0.5 text-[9px] font-semibold leading-none ${cell.isSelected ? 'text-white' : 'text-deepOceanNavy'}`}
                           >
-                            +{eventCount - maxDots}
+                            +{cell.eventsForDay.length - 4}
                           </span>
                         ) : null}
                       </span>
@@ -247,17 +245,15 @@ export default function ScheduleCalendarPanel({
           </div>
         </div>
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-full min-w-0 flex-col">
           <div className="mb-4">
             <h3 className="font-pretendard text-base font-semibold text-deepOceanNavy">리마인더</h3>
             <p className="mt-0.5 font-pretendard text-xs text-secondary">{selectedLabel}</p>
           </div>
 
-          <div className="flex flex-1 flex-col">
+          <div className="flex-1">
             {isLoadingEvents ? (
-              <div className="flex flex-1 items-center justify-center px-4">
-                <p className="text-center font-pretendard text-sm text-secondary">일정을 불러오는 중…</p>
-              </div>
+              <p className="py-6 text-center font-pretendard text-sm text-secondary">일정을 불러오는 중...</p>
             ) : selectedEvents.length > 0 ? (
               <ul className="divide-y divide-mistSkyBlue/25">
                 {selectedEvents.map((event) => {
@@ -301,11 +297,9 @@ export default function ScheduleCalendarPanel({
                 })}
               </ul>
             ) : (
-              <div className="flex flex-1 items-center justify-center px-4">
-                <p className="text-center font-pretendard text-sm text-secondary">
-                  선택한 날짜의 일정이 없습니다.
-                </p>
-              </div>
+              <p className="py-6 text-center font-pretendard text-sm text-secondary">
+                선택한 날짜의 일정이 없습니다.
+              </p>
             )}
           </div>
 
@@ -323,7 +317,7 @@ export default function ScheduleCalendarPanel({
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 
   if (withCard) {

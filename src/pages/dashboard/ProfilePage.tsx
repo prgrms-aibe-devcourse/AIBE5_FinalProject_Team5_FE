@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Toast from '../../components/common/Toast'
 import { ApiError } from '../../services/ApiError'
 import { clearAuthSession, updateStoredUserProfile } from '../../services/auth'
@@ -25,16 +25,6 @@ import { scheduleInputClassName } from './components/ScheduleEventForm'
 const PROFILE_IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp'
 const PROFILE_IMAGE_MAX_SIZE = 5 * 1024 * 1024
 const NICKNAME_MAX_LENGTH = 30
-
-type ProfileLocationState = {
-  verificationId?: number
-}
-
-function isProfileLocationState(value: unknown): value is ProfileLocationState {
-  if (!value || typeof value !== 'object') return false
-  const verificationId = (value as ProfileLocationState).verificationId
-  return verificationId === undefined || (typeof verificationId === 'number' && !Number.isNaN(verificationId))
-}
 
 type ProfileFormState = {
   nickname: string
@@ -184,7 +174,6 @@ function CertificationRequestListSkeleton() {
 // 내 정보 페이지 (프로필·과정 인증)
 export default function ProfilePage() {
   const navigate = useNavigate()
-  const location = useLocation()
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   // --- 모달·토스트 ---
@@ -251,16 +240,6 @@ export default function ProfilePage() {
   useEffect(() => {
     loadCertificationRequests()
   }, [loadCertificationRequests])
-
-  useEffect(() => {
-    if (!isProfileLocationState(location.state)) return
-
-    const verificationId = location.state.verificationId
-    if (verificationId == null) return
-
-    setDocumentsVerificationId(verificationId)
-    navigate(location.pathname, { replace: true, state: null })
-  }, [location.pathname, location.state, navigate])
 
   useEffect(() => {
     return () => revokeBlobUrl(form.imageUrl)
