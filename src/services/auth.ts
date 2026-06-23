@@ -1,5 +1,6 @@
 import { http } from './http'
 import { clearLegacyTokenStorage } from './authToken'
+import { clearCompareCourses } from './courseCompare'
 import { clearRecentViewedCourses } from './recentViewedCourses'
 
 clearLegacyTokenStorage()
@@ -154,6 +155,7 @@ export function clearAuthSession(): void {
   clearLegacyTokenStorage()
   clearStoredUser()
   clearRecentViewedCourses()
+  clearCompareCourses()
 }
 
 export function saveAuthSession(response: LoginResponse, fallbackEmail?: string): void {

@@ -6,7 +6,6 @@ type SidebarIconName =
   | 'grid'
   | 'pin'
   | 'folder'
-  | 'calendar'
   | 'user'
   | 'headset'
   | 'document'
@@ -48,13 +47,6 @@ function SidebarIcon({ icon }: { icon: SidebarIconName }) {
         <svg {...svgProps} aria-hidden="true">
           <path d="M4 7.5h6l2 2h8v8.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
           <path d="M4 7.5V6a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v1.5" />
-        </svg>
-      )
-    case 'calendar':
-      return (
-        <svg {...svgProps} aria-hidden="true">
-          <rect x="4" y="5" width="16" height="15" rx="2" />
-          <path d="M8 3v4M16 3v4M4 10h16" />
         </svg>
       )
     case 'user':
@@ -118,7 +110,6 @@ const dashboardItems: SideNavbarItem[] = [
   { label: '대시보드', href: '/dashboard', icon: 'grid' },
   { label: '스크랩 목록', href: '/dashboard/bookmarks', icon: 'pin' },
   { label: '내가 쓴 글', href: '/dashboard/posts', icon: 'folder' },
-  { label: '일정', href: '/dashboard/schedule', icon: 'calendar' },
   { label: '내 정보', href: '/dashboard/profile', icon: 'user' },
   { label: '문의', href: '/dashboard/inquiries', icon: 'headset' },
   { label: 'AI 포트폴리오', href: '/dashboard/portfolio', icon: 'document' },
