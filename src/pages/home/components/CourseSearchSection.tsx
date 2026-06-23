@@ -46,7 +46,7 @@ export default function CourseSearchSection() {
                 type="search"
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
-                placeholder="키워드, 과정명 등 입력"
+                placeholder="과정명, 기관명 키워드 등을 입력하세요"
                 aria-label="과정 검색"
                 className="h-17.5 w-full rounded-full border border-[#b9bec6] bg-white pl-6 pr-16 text-[15px] text-deepOceanNavy placeholder:text-[#8b94a3] shadow-[0_1px_3px_rgba(15,23,42,0.04)] outline-none transition-colors focus:border-waterlineBlue font-pretendard"
               />

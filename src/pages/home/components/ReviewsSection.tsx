@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getLatestReviews, type CourseReview } from '../../../services/review.ts'
 import { toAbsoluteUrl } from '../../../utils/toAbsoluteUrl.ts'
-import { truncateTextMiddle } from '../../../utils/truncateText.ts'
 import { reviews } from '../homeData'
+import { HomeCarouselNavShell } from './HomeCarouselNav.tsx'
+import {
+  HOME_CAROUSEL_SLIDE_MS,
+  easeOutCubic,
+  getReviewViewportWidth,
+  getWindowItems,
+  useHomeReviewVisibleCount,
+} from './homeCarouselLayout.ts'
 
 const REVIEW_FETCH_LIMIT = 10
 const ROTATE_INTERVAL_MS = 4000
@@ -53,49 +60,10 @@ function mapMockReviews(): CourseReview[] {
   return base.slice(0, REVIEW_FETCH_LIMIT)
 }
 
-function useVisibleReviewCount() {
-  const [visibleCount, setVisibleCount] = useState(5)
-
-  useEffect(() => {
-    const mqLg = window.matchMedia('(min-width: 1024px)')
-    const mqMd = window.matchMedia('(min-width: 768px)')
-
-    const update = () => {
-      if (mqLg.matches) setVisibleCount(5)
-      else if (mqMd.matches) setVisibleCount(3)
-      else setVisibleCount(1)
-    }
-
-    update()
-    mqLg.addEventListener('change', update)
-    mqMd.addEventListener('change', update)
-    return () => {
-      mqLg.removeEventListener('change', update)
-      mqMd.removeEventListener('change', update)
-    }
-  }, [])
-
-  return visibleCount
-}
-
 function getFeaturedSlot(visibleCount: number) {
   return Math.floor((visibleCount - 1) / 2)
 }
 
-function getWindowReviews(reviewsList: CourseReview[], activeIndex: number, visibleCount: number) {
-  const total = reviewsList.length
-
-  return Array.from({ length: visibleCount }, (_, slot) => {
-    const reviewIndex = (activeIndex + slot) % total
-    return {
-      slot,
-      review: reviewsList[reviewIndex],
-      reviewIndex,
-    }
-  })
-}
-
-const SLIDE_DURATION_MS = 700
 const CARD_HEIGHT = 268
 const ARC_SPACING = CARD_STEP
 
@@ -103,8 +71,12 @@ function formatRating(rating: number) {
   return Number.isInteger(rating) ? String(rating) : rating.toFixed(1)
 }
 
-function formatReviewContent(content: string, featured: boolean) {
-  return truncateTextMiddle(content, featured ? 72 : 44)
+const REVIEW_PREVIEW_MAX_LENGTH = 50
+
+function formatReviewPreview(content: string) {
+  const normalized = content.replace(/\s+/g, ' ').trim()
+  if (normalized.length <= REVIEW_PREVIEW_MAX_LENGTH) return normalized
+  return `${normalized.slice(0, REVIEW_PREVIEW_MAX_LENGTH)}...`
 }
 
 function StarRating({ value, max = 5 }: { value: number; max?: number }) {
@@ -144,10 +116,6 @@ function StarRating({ value, max = 5 }: { value: number; max?: number }) {
       })}
     </div>
   )
-}
-
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3
 }
 
 function getMaxArcDistance(visibleCount: number, featuredSlot: number) {
@@ -220,7 +188,7 @@ function ReviewCard({ review, featured }: { review: CourseReview; featured: bool
 
   return (
     <article
-      className={`flex h-full w-full flex-col overflow-hidden rounded-2xl border text-center transition-[box-shadow,background-color,border-color] duration-700 ${
+      className={`flex h-full w-full flex-col overflow-visible rounded-2xl border text-center transition-[box-shadow,background-color,border-color] duration-700 ${
         featured
           ? 'border-[#d0e0f0] bg-white px-5 pb-5 pt-5 shadow-[0_10px_28px_rgba(52,74,100,0.12)]'
           : 'border-[#e7edf3] bg-white/92 px-4 pb-4 pt-4 shadow-[0_2px_10px_rgba(52,74,100,0.05)] backdrop-blur-sm'
@@ -244,15 +212,15 @@ function ReviewCard({ review, featured }: { review: CourseReview; featured: bool
       </div>
 
       <p
-        className={`mt-3 min-h-0 flex-1 overflow-hidden text-left leading-[1.65] text-[#4a5565] font-pretendard break-words [overflow-wrap:anywhere] ${
-          featured ? 'line-clamp-4 text-[13px]' : 'line-clamp-3 text-xs'
+        className={`mt-3 shrink-0 text-left leading-[1.65] text-[#4a5565] font-pretendard break-words [overflow-wrap:anywhere] ${
+          featured ? 'text-[13px]' : 'text-xs'
         }`}
         title={review.content}
       >
-        &ldquo;{formatReviewContent(review.content, featured)}&rdquo;
+        &ldquo;{formatReviewPreview(review.content)}&rdquo;
       </p>
 
-      <footer className="mt-4 w-full shrink-0 border-t border-[#eef2f6] pt-3">
+      <footer className="mt-auto w-full shrink-0 border-t border-[#eef2f6] pt-3">
         <p
           className={`w-full text-center font-medium text-secondary font-pretendard line-clamp-1 ${
             featured ? 'text-xs' : 'text-[11px]'
@@ -269,7 +237,7 @@ function ReviewCard({ review, featured }: { review: CourseReview; featured: bool
 function ReviewCardSkeleton({ featured }: { featured: boolean }) {
   return (
     <div
-      className={`flex h-full w-full animate-pulse flex-col overflow-hidden rounded-2xl border border-[#e7edf3] bg-white/50 ${
+      className={`flex h-full w-full animate-pulse flex-col overflow-visible rounded-2xl border border-[#e7edf3] bg-white/50 ${
         featured ? 'px-5 pb-5 pt-5' : 'px-4 pb-4 pt-4'
       }`}
       style={{ height: CARD_HEIGHT }}
@@ -293,41 +261,8 @@ function ReviewCardSkeleton({ featured }: { featured: boolean }) {
   )
 }
 
-function CarouselNavButton({
-  direction,
-  onClick,
-  label,
-}: {
-  direction: 'prev' | 'next'
-  onClick: () => void
-  label: string
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="flex h-10 w-10 items-center justify-center text-[#9aafc2] transition-colors hover:text-deepOceanNavy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-waterlineBlue/40"
-    >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        {direction === 'prev' ? <path d="M15 6l-6 6 6 6" /> : <path d="M9 6l6 6-6 6" />}
-      </svg>
-    </button>
-  )
-}
-
 function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
-  const visibleCount = useVisibleReviewCount()
+  const visibleCount = useHomeReviewVisibleCount()
   const [activeIndex, setActiveIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const [animDirection, setAnimDirection] = useState<0 | 1 | -1>(0)
@@ -338,8 +273,8 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
   const total = reviewsList.length
   const featuredSlot = getFeaturedSlot(visibleCount)
   const maxArcDistance = getMaxArcDistance(visibleCount, featuredSlot)
-  const windowReviews = getWindowReviews(reviewsList, activeIndex, visibleCount)
-  const viewportWidth = visibleCount * CARD_STEP - CARD_GAP + 48
+  const windowReviews = getWindowItems(reviewsList, activeIndex, visibleCount)
+  const viewportWidth = getReviewViewportWidth(visibleCount)
 
   const runArcAnimation = useCallback(
     (direction: 1 | -1, onComplete: () => void) => {
@@ -352,7 +287,7 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
       const start = performance.now()
 
       const frame = (now: number) => {
-        const raw = Math.min(1, (now - start) / SLIDE_DURATION_MS)
+        const raw = Math.min(1, (now - start) / HOME_CAROUSEL_SLIDE_MS)
         setProgress(easeOutCubic(raw))
 
         if (raw < 1) {
@@ -414,7 +349,7 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
     return (
       <li
         key={key}
-        className="absolute left-1/2 overflow-hidden will-change-transform"
+        className="absolute left-1/2 overflow-visible will-change-transform"
         style={{
           top: '50%',
           width: CARD_WIDTH,
@@ -434,117 +369,95 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
   }
 
   return (
-    <div className="mt-10 overflow-visible">
-      <div
-        className="relative mx-auto min-h-[23rem] max-w-full overflow-visible px-12 pb-6 pt-8 sm:px-16 md:min-h-[24rem] md:pt-10"
-        aria-live="polite"
-      >
-        {total > 1 && (
-          <>
-            <div className="pointer-events-none absolute left-1 top-1/2 z-40 -translate-y-1/2 sm:left-2">
-              <div className="pointer-events-auto">
-                <CarouselNavButton
-                  direction="prev"
-                  label="이전 후기"
-                  onClick={() => {
-                    pauseUntilRef.current = Date.now() + MANUAL_ROTATE_PAUSE_MS
-                    animatePrev()
-                  }}
-                />
-              </div>
-            </div>
-            <div className="pointer-events-none absolute right-1 top-1/2 z-40 -translate-y-1/2 sm:right-2">
-              <div className="pointer-events-auto">
-                <CarouselNavButton
-                  direction="next"
-                  label="다음 후기"
-                  onClick={() => {
-                    pauseUntilRef.current = Date.now() + MANUAL_ROTATE_PAUSE_MS
-                    animateNext()
-                  }}
-                />
-              </div>
-            </div>
-          </>
-        )}
+    <HomeCarouselNavShell
+      viewportWidth={viewportWidth}
+      showNav={total > 1}
+      onPrev={() => {
+        pauseUntilRef.current = Date.now() + MANUAL_ROTATE_PAUSE_MS
+        animatePrev()
+      }}
+      onNext={() => {
+        pauseUntilRef.current = Date.now() + MANUAL_ROTATE_PAUSE_MS
+        animateNext()
+      }}
+      prevLabel="이전 후기"
+      nextLabel="다음 후기"
+      contentHeight={CARD_HEIGHT + 48}
+    >
+      <ul className="relative h-full w-full" style={{ perspective: '1000px' }}>
+        {prependedReview &&
+          renderArcCard(
+            prependedReview,
+            -(featuredSlot + 1) + progress,
+            `prepend-${prependedReview.reviewId}`,
+          )}
 
-        <div
-          className="relative mx-auto overflow-x-hidden overflow-y-visible py-4"
-          style={{ width: viewportWidth, height: `${CARD_HEIGHT + 48}px`, perspective: '1000px' }}
-        >
-          <ul className="relative h-full w-full">
-            {prependedReview &&
-              renderArcCard(
-                prependedReview,
-                -(featuredSlot + 1) + progress,
-                `prepend-${prependedReview.reviewId}`,
-              )}
+        {windowReviews.map(({ slot, item: review }) => {
+          const baseDistance = slot - featuredSlot
+          const distance =
+            animDirection === 1
+              ? baseDistance - progress
+              : animDirection === -1
+                ? baseDistance + progress
+                : baseDistance
 
-            {windowReviews.map(({ slot, review }) => {
-              const baseDistance = slot - featuredSlot
-              const distance =
-                animDirection === 1
-                  ? baseDistance - progress
-                  : animDirection === -1
-                    ? baseDistance + progress
-                    : baseDistance
+          return renderArcCard(review, distance, `slot-${slot}-${review.reviewId}`)
+        })}
 
-              return renderArcCard(review, distance, `slot-${slot}-${review.reviewId}`)
-            })}
-
-            {enteringReview &&
-              renderArcCard(
-                enteringReview,
-                maxArcDistance + 1 - progress,
-                `enter-${enteringReview.reviewId}`,
-              )}
-          </ul>
-        </div>
-      </div>
-    </div>
+        {enteringReview &&
+          renderArcCard(
+            enteringReview,
+            maxArcDistance + 1 - progress,
+            `enter-${enteringReview.reviewId}`,
+          )}
+      </ul>
+    </HomeCarouselNavShell>
   )
 }
 
 function ReviewsCarouselSkeleton() {
-  const visibleCount = useVisibleReviewCount()
+  const visibleCount = useHomeReviewVisibleCount()
   const featuredSlot = getFeaturedSlot(visibleCount)
   const maxArcDistance = getMaxArcDistance(visibleCount, featuredSlot)
-  const viewportWidth = visibleCount * CARD_STEP - CARD_GAP + 48
+  const viewportWidth = getReviewViewportWidth(visibleCount)
 
   return (
-    <div className="relative mx-auto mt-10 min-h-[23rem] max-w-full overflow-visible px-12 pb-6 pt-8 sm:px-16 md:min-h-[24rem] md:pt-10">
-      <div
-        className="relative mx-auto overflow-x-hidden overflow-y-visible py-4"
-        style={{ width: viewportWidth, height: `${CARD_HEIGHT + 48}px` }}
-      >
-        <ul className="relative h-full w-full">
-          {Array.from({ length: visibleCount }, (_, slot) => {
-            const distance = slot - featuredSlot
-            const arcStyle = getArcTransform(distance, maxArcDistance)
-            const featured = isFeaturedDistance(distance)
+    <HomeCarouselNavShell
+      viewportWidth={viewportWidth}
+      showNav={false}
+      onPrev={() => {}}
+      onNext={() => {}}
+      prevLabel="이전 후기"
+      nextLabel="다음 후기"
+      contentHeight={CARD_HEIGHT + 48}
+    >
+      <ul className="relative h-full w-full">
+        {Array.from({ length: visibleCount }, (_, slot) => {
+          const distance = slot - featuredSlot
+          const arcStyle = getArcTransform(distance, maxArcDistance)
+          const featured = isFeaturedDistance(distance)
 
-            return (
-              <li
-                key={slot}
-                className="absolute left-1/2 overflow-hidden"
-                style={{
-                  top: '46%',
-                  width: CARD_WIDTH,
-                  height: CARD_HEIGHT,
-                  marginLeft: -CARD_WIDTH / 2,
-                  marginTop: -CARD_HEIGHT / 2,
-                  opacity: arcStyle.opacity,
-                  transform: arcStyle.transform,
-                  zIndex: arcStyle.zIndex,
-                }}
-              >
-                <ReviewCardSkeleton featured={featured} />
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-    </div>
+          return (
+            <li
+              key={slot}
+              className="absolute left-1/2 overflow-visible"
+              style={{
+                top: '46%',
+                width: CARD_WIDTH,
+                height: CARD_HEIGHT,
+                marginLeft: -CARD_WIDTH / 2,
+                marginTop: -CARD_HEIGHT / 2,
+                opacity: arcStyle.opacity,
+                transform: arcStyle.transform,
+                zIndex: arcStyle.zIndex,
+              }}
+            >
+              <ReviewCardSkeleton featured={featured} />
+            </li>
+          )
+        })}
+      </ul>
+    </HomeCarouselNavShell>
   )
 }
 
