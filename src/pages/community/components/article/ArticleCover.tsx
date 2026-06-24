@@ -59,11 +59,12 @@ export function ArticleCategoryBadge({ category }: { category: string }) {
   )
 }
 
-function ArticleCoverPlaceholder({ article, className, showCategory = false }: ArticleCoverProps) {
+function ArticleCoverPlaceholder({ article, className }: Pick<ArticleCoverProps, 'article' | 'className'>) {
   const { gradient, accent, glow } = getPlaceholderStyle(article.category)
+  const sourceLabel = article.category.trim() || '아티클'
 
   return (
-    <div className={`relative overflow-hidden ${className ?? ''}`} aria-hidden="true">
+    <div className={`relative overflow-hidden ${className ?? ''}`}>
       <div className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-opacity duration-500 group-hover:opacity-95`} />
 
       <div
@@ -100,11 +101,15 @@ function ArticleCoverPlaceholder({ article, className, showCategory = false }: A
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-deepOceanNavy/[0.06] via-transparent to-white/20" />
 
-      {showCategory ? (
-        <div className="absolute bottom-3 left-3 z-10">
-          <ArticleCategoryBadge category={article.category} />
+      {/* 소스명 — 과정 카드 기관명 칩과 동일 패턴 */}
+      <div className="absolute inset-0 z-10 flex items-center justify-center px-2 sm:px-3">
+        <div className="flex max-w-[92%] items-center justify-center rounded-xl bg-white/85 px-2.5 py-2 shadow-sm ring-1 ring-white/60 backdrop-blur-sm sm:rounded-2xl sm:px-3.5 sm:py-2.5">
+          <span className="line-clamp-3 text-center text-[10px] font-bold leading-snug tracking-tight text-deepOceanNavy sm:text-xs md:text-sm">
+            <span className="sr-only">출처 </span>
+            {sourceLabel}
+          </span>
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
@@ -115,7 +120,7 @@ export default function ArticleCover({ article, className, showCategory = false 
   const showThumbnail = Boolean(thumbnailUrl) && !imageError
 
   if (!showThumbnail) {
-    return <ArticleCoverPlaceholder article={article} className={className} showCategory={showCategory} />
+    return <ArticleCoverPlaceholder article={article} className={className} />
   }
 
   return (
