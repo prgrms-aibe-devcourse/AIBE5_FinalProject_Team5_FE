@@ -18,7 +18,7 @@ interface KakaoTokenResponse {
 
 /** 1단계: 카카오 로그인 리다이렉트 (code 발급) */
 export function redirectToKakaoLogin(): void {
-  const clientId = getEnv('KAKAO_CLIENT_ID')
+  const clientId = getEnv('VITE_KAKAO_CLIENT_ID')
   const redirectUri = getKakaoRedirectUri()
 
   if (!clientId) {
@@ -37,11 +37,11 @@ export function redirectToKakaoLogin(): void {
 
 /** 2단계: 카카오 id_token 발급 (code → id_token 교환) */
 export async function exchangeKakaoCodeForIdToken(code: string): Promise<string> {
-  const clientId = getEnv('KAKAO_CLIENT_ID')
+  const clientId = getEnv('VITE_KAKAO_CLIENT_ID')
   const redirectUri = getKakaoRedirectUri()
 
   if (!clientId) {
-    throw new Error('Kakao OAuth 환경 변수(KAKAO_CLIENT_ID)를 확인해주세요.')
+    throw new Error('Kakao OAuth 환경 변수(VITE_KAKAO_CLIENT_ID)를 확인해주세요.')
   }
 
   const res = await fetch(KAKAO_TOKEN_URL, {

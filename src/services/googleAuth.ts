@@ -20,7 +20,7 @@ interface GoogleTokenResponse {
 
 /* 1 단계: 구글 로그인 리다이렉트 (코드발급) */
 export function redirectToGoogleLogin(): void {
-  const clientId = getEnv('GOOGLE_CLIENT_ID')
+  const clientId = getEnv('VITE_GOOGLE_CLIENT_ID')
   const redirectUri = getGoogleRedirectUri()
 
   if (!clientId) {
@@ -44,12 +44,12 @@ export function redirectToGoogleLogin(): void {
 
 /** 2단계: 구글 id_token 발급 (code → id_token 교환) */
 export async function exchangeGoogleCodeForIdToken(code: string): Promise<string> {
-  const clientId = getEnv('GOOGLE_CLIENT_ID')
-  const clientSecret = getEnv('GOOGLE_CLIENT_SECRET')
+  const clientId = getEnv('VITE_GOOGLE_CLIENT_ID')
+  const clientSecret = getEnv('VITE_GOOGLE_CLIENT_SECRET')
   const redirectUri = getGoogleRedirectUri()
 
   if (!clientId || !clientSecret) {
-    throw new Error('Google OAuth 환경 변수(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)를 확인해주세요.')
+    throw new Error('Google OAuth 환경 변수(VITE_GOOGLE_CLIENT_ID, VITE_GOOGLE_CLIENT_SECRET)를 확인해주세요.')
   }
 
   // 구글 id_token 교환 요청
