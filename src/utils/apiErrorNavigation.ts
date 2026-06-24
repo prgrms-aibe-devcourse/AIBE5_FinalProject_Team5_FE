@@ -9,6 +9,12 @@ const NOT_FOUND_CODES = new Set([
   'COMMENT_NOT_FOUND',
 ])
 
+const ERROR_PAGE_PATHS = new Set(['/error', '/500', '/404', '/403'])
+
+export function isOnErrorPage(): boolean {
+  return ERROR_PAGE_PATHS.has(window.location.pathname)
+}
+
 export function isNotFoundApiError(error: ApiError): boolean {
   return error.status === 404 || NOT_FOUND_CODES.has(error.code) || error.code.endsWith('_NOT_FOUND')
 }
@@ -37,6 +43,8 @@ export function getErrorPagePath(error: unknown): '/403' | '/404' | '/error' | n
 }
 
 export function redirectToErrorPage(error: unknown): boolean {
+  if (isOnErrorPage()) return false
+
   const path = getErrorPagePath(error)
   if (!path) return false
 

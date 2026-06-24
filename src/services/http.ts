@@ -1,5 +1,5 @@
 import { ApiError, isExpiredAuthTokenError } from './ApiError'
-import { getErrorPagePath } from '../utils/apiErrorNavigation'
+import { getErrorPagePath, isOnErrorPage } from '../utils/apiErrorNavigation'
 import { setTokenExpiredLogoutFlash } from './authFlash'
 import type { ApiResponse } from './apiTypes'
 
@@ -68,7 +68,7 @@ function maybeRedirectForApiError(
     errorPath = '/error'
   }
 
-  if (errorPath) {
+  if (errorPath && !isOnErrorPage()) {
     window.location.replace(errorPath)
   }
 }
