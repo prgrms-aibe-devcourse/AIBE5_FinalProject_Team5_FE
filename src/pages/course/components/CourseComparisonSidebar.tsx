@@ -4,7 +4,7 @@ import CourseThumbnail from './CourseThumbnail.tsx'
 interface CourseComparisonSidebarProps {
   selectedCourses: CompareCourseItem[]
   maxCount: number
-  onRemove: (courseId: string) => void
+  onRemove: (courseSessionId: number) => void
   onCompare: () => void
 }
 
@@ -34,10 +34,13 @@ export default function CourseComparisonSidebar({
             비교할 과정을 선택해 주세요
           </li>
         ) : ( // 비교 목록이 있을 때
-          selectedCourses.map((course) => ( // 비교 목록 아이템 렌더링
-            <li key={course.id} className="relative rounded-xl border border-mistSkyBlue/50 bg-foamWhite/30 p-3 pr-8">
+          selectedCourses.map((course) => (
+            <li key={course.courseSessionId} className="relative rounded-xl border border-mistSkyBlue/50 bg-foamWhite/30 p-3 pr-8">
               {/* 제거 버튼 */}
-              <button type="button" aria-label={`${course.title} 제거`} onClick={() => onRemove(course.id)} 
+              <button
+                type="button"
+                aria-label={`${course.title} 제거`}
+                onClick={() => onRemove(course.courseSessionId)} 
                 className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-softAquaBlue transition-colors hover:bg-white hover:text-deepOceanNavy"
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -46,7 +49,13 @@ export default function CourseComparisonSidebar({
               </button>
               {/* 과정 정보 */}
               <div className="flex items-center gap-3">
-                <CourseThumbnail variant="square" imageUrl={course.logoUrl} company={course.company} seed={course.id} alt="" />
+                <CourseThumbnail
+                  variant="square"
+                  imageUrl={course.logoUrl}
+                  company={course.company}
+                  seed={String(course.courseSessionId)}
+                  alt=""
+                />
                 {/* 과정 제목 + 기관명 */}
                 <div className="min-w-0 flex-1">
                   <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-deepOceanNavy">

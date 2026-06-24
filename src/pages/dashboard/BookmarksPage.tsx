@@ -31,7 +31,7 @@ export default function BookmarksPage() {
   const { toggleBookmark } = useBookmarkSessions()
   const {
     selectedCourses,
-    selectedIds,
+    selectedSessionIds,
     canAddMore,
     toggleCompareBookmark,
     removeFromCompare,
@@ -161,7 +161,7 @@ export default function BookmarksPage() {
                   <li key={course.bookmarkId}>
                     <BookmarkCourseRowCard
                       course={course}
-                      isInCompare={selectedIds.has(String(course.id))}
+                      isInCompare={selectedSessionIds.has(course.courseSessionId)}
                       canAddToCompare={canAddMore}
                       isBookmarked
                       onToggleCompare={() => toggleCompareBookmark(course)}

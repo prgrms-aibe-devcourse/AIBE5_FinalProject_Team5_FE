@@ -75,7 +75,7 @@ export default function CourseSearchPage() {
 
   const {
     selectedCourses,
-    selectedIds,
+    selectedSessionIds,
     canAddMore,
     toggleCompareCourse,
     removeFromCompare,
@@ -208,10 +208,13 @@ export default function CourseSearchPage() {
             ) : (
               <div className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4">
                 {courses.map((course) => (
-                  <div key={course.id} className="flex min-w-0 justify-center">
+                  <div key={course.courseSessionId ?? course.id} className="flex min-w-0 justify-center">
                     <CourseCard
                       course={course}
-                      isSelected={selectedIds.has(course.id)}
+                      isSelected={
+                        course.courseSessionId != null &&
+                        selectedSessionIds.has(course.courseSessionId)
+                      }
                       isBookmarked={isBookmarked(course.courseSessionId)}
                       isBookmarkPending={isPending(course.courseSessionId)}
                       canAddToCompare={canAddMore}
