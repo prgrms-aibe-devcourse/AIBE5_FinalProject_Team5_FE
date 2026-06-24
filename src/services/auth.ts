@@ -116,26 +116,6 @@ export async function forgotPassword(body: PasswordForgotRequest): Promise<Passw
   return http.post<PasswordForgotResponse>('/api/auth/password/forgot', body)
 }
 
-/** forgot 응답의 resetUrl / resetToken으로 SPA 이동 경로 생성 */
-export function getPasswordResetNavigationPath(result: PasswordForgotResponse): string | null {
-  const resetUrl = result.resetUrl?.trim()
-  if (resetUrl) {
-    try {
-      const url = new URL(resetUrl, window.location.origin)
-      return `${url.pathname}${url.search}${url.hash}`
-    } catch {
-      if (resetUrl.startsWith('/')) return resetUrl
-    }
-  }
-
-  const resetToken = result.resetToken?.trim()
-  if (resetToken) {
-    return `/reset-password?token=${encodeURIComponent(resetToken)}`
-  }
-
-  return null
-}
-
 /** [비밀번호 재설정_요청]
  * POST /api/auth/password/reset */
 export interface PasswordResetRequest {
