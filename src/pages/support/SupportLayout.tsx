@@ -21,14 +21,16 @@ export default function SupportLayout() {
           <SupportHero contact={supportContactInfo} />
 
           {/* 고객센터 콘텐츠 */}
-          <div>
-            {/* 고객센터 탭 */}
-            <div className="border-b border-mistSkyBlue/50">
-              <SupportTabs />
+          <div className="flex min-w-0 flex-1 flex-col gap-8">
+            <div className="border-b border-mistSkyBlue/50 pb-4 md:pb-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                <div className="min-w-0 flex-1">
+                  <SupportTabs />
+                </div>
+              </div>
             </div>
 
-            {/* 고객센터 콘텐츠 */}
-            <div className="pt-8" role="tabpanel">
+            <div role="tabpanel">
               <Outlet />
             </div>
           </div>

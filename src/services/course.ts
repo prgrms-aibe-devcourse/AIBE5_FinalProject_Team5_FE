@@ -408,9 +408,9 @@ function isStatMissing(value: number | null | undefined): boolean {
   return value === null || value === undefined || value === 0
 }
 
-function formatScore(score: number | null | undefined): string {
+function formatSatisfactionScore(score: number | null | undefined): string {
   if (isStatMissing(score)) return COURSE_STAT_PLACEHOLDER
-  return String(score)
+  return `${score}%`
 }
 
 function formatEmploymentRate(rate: number | null | undefined): string {
@@ -450,7 +450,7 @@ export function toCourseCardVM(item: CourseListItem): Course {
     location: formatAreaCode(item.trngAreaCd),
     price: formatCoursePrice(item.selfPaymentAmount),
     dateRange: formatDateRange(item.traStartDate, item.traEndDate),
-    satisfaction: formatScore(item.stdgScor),
+    satisfaction: formatSatisfactionScore(item.stdgScor),
     employmentRate: formatEmploymentRate(item.employmentRate),
     rating: formatRating(item.reviewRating),
     logoUrl: item.profileImageUrl ?? undefined,
@@ -513,7 +513,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
     location: formatAreaCode(detail.trngAreaCd),
     price: formatCoursePrice(detail.selfPaymentAmount),
     dateRange,
-    satisfaction: formatScore(detail.stdgScor),
+    satisfaction: formatSatisfactionScore(detail.stdgScor),
     satisfactionOutOf5: stdgScorToFivePoint(detail.stdgScor),
     employmentRate,
     rating: '-',
