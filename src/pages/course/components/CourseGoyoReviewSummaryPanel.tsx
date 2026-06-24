@@ -224,31 +224,35 @@ export default function CourseGoyoReviewSummaryPanel({
           {viewState === 'login_required' || viewState === 'error' ? (
             <div className="flex flex-col items-center gap-3 py-10">
               {viewState === 'login_required' ? (
-                <InfoNotice>
-                  <p>고용 24 리뷰 요약은 로그인 후 확인할 수 있습니다.</p>
+                <div className="flex flex-col items-center py-2 text-center">
+                  <p className="text-sm font-semibold text-deepOceanNavy">
+                    고용 24 리뷰 요약은 로그인 후 확인할 수 있습니다.
+                  </p>
+                  <p className="mt-1 text-xs text-secondary">로그인 후 AI 요약 결과를 확인해 보세요.</p>
                   <Link
                     to="/login"
-                    className="mt-2 inline-flex items-center gap-1 font-semibold text-waterlineBlue transition-colors hover:text-deepOceanNavy"
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-waterlineBlue transition-colors hover:text-deepOceanNavy"
                   >
                     로그인하러 가기
                     <span aria-hidden="true">→</span>
                   </Link>
-                </InfoNotice>
-              ) : null}
-
-              {viewState === 'error' ? (
-                <div className="w-full rounded-lg border border-red-200/80 bg-red-50/80 px-4 py-3 text-sm text-red-800">
-                  {errorMessage}
                 </div>
               ) : null}
 
-              <button
-                type="button"
-                onClick={() => void handleFetchSummary()}
-                className="inline-flex items-center justify-center rounded-lg border border-dashed border-waterlineBlue/50 bg-waterlineBlue/8 px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:bg-waterlineBlue/12"
-              >
-                AI 요약 불러오기
-              </button>
+              {viewState === 'error' ? (
+                <>
+                  <div className="w-full rounded-lg border border-red-200/80 bg-red-50/80 px-4 py-3 text-sm text-red-800">
+                    {errorMessage}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void handleFetchSummary()}
+                    className="inline-flex items-center justify-center rounded-lg border border-dashed border-waterlineBlue/50 bg-waterlineBlue/8 px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:border-waterlineBlue hover:bg-waterlineBlue/12"
+                  >
+                    AI 요약 불러오기
+                  </button>
+                </>
+              ) : null}
             </div>
           ) : null}
 
