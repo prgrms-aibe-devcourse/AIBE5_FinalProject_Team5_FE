@@ -78,7 +78,7 @@ export default function CourseCard({
       tabIndex={onOpenDetail ? 0 : undefined}
       onClick={onOpenDetail ? handleCardClick : undefined}
       onKeyDown={onOpenDetail ? handleCardKeyDown : undefined}
-      className={`glass-card flex h-full w-full origin-center flex-col rounded-[1.75rem] px-5 pb-5 pt-4 font-pretendard transition-[transform,box-shadow] duration-200 ease-out hover:scale-[1.02] ${
+      className={`glass-card flex h-full w-full origin-center flex-col rounded-[1.75rem] px-5 pb-5 pt-4 font-pretendard transition duration-600 ease-out hover:scale-[1.05] ${
         isSelected ? 'glass-card--selected' : ''
       } ${
         onOpenDetail

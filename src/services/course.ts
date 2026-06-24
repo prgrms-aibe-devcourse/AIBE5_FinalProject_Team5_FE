@@ -321,7 +321,7 @@ export function toCourseListParams(
   keyword: string,
   currentPage: number,
   sortKey: CourseSortKey = 'latest',
-  size = 9,
+  size = 12,
 ): CourseListParams {
   const category = filterValues.category
   const price = filterValues.price

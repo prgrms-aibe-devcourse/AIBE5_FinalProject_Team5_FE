@@ -51,7 +51,7 @@ const profileButtonClass =
   'font-pretendard flex max-w-full items-center gap-2 text-base font-semibold text-deepOceanNavy transition-colors hover:text-waterlineBlue'
 
 const dropdownItemClass =
-  'font-pretendard block px-4 py-2 text-center text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite'
+  'font-pretendard mx-1.5 block rounded-lg px-4 py-2 text-center text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite'
 
 const logoutButtonClass =
   'font-pretendard w-full rounded border border-deepOceanNavy px-3 py-1.5 text-sm text-deepOceanNavy transition-colors hover:bg-foamWhite'

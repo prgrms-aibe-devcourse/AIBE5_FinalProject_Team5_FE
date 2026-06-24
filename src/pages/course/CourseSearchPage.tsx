@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
@@ -20,6 +20,17 @@ function buildInitialFilterValues(): Record<string, string> {
     acc[filter.id] = filter.options[0]?.value ?? ''
     return acc
   }, {})
+}
+
+/** 상세 진입 직전 페이지 번호 보관 키 (뒤로 가기 복원용) */
+const SAVED_PAGE_KEY = 'courseSearch:savedPage'
+
+/** 상세에서 돌아온 경우에만 저장된 페이지를 꺼내 복원하고, 키는 비운다. */
+function consumeSavedPage(): number {
+  const raw = sessionStorage.getItem(SAVED_PAGE_KEY)
+  sessionStorage.removeItem(SAVED_PAGE_KEY)
+  const page = raw ? Number.parseInt(raw, 10) : NaN
+  return Number.isFinite(page) && page >= 1 ? page : 1
 }
 
 export default function CourseSearchPage() {
@@ -53,7 +64,8 @@ export default function CourseSearchPage() {
     return initial
   })
   const [sortKey, setSortKey] = useState<CourseSortKey>('latest')
-  const [currentPage, setCurrentPage] = useState(1)
+  // 상세에서 뒤로 가기로 돌아온 경우 저장된 페이지를 복원 (없으면 1)
+  const [currentPage, setCurrentPage] = useState(() => consumeSavedPage())
 
   const [courses, setCourses] = useState<Course[]>([])
   const [totalElements, setTotalElements] = useState(0)
@@ -70,8 +82,16 @@ export default function CourseSearchPage() {
   } = useCompareCourses()
   const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
 
+  // 마운트 시점에는 searchParams 동기화 효과가 페이지를 1로 덮어쓰지 않도록 건너뛴다 (복원된 페이지 보존)
+  const skipSearchParamsSync = useRef(true)
+
   // Sync state when URL query parameters change (e.g. from back/forward navigation or clicking header)
   useEffect(() => {
+    if (skipSearchParamsSync.current) {
+      skipSearchParamsSync.current = false
+      return
+    }
+
     const q = searchParams.get('q') || searchParams.get('keyword') || ''
     setKeyword(q)
     setSearchKeyword(q)
@@ -186,7 +206,7 @@ export default function CourseSearchPage() {
                 검색 결과가 없습니다.
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-2 sm:gap-5 xl:grid-cols-3 xl:gap-6">
+              <div className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4">
                 {courses.map((course) => (
                   <div key={course.id} className="flex min-w-0 justify-center">
                     <CourseCard
@@ -199,6 +219,8 @@ export default function CourseSearchPage() {
                       onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
                       onOpenDetail={(c) => {
                         if (c.courseSessionId == null) return
+                        // 뒤로 가기 복원을 위해 현재 페이지 저장
+                        sessionStorage.setItem(SAVED_PAGE_KEY, String(currentPage))
                         navigate(`/courses/${c.courseSessionId}`)
                       }}
                     />

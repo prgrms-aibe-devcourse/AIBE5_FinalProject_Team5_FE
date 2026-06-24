@@ -12,7 +12,11 @@ import {
   useHomeCarouselBreakpointCounts,
 } from './homeCarouselLayout.ts'
 
-const COURSE_CARD_HEIGHT = 320
+/** 이미지 아래 본문(타이틀·기관·정보·뱃지) 영역 고정 높이 */
+const COURSE_CARD_CONTENT_HEIGHT = 204
+/** 썸네일 비율(3:2)에 맞춘 이미지 영역 높이 = 카드 폭 * 2/3 */
+const getCardImageHeight = (cardWidth: number) => Math.round((cardWidth * 2) / 3)
+const getCardHeight = (cardWidth: number) => getCardImageHeight(cardWidth) + COURSE_CARD_CONTENT_HEIGHT
 const HOME_POPULAR_INITIAL_SIZE = 10
 const POPULAR_ROTATE_INTERVAL_MS = 4000
 const POPULAR_MANUAL_ROTATE_PAUSE_MS = 6000
@@ -78,7 +82,17 @@ function CourseStatBadge({
   )
 }
 
-function PopularCourseCard({ course, cardWidth }: { course: Course; cardWidth: number }) {
+function PopularCourseCard({
+  course,
+  cardWidth,
+  cardHeight,
+  imageHeight,
+}: {
+  course: Course
+  cardWidth: number
+  cardHeight: number
+  imageHeight: number
+}) {
   const navigate = useNavigate()
 
   const goToCourse = () => {
@@ -89,7 +103,7 @@ function PopularCourseCard({ course, cardWidth }: { course: Course; cardWidth: n
 
   return (
     <article
-      style={{ width: cardWidth, height: COURSE_CARD_HEIGHT }}
+      style={{ width: cardWidth, height: cardHeight }}
       tabIndex={0}
       onClick={goToCourse}
       onKeyDown={(e) => {
@@ -100,7 +114,7 @@ function PopularCourseCard({ course, cardWidth }: { course: Course; cardWidth: n
       }}
       className="flex shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e7edf3] bg-white shadow-[0_2px_10px_rgba(52,74,100,0.05)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(52,74,100,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-waterlineBlue"
     >
-      <div className="relative h-[7.25rem] shrink-0 overflow-hidden bg-foamWhite">
+      <div style={{ height: imageHeight }} className="relative shrink-0 overflow-hidden bg-foamWhite">
         <CourseThumbnail imageUrl={course.logoUrl} company={course.company} seed={course.id} />
       </div>
 
@@ -129,13 +143,21 @@ function PopularCourseCard({ course, cardWidth }: { course: Course; cardWidth: n
   )
 }
 
-function PopularCourseCardSkeleton({ cardWidth }: { cardWidth: number }) {
+function PopularCourseCardSkeleton({
+  cardWidth,
+  cardHeight,
+  imageHeight,
+}: {
+  cardWidth: number
+  cardHeight: number
+  imageHeight: number
+}) {
   return (
     <div
-      style={{ width: cardWidth, height: COURSE_CARD_HEIGHT }}
+      style={{ width: cardWidth, height: cardHeight }}
       className="animate-pulse shrink-0 overflow-hidden rounded-2xl border border-[#e7edf3] bg-white/50"
     >
-      <div className="h-[7.25rem] bg-gray-200" />
+      <div style={{ height: imageHeight }} className="bg-gray-200" />
       <div className="space-y-3 px-4 py-4">
         <div className="h-4 w-4/5 rounded bg-gray-200" />
         <div className="h-3 w-1/2 rounded bg-gray-200" />
@@ -164,6 +186,8 @@ function getPageCourses(courses: Course[], pageIndex: number, visibleCount: numb
 function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
   const { review: reviewVisibleCount, course: courseVisibleCount } = useHomeCarouselBreakpointCounts()
   const { viewportWidth, cardWidth, cardStep } = getCourseCarouselMetrics(courseVisibleCount, reviewVisibleCount)
+  const imageHeight = getCardImageHeight(cardWidth)
+  const cardHeight = getCardHeight(cardWidth)
 
   const [activePageIndex, setActivePageIndex] = useState(0)
   const [progress, setProgress] = useState(0)
@@ -278,7 +302,7 @@ function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
         transform: `translate3d(${getSlideX(slot, pageOffsetPages)}px, 0, 0)`,
       }}
     >
-      <PopularCourseCard course={course} cardWidth={cardWidth} />
+      <PopularCourseCard course={course} cardWidth={cardWidth} cardHeight={cardHeight} imageHeight={imageHeight} />
     </li>
   )
 
@@ -297,7 +321,7 @@ function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
         }}
         prevLabel="이전 과정"
         nextLabel="다음 과정"
-        contentHeight={COURSE_CARD_HEIGHT + 32}
+        contentHeight={cardHeight + 32}
       >
         <ul className="relative mx-auto h-full" style={{ width: viewportWidth }}>
           {prependedCourses.map(({ slot, item, itemIndex }) =>
@@ -339,6 +363,8 @@ function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
 function PopularCoursesCarouselSkeleton() {
   const { review: reviewVisibleCount, course: courseVisibleCount } = useHomeCarouselBreakpointCounts()
   const { viewportWidth, cardWidth, cardStep } = getCourseCarouselMetrics(courseVisibleCount, reviewVisibleCount)
+  const imageHeight = getCardImageHeight(cardWidth)
+  const cardHeight = getCardHeight(cardWidth)
   const trackWidth = courseVisibleCount * cardStep - HOME_CAROUSEL_GAP
   const trackOffset = (viewportWidth - trackWidth) / 2
 
@@ -350,7 +376,7 @@ function PopularCoursesCarouselSkeleton() {
       onNext={() => {}}
       prevLabel="이전 과정"
       nextLabel="다음 과정"
-      contentHeight={COURSE_CARD_HEIGHT + 32}
+      contentHeight={cardHeight + 32}
     >
       <ul className="relative mx-auto h-full" style={{ width: viewportWidth }}>
         {Array.from({ length: courseVisibleCount }, (_, slot) => (
@@ -359,7 +385,7 @@ function PopularCoursesCarouselSkeleton() {
             className="absolute top-0"
             style={{ transform: `translate3d(${trackOffset + slot * cardStep}px, 0, 0)` }}
           >
-            <PopularCourseCardSkeleton cardWidth={cardWidth} />
+            <PopularCourseCardSkeleton cardWidth={cardWidth} cardHeight={cardHeight} imageHeight={imageHeight} />
           </li>
         ))}
       </ul>
