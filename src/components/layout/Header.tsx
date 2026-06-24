@@ -14,11 +14,11 @@ const communityLinks = [
 
 const userMenuLinks = [
   { label: '대시보드', to: '/dashboard' },
+  { label: '내 정보', to: '/dashboard/profile' },
   { label: '스크랩 목록', to: '/dashboard/bookmarks' },
   { label: '내가 쓴 글', to: '/dashboard/posts' },
-  { label: '내 정보', to: '/dashboard/profile' },
-  { label: '문의', to: '/dashboard/inquiries' },
   { label: 'AI 포트폴리오', to: '/dashboard/portfolio' },
+  { label: '문의', to: '/dashboard/inquiries' },
 ]
 
 const adminMenuLinks = [
