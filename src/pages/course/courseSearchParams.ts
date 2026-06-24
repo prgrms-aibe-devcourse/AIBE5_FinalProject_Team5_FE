@@ -1,5 +1,5 @@
 import type { CourseSortKey, FieldCategory } from '../../services/course.ts'
-import { COURSE_FILTERS } from './data/mockCourses.ts'
+import { COURSE_FILTERS } from './data/courseFilters.ts'
 
 const FILTER_ALL = 'all'
 const DEFAULT_SORT: CourseSortKey = 'latest'

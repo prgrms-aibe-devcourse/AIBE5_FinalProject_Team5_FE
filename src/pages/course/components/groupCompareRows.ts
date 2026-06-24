@@ -1,5 +1,5 @@
 import type { CourseDetail } from '../../../services/course.ts'
-import type { CompareTableRow } from '../data/mockCourseCompare.ts'
+import type { CompareTableRow } from '../data/courseCompareRows.ts'
 
 export interface CompareFieldRow {
   label: string

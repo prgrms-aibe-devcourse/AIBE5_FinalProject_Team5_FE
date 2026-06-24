@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { buildPriorKnowledgeConicGradient } from '../data/mockCourseReviews.ts'
 import {
+  buildPriorKnowledgeConicGradient,
   createEmptyVerifiedReviewStatistics,
   getVerifiedReviewStatistics,
   type VerifiedReviewStatistics,

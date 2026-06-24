@@ -4,7 +4,7 @@ import type { CourseDetail } from '../../../services/course.ts'
 import { isMissingDisplayValue } from '../../../services/course.ts'
 
 import type { VerifiedReviewStatistics } from '../../../services/review.ts'
-import { COMPARE_TABLE_ROWS } from '../data/mockCourseCompare.ts'
+import { COMPARE_TABLE_ROWS } from '../data/courseCompareRows.ts'
 import type { CompareLayoutConfig } from './compareLayout.ts'
 import { CompareSectionIcon } from './compareSectionIcons.tsx'
 import { groupCompareRows } from './groupCompareRows.ts'
