@@ -5,7 +5,7 @@ import AuthButton from './components/AuthButton.tsx'
 import LoginVisualPanel from './components/LoginVisualPanel.tsx'
 import AuthExitButton from './components/AuthExitButton.tsx'
 import { EMAIL_INVALID_MESSAGE, isValidEmail } from '../../utils/validation.ts'
-import { forgotPassword, getPasswordResetNavigationPath } from '../../services/auth.ts'
+import { forgotPassword } from '../../services/auth.ts'
 import { ApiError } from '../../services/ApiError.ts'
 
 /** 비밀번호 찾기 — 재설정 안내 메일 발송 요청 */
@@ -32,12 +32,7 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true)
 
     try {
-      const result = await forgotPassword({ email: email.trim() })
-      const resetPath = getPasswordResetNavigationPath(result)
-      if (resetPath) {
-        navigate(resetPath, { replace: true })
-        return
-      }
+      await forgotPassword({ email: email.trim() })
       setIsSubmitted(true)
     } catch (error) {
       setSubmitError(
@@ -62,16 +57,15 @@ export default function ForgotPasswordPage() {
             <h1 className="mb-3 text-center text-2xl font-semibold text-deepOceanNavy">
               비밀번호 재설정
             </h1>
-            <p className="mb-8 text-center text-sm text-softAquaBlue">
-              가입 시 사용한 이메일을 입력하면 비밀번호 재설정 안내를 보내 드립니다.
-            </p>
-
             {isSubmitted ? (
               <div className="space-y-6 text-center">
-                <p className="text-sm leading-relaxed text-deepOceanNavy">
-                  입력하신 이메일로 비밀번호 재설정 안내를 보냈습니다.
+                <p className="text-base leading-relaxed text-deepOceanNavy">
+                  가입 이메일로 비밀번호 재설정 URL을 전송드렸습니다.
                   <br />
-                  메일함을 확인해 주세요.
+                  해당 URL을 통해 접속해 주세요.
+                </p>
+                <p className="text-xs font-medium leading-relaxed text-waterlineBlue">
+                  전송된 URL의 유효시간은 3분입니다. 해당 시간 내에 접속해 새 비밀번호를 설정해 주세요.
                 </p>
                 <AuthButton
                   type="button"
