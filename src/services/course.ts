@@ -222,6 +222,7 @@ export interface CourseListParams {
   page?: number // 0-based (BE 규격)
   size?: number
   sort?: string
+  prioritizeFull?: boolean
 }
 
 /** BE 분야 카테고리 목록 (fieldCategory 필터 옵션) */
@@ -337,6 +338,7 @@ export function toCourseListParams(
     page: currentPage - 1,
     size,
     sort: sortKey,
+    prioritizeFull: true,
   }
 }
 
