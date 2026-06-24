@@ -32,6 +32,23 @@ function SpecRow({ label, value }: { label: string; value: string }) {
   )
 }
 
+/** 기수 뱃지 — glass-card·과정 상세 필과 동일한 글래스 톤 */
+function BatchBadge({ batch }: { batch: string }) {
+  const unavailable = batch === '-' || isCourseStatPlaceholder(batch)
+
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold leading-none shadow-[0_2px_8px_rgba(52,74,100,0.06)] backdrop-blur-sm ${
+        unavailable
+          ? 'border-mistSkyBlue/35 bg-white/25 text-secondary/55'
+          : 'border-mistSkyBlue/45 bg-white/45 text-waterlineBlue'
+      }`}
+    >
+      {batch}
+    </span>
+  )
+}
+
 /** 통계 1칸 — 라벨(위) / 값(아래) */
 function StatCell({ label, value }: { label: string; value: string }) {
   const unavailable = isCourseStatPlaceholder(value)
@@ -86,11 +103,9 @@ export default function CourseCard({
           : ''
       }`}
     >
-      {/* 상단 바: 지역 태그 / 액션 */}
+      {/* 상단 바: 기수 뱃지 / 액션 */}
       <div className="flex items-center justify-between border-b border-mistSkyBlue/60 pb-3">
-        <span className="truncate text-[0.625rem] uppercase tracking-[0.2em] text-secondary">
-          {course.location || 'COURSE'}
-        </span>
+        <BatchBadge batch={course.batch} />
         <div className="ml-2 flex shrink-0 gap-1.5">
           <button
             type="button"

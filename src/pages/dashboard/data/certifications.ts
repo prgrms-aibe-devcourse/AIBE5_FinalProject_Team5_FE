@@ -5,6 +5,7 @@ export type CertifiableCourse = {
   courseSessionId: number
   title: string
   academy: string
+  batch: string
 }
 
 export type CertificationDocumentType = 'TRAINING_HISTORY' | 'ONLINE_APPLICATION'
@@ -27,6 +28,7 @@ export type UserCertificationRequest = {
   id: number
   courseName: string
   courseSessionId: number
+  batch: string
   requestedAt: string
   status: UserCertificationStatus
   rejectReason?: string
@@ -71,6 +73,7 @@ export const myCertificationRequests: UserCertificationRequest[] = [
     id: 1,
     courseName: '[프로그래밍] 국비지원 프론트엔드 데브코스',
     courseSessionId: 1001,
+    batch: '3기',
     requestedAt: '2026-06-02',
     status: 'PENDING',
     documents: [
@@ -82,6 +85,7 @@ export const myCertificationRequests: UserCertificationRequest[] = [
     id: 2,
     courseName: '데이터 분석가 부트캠프 12기',
     courseSessionId: 1002,
+    batch: '12기',
     requestedAt: '2026-05-28',
     status: 'APPROVED',
     documents: [
@@ -93,6 +97,7 @@ export const myCertificationRequests: UserCertificationRequest[] = [
     id: 3,
     courseName: 'React Native 모바일 앱 개발',
     courseSessionId: 1003,
+    batch: '5기',
     requestedAt: '2026-05-25',
     status: 'REJECTED',
     rejectReason: '제출하신 수료증의 과정명이 신청 과정과 일치하지 않습니다.',

@@ -17,6 +17,7 @@ export function toApiCourse(course: Course): ApiCourse {
     id: String(course.id),
     title: course.title,
     company: course.academy,
+    batch: '-',
     location: course.region,
     price: course.subsidy,
     dateRange: course.period,

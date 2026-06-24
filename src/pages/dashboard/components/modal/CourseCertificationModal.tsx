@@ -27,6 +27,7 @@ function toCertifiableCourse(course: Course): CertifiableCourse | null {
     courseSessionId,
     title: course.title,
     academy: course.company,
+    batch: course.batch,
   }
 }
 
@@ -34,6 +35,10 @@ function mapSearchResults(courses: Course[]) {
   return courses
     .map(toCertifiableCourse)
     .filter((course): course is CertifiableCourse => course !== null)
+}
+
+function formatCourseMeta(academy: string, batch: string) {
+  return [academy, batch !== '-' ? batch : null].filter(Boolean).join(' · ')
 }
 
 type UploadSlotState = {
@@ -354,7 +359,9 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
                       <p className="line-clamp-2 font-pretendard text-sm font-semibold text-deepOceanNavy">
                         {course.title}
                       </p>
-                      <p className="mt-0.5 font-pretendard text-xs text-secondary">{course.academy}</p>
+                      <p className="mt-0.5 font-pretendard text-xs text-secondary">
+                        {formatCourseMeta(course.academy, course.batch)}
+                      </p>
                     </button>
                   </li>
                 ))}
@@ -392,7 +399,9 @@ export default function CourseCertificationModal({ onClose, onSubmit }: CourseCe
               <p className="mt-1 line-clamp-2 font-pretendard text-sm font-semibold text-deepOceanNavy">
                 {selectedCourse.title}
               </p>
-              <p className="mt-0.5 font-pretendard text-xs text-deepOceanNavy/70">{selectedCourse.academy}</p>
+              <p className="mt-0.5 font-pretendard text-xs text-deepOceanNavy/70">
+                {formatCourseMeta(selectedCourse.academy, selectedCourse.batch)}
+              </p>
             </div>
           ) : null}
         </div>

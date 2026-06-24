@@ -31,6 +31,8 @@ export interface Course {
   courseSessionId?: number
   title: string
   company: string
+  /** trprDegr → "N기" */
+  batch: string
   location: string
   price: string
   dateRange: string
@@ -55,7 +57,6 @@ export interface CourseContact {
 export interface CourseDetail extends Course {
   /** 과정 ID (회차 ID `courseSessionId`와 구분) */
   courseId: number
-  batch: string
   recruitment: CourseRecruitment
   eligibility: string
   goals: string
@@ -78,6 +79,7 @@ export interface CourseListItem {
   id: number
   courseId?: number
   courseSessionId?: number
+  trprDegr?: number | null
   trprId: string
   title: string
   institutionName: string
@@ -352,6 +354,11 @@ function formatAreaCode(code: string | null | undefined): string {
   return AREA_CODE_MAP[prefix] ?? code
 }
 
+function formatBatch(trprDegr: number | null | undefined): string {
+  if (trprDegr == null) return '-'
+  return `${trprDegr}기`
+}
+
 export function formatCoursePrice(amount: number | null | undefined): string {
   if (amount === null || amount === undefined) return '-'
   if (amount === 0) return '무료'
@@ -437,6 +444,7 @@ export function toCourseCardVM(item: CourseListItem): Course {
     courseSessionId: item.courseSessionId ?? (item.courseId != null ? item.id : undefined),
     title: item.title,
     company: item.institutionName,
+    batch: formatBatch(item.trprDegr),
     location: formatAreaCode(item.trngAreaCd),
     price: formatCoursePrice(item.selfPaymentAmount),
     dateRange: formatDateRange(item.traStartDate, item.traEndDate),
