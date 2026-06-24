@@ -16,7 +16,7 @@ export default function CourseReviewStepProgress({ currentStep }: CourseReviewSt
             <div key={label} className="flex min-w-0 flex-1 items-center gap-2.5">
               <div className="min-w-0 flex-1">
                 <div className={`h-1.5 rounded-full transition-colors ${isActive ? 'bg-waterlineBlue' : 'bg-mistSkyBlue/45'}`} />
-                <p className={`mt-1 text-xs font-medium ${isActive ? 'text-deepOceanNavy' : 'text-secondary/80'}`}>
+                <p className={`mt-0.5 hidden text-[10px] font-medium sm:mt-1 sm:block sm:text-xs ${isActive ? 'text-deepOceanNavy' : 'text-secondary/80'}`}>
                   {label}
                 </p>
               </div>

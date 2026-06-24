@@ -248,9 +248,18 @@ export default function Header({
           {userActions}
         </div>
 
-        {/* 모바일: 유저 액션만 */}
+        {/* 모바일: 닉네임만 표시 (드롭다운 제거) */}
         <div className="flex items-center gap-3 lg:hidden">
-          {userActions}
+          {isLoggedIn ? (
+            <div className="font-pretendard inline-flex max-w-[55vw] items-center gap-2 text-sm font-semibold text-deepOceanNavy">
+              <UserIcon />
+              <span className="truncate">{nickname}</span>
+            </div>
+          ) : (
+            <Link to="/login" className="font-pretendard text-sm font-semibold text-deepOceanNavy">
+              로그인
+            </Link>
+          )}
         </div>
       </header>
     )
@@ -258,10 +267,10 @@ export default function Header({
 
   return (
     <>
-      <header className={`site-header z-50 w-full min-w-desktop px-6 md:px-12 ${headerPositionClass}`}>
-        <div className="mx-auto flex h-20 w-full max-w-desktop-content items-center justify-between">
+      <header className={`site-header z-50 w-full min-w-desktop px-4 md:px-12 ${headerPositionClass}`}>
+        <div className="mx-auto flex h-16 w-full max-w-desktop-content items-center justify-between md:h-20">
           <Link to="/" aria-label="BootSignal 홈">
-            <img src={logo} alt="BootSignal" className="h-11 w-auto" />
+            <img src={logo} alt="BootSignal" className="h-9 w-auto md:h-11" />
           </Link>
 
           {navAndActions}

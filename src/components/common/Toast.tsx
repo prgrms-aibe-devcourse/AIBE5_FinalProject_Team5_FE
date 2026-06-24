@@ -20,7 +20,7 @@ export default function Toast({ message, onClose, variant = 'info', className }:
       : 'text-secondary hover:bg-foamWhite/80 hover:text-deepOceanNavy'
 
   return (
-    <div className={`fixed right-6 top-6 z-[70] max-w-[360px] rounded-xl border px-4 py-3 ${toneClassName} ${className ?? ''}`}>
+    <div className={`fixed right-6 top-6 z-[70] max-w-[360px] rounded-xl border px-4 py-3 max-sm:left-4 max-sm:right-4 max-sm:top-4 max-sm:max-w-none ${toneClassName} ${className ?? ''}`}>
       <div className="flex items-start gap-3">
         <span className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold ${iconClassName}`}>
           {variant === 'error' ? '!' : 'i'}

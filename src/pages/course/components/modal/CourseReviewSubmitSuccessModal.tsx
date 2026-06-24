@@ -1,4 +1,10 @@
 import { useEffect } from 'react'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 interface CourseReviewSubmitSuccessModalProps {
   isOpen: boolean
@@ -26,18 +32,18 @@ export default function CourseReviewSubmitSuccessModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label={message ? '후기 수정 완료' : '후기 작성 완료'}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[720px] overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">
             {message ? '후기 수정 완료' : '후기 작성 완료'}
           </h2>
           <button
@@ -52,11 +58,11 @@ export default function CourseReviewSubmitSuccessModal({
           </button>
         </div>
 
-        <div className="px-6 pb-7 pt-8 text-center md:px-7">
-          <span className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-mistSkyBlue/35 text-3xl">
+        <div className={`${COURSE_REVIEW_MODAL_BODY} text-center`}>
+          <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-mistSkyBlue/35 text-2xl sm:h-16 sm:w-16 sm:text-3xl">
             🎉
           </span>
-          <p className="mt-4 text-lg font-semibold text-deepOceanNavy">
+          <p className="mt-4 text-base font-semibold text-deepOceanNavy sm:text-lg">
             {message ?? '후기 작성이 완료되었습니다.'}
           </p>
           <p className="mt-1 text-sm text-secondary">

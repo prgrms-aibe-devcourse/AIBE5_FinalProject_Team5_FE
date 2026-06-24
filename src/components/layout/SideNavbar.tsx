@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../../assets/bootsignal_transparent.png'
+import { logout } from '../../services/auth'
 
 // 사이드바 아이콘 이름
 type SidebarIconName =
@@ -137,7 +138,15 @@ export type SideNavbarProps = {
 export default function SideNavbar({ variant, isOpen = false, onClose }: SideNavbarProps) {
   const { items, navAriaLabel } = navConfig[variant]
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const currentPath = pathname.replace(/\/+$/, '') || '/'
+
+  const handleLogout = async () => {
+    await logout()
+    onClose?.()
+    navigate('/', { replace: true })
+    window.scrollTo({ top: 0, left: 0 })
+  }
 
   return (
     <>
@@ -205,6 +214,19 @@ export default function SideNavbar({ variant, isOpen = false, onClose }: SideNav
             })}
           </ul>
         </nav>
+        {variant === 'dashboard' ? (
+          <div className="mt-auto border-t border-mistSkyBlue/30 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                void handleLogout()
+              }}
+              className="flex w-full items-center justify-center rounded-xl border border-deepOceanNavy/25 px-4 py-2.5 text-sm font-semibold text-deepOceanNavy transition-colors hover:bg-[#f5f8fb]"
+            >
+              로그아웃
+            </button>
+          </div>
+        ) : null}
       </aside>
     </>
   )

@@ -19,7 +19,7 @@ export default function SupportHero({ contact }: SupportHeroProps) {
   return (
     <section className="relative w-full overflow-hidden" aria-label="고객센터 소개">
       {/* 배경 */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-8 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] md:p-10 lg:p-12">
+      <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-5 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] sm:p-8 md:p-10 lg:p-12">
         <div
           className="pointer-events-none absolute -right-12 top-0 h-56 w-56 rounded-full bg-softAquaBlue/15 blur-3xl"
           aria-hidden="true"
@@ -33,26 +33,26 @@ export default function SupportHero({ contact }: SupportHeroProps) {
         <div className="relative z-10 grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
           
           {/* 콘텐츠 영역 왼쪽 (타이틀·설명) */}
-          <div className="relative pl-5 md:pl-6">
+          <div className="relative pl-4 md:pl-6">
             <div
               className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-gradient-to-b from-[#005EB8] via-waterlineBlue to-softAquaBlue/30"
               aria-hidden="true"
             />
 
-            <h1 className="text-3xl font-bold leading-[1.25] tracking-tight text-deepOceanNavy md:text-4xl lg:text-[2.5rem]">
+            <h1 className="text-2xl font-bold leading-[1.25] tracking-tight text-deepOceanNavy sm:text-3xl md:text-4xl lg:text-[2.5rem]">
               궁금한 점이 있으신가요?
               <br />
               <span className="bg-gradient-to-r from-[#005EB8] via-waterlineBlue to-softAquaBlue bg-clip-text text-transparent">
                 고객센터에서 안내해 드립니다
               </span>
             </h1>
-            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-deepOceanNavy/60 md:text-base">
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-deepOceanNavy/60 sm:mt-4 sm:text-[15px] md:text-base">
               공지사항과 과정 인증 가이드를 확인하시고, 추가 문의가 필요하면 1:1 문의를 이용해 주세요.
             </p>
           </div>
 
-          {/* 콘텐츠 영역 오른쪽 (문의 안내) */}
-          <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/55 p-6 [backdrop-filter:blur(10px)] shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] sm:p-7">
+          {/* 문의 안내 카드 — 모바일 숨김 */}
+          <div className="hidden overflow-hidden rounded-2xl border border-white/70 bg-white/55 p-6 [backdrop-filter:blur(10px)] shadow-[0_4px_16px_rgba(28,46,92,0.10),inset_0_1px_0_rgba(255,255,255,0.80)] md:block sm:p-7">
             <h2 className="font-pretendard text-base font-semibold text-deepOceanNavy">문의 안내</h2>
             <p className="mt-2.5 font-pretendard text-sm leading-[1.75] text-secondary">
               기본 문의는 대시보드 문의를 이용해 주세요.

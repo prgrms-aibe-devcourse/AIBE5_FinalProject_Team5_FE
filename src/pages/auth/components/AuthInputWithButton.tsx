@@ -12,9 +12,9 @@ interface AuthInputWithButtonProps extends InputHTMLAttributes<HTMLInputElement>
 }
 
 /** 체크 표시 아이콘 */
-function CheckIcon() {
+function CheckIcon({ className = 'h-[18px] w-[18px] sm:h-[22px] sm:w-[22px]' }: { className?: string }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
+    <svg className={`shrink-0 ${className}`} viewBox="0 0 22 22" fill="none" aria-hidden>
       <circle cx="11" cy="11" r="11" fill="#5484B7" />
       <path
         d="M6.5 11.2l2.8 2.8 6.2-6.4"
@@ -46,23 +46,22 @@ export default function AuthInputWithButton({
       <label htmlFor={inputId} className="block text-sm font-medium text-deepOceanNavy font-pretendard">
         {label}
       </label>
-      <div className="flex gap-2">
-        {/* error prop이 있으면 border-red-500 적용 */}
+      <div className="flex items-stretch gap-2">
         <input
           id={inputId}
-          className={`min-w-0 flex-1 rounded-lg border bg-white px-4 py-3 text-sm text-deepOceanNavy placeholder:text-softAquaBlue outline-none transition-colors font-pretendard ${error ? 'border-red-500 focus:border-red-500' : 'border-mistSkyBlue focus:border-waterlineBlue'} ${className}`}
+          className={`min-w-0 flex-1 rounded-lg border bg-white px-3 py-2.5 text-sm text-deepOceanNavy placeholder:text-softAquaBlue outline-none transition-colors font-pretendard sm:px-4 sm:py-3 ${error ? 'border-red-500 focus:border-red-500' : 'border-mistSkyBlue focus:border-waterlineBlue'} ${className}`}
           {...props}
         />
 
-        {/* 체크 아이콘 액션 버튼 (중복 확인, 확인) */}
         <button
           type="button"
           onClick={onButtonClick}
           disabled={buttonDisabled}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-mistSkyBlue bg-white px-3 py-3 text-sm font-medium text-deepOceanNavy transition-colors hover:border-waterlineBlue disabled:cursor-not-allowed disabled:opacity-50 font-pretendard"
+          aria-label={buttonLabel}
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-mistSkyBlue bg-white px-2 py-2.5 text-xs font-medium text-deepOceanNavy transition-colors hover:border-waterlineBlue disabled:cursor-not-allowed disabled:opacity-50 font-pretendard sm:gap-1.5 sm:px-3 sm:py-3 sm:text-sm"
         >
           <CheckIcon />
-          {buttonLabel}
+          <span className="whitespace-nowrap">{buttonLabel}</span>
         </button>
       </div>
 

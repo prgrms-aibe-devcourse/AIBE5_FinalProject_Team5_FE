@@ -20,11 +20,11 @@ export default function CommunityLayout() {
             <div className="flex min-w-0 flex-1 flex-col gap-8">
               {/* 탭 + 작성 버튼 — 목록 카드와 동일한 좌우 너비 */}
               <div className="border-b border-mistSkyBlue/50 pb-4 md:pb-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-                  <div className="min-w-0 flex-1">
-                    <CommunityTabs />
+                <div className="flex flex-col gap-3">
+                  <CommunityTabs />
+                  <div className="flex justify-end">
+                    <CommunityWriteButton />
                   </div>
-                  <CommunityWriteButton />
                 </div>
               </div>
 

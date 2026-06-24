@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import CourseReviewStepProgress from './CourseReviewStepProgress.tsx'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_FOOTER,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 interface CourseVerifiedReviewStep2RatingModalProps {
   isOpen: boolean
@@ -32,12 +39,12 @@ function SegmentField({
   onChange: (value: string) => void
 }) {
   return (
-    <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-      <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-        <p className="text-lg font-semibold text-deepOceanNavy">{label}</p>
+    <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-3.5 md:px-5">
+      <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[170px_1fr]">
+        <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">{label}</p>
         <div
-          className="rounded-2xl border border-mistSkyBlue/65 bg-white p-1"
-          style={{ display: 'grid', gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+          className="grid gap-0.5 rounded-xl border border-mistSkyBlue/65 bg-white p-0.5 sm:rounded-2xl sm:p-1"
+          style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
         >
           {options.map((option) => {
             const isSelected = value === option.value
@@ -46,7 +53,7 @@ function SegmentField({
                 key={option.value}
                 type="button"
                 onClick={() => onChange(option.value)}
-                className={`rounded-xl px-3 py-2.5 text-base font-semibold transition-colors ${
+                className={`rounded-lg px-1 py-2 text-xs font-semibold transition-colors sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-base ${
                   isSelected ? 'bg-mistSkyBlue/55 text-deepOceanNavy' : 'text-secondary hover:bg-foamWhite/60'
                 }`}
               >
@@ -110,18 +117,18 @@ export default function CourseVerifiedReviewStep2RatingModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label="인증 후기 작성 2단계"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">
             {isEditMode ? '후기 수정' : '후기 작성'}
           </h2>
           <button
@@ -136,7 +143,7 @@ export default function CourseVerifiedReviewStep2RatingModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-7 md:px-7 md:pb-7">
+        <div className={COURSE_REVIEW_MODAL_BODY}>
           <CourseReviewStepProgress currentStep={2} />
 
           <div className="space-y-3">
@@ -173,9 +180,9 @@ export default function CourseVerifiedReviewStep2RatingModal({
               ]}
             />
 
-            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-              <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-                <p className="text-lg font-semibold text-deepOceanNavy">하루 평균 자습 시간</p>
+            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-3.5 md:px-5">
+              <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[170px_1fr]">
+                <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">하루 평균 자습 시간</p>
                 <div className="relative">
                   <input
                     type="number"
@@ -183,9 +190,9 @@ export default function CourseVerifiedReviewStep2RatingModal({
                     value={avgSelfStudyHours}
                     onChange={(event) => setAvgSelfStudyHours(event.target.value)}
                     placeholder="시간을 입력해주세요"
-                    className="h-12 w-full rounded-2xl border border-mistSkyBlue/65 bg-foamWhite/40 px-5 pr-12 text-base font-semibold text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/75 focus:border-waterlineBlue"
+                    className="h-11 w-full rounded-xl border border-mistSkyBlue/65 bg-foamWhite/40 px-4 pr-12 text-sm font-semibold text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/75 focus:border-waterlineBlue sm:h-12 sm:rounded-2xl sm:px-5 sm:text-base"
                   />
-                  <span className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-secondary">
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-secondary sm:right-5 sm:text-sm">
                     시간
                   </span>
                 </div>
@@ -194,7 +201,7 @@ export default function CourseVerifiedReviewStep2RatingModal({
           </div>
         </div>
 
-        <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
+        <div className={COURSE_REVIEW_MODAL_FOOTER}>
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"

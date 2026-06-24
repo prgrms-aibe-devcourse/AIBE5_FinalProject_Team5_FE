@@ -124,7 +124,7 @@ export default function CourseSearchPage() {
         onFilterChange={handleFilterChange}
       />
 
-      <main className="flex-1 px-8 pb-16 pt-8 md:px-16 lg:px-20">
+      <main className="flex-1 px-4 pb-12 pt-6 sm:px-8 sm:pb-16 sm:pt-8 md:px-16 lg:px-20">
         <div className="mx-auto flex w-full max-w-course-main flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
           <div className="min-w-0 flex-1">
             <CourseResultsToolbar
@@ -146,7 +146,7 @@ export default function CourseSearchPage() {
                 검색 결과가 없습니다.
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 overflow-visible sm:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4">
                 {courses.map((course) => (
                   <div key={course.courseSessionId ?? course.id} className="flex min-w-0 justify-center">
                     <CourseCard

@@ -17,7 +17,7 @@ export default function CourseComparisonSidebar({
   return (
     // 과정 비교 사이드바
     <aside
-      className="sticky top-6 h-fit w-full shrink-0 rounded-2xl glass-panel p-5 shadow-sm lg:w-72 font-pretendard"
+      className="w-full shrink-0 rounded-2xl glass-panel p-4 font-pretendard shadow-sm sm:p-5 lg:sticky lg:top-6 lg:w-72"
       aria-label="선택 과정 비교"
     >
       {/* 헤더: 제목 + N/max 카운터 + 인내 */}

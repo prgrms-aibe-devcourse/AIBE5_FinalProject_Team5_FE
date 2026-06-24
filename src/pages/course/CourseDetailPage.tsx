@@ -8,7 +8,10 @@ import CourseDetailHeader from './components/CourseDetailHeader.tsx'
 import CourseDetailTabs, { type CourseDetailTab } from './components/CourseDetailTabs.tsx'
 import CourseDetailInfoSections from './components/CourseDetailInfoSections.tsx'
 import CourseDetailReviewsSection from './components/CourseDetailReviewsSection.tsx'
-import CourseDetailSidebar from './components/CourseDetailSidebar.tsx'
+import {
+  CourseDetailSidebarCompact,
+  CourseDetailSidebarFull,
+} from './components/CourseDetailSidebar.tsx'
 import { getCourseSessionDetail, type CourseDetail } from '../../services/course.ts'
 import { isAuthenticated } from '../../services/auth.ts'
 import { addRecentViewedCourse } from '../../services/recentViewedCourses.ts'
@@ -118,8 +121,8 @@ export default function CourseDetailPage() {
         <Toast message={bookmarkError} variant="error" onClose={clearBookmarkError} />
       ) : null}
 
-      <main className="flex-1 min-h-[calc(100dvh-12rem)] px-6 pb-[15.6rem] pt-8 md:px-12 md:pb-[18.2rem] lg:px-20">
-        <div className="mx-auto flex w-full max-w-course-main flex-col gap-6 md:gap-8">
+      <main className="flex-1 min-h-[calc(100dvh-12rem)] px-4 pb-24 pt-6 sm:px-6 sm:pb-[15.6rem] sm:pt-8 md:px-12 md:pb-[18.2rem] lg:px-20">
+        <div className="mx-auto flex w-full max-w-course-main flex-col gap-5 md:gap-8">
           <CourseDetailBreadcrumb />
 
           <CourseDetailHeader
@@ -128,6 +131,8 @@ export default function CourseDetailPage() {
             isBookmarkPending={isPending(course.courseSessionId)}
             onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
           />
+
+          <CourseDetailSidebarCompact course={course} />
 
           <CourseDetailTabs
             activeTab={activeTab}
@@ -148,7 +153,7 @@ export default function CourseDetailPage() {
               ) : null}
             </div>
 
-            <CourseDetailSidebar course={course} />
+            <CourseDetailSidebarFull course={course} />
           </div>
         </div>
       </main>

@@ -272,29 +272,29 @@ export default function CourseGoyoReviewSummaryPanel({
 
           {viewState === 'success' && summary ? (
             <div className="space-y-4">
-              <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
-                <div className="flex shrink-0 flex-col items-center justify-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/35 px-5 py-4 md:min-w-[120px]">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-2xl font-bold tabular-nums text-deepOceanNavy md:text-[1.7rem]">
+              <div className="flex items-stretch gap-3 md:gap-4">
+                <div className="flex w-[5.25rem] shrink-0 flex-col items-center justify-center rounded-xl border border-mistSkyBlue/35 bg-foamWhite/35 px-2 py-3 md:min-w-[120px] md:px-5 md:py-4">
+                  <div className="flex items-center gap-1">
+                    <p className="text-xl font-bold tabular-nums text-deepOceanNavy md:text-[1.7rem]">
                       {summary.averageRating.toFixed(1)}
                     </p>
-                    <span className="text-[1.7rem] leading-none text-waterlineBlue" aria-hidden="true">
+                    <span className="text-xl leading-none text-waterlineBlue md:text-[1.7rem]" aria-hidden="true">
                       ★
                     </span>
                   </div>
-                  <p className="mt-1.5 text-center text-[0.72rem] font-semibold text-deepOceanNavy md:text-xs">
+                  <p className="mt-1 text-center text-[10px] font-semibold leading-snug text-deepOceanNavy md:text-xs">
                     <span className="text-waterlineBlue">고용 24</span>
-                    <span className="mx-1 text-mistSkyBlue">·</span>
-                    <span>{summary.reviewCount}건 기준</span>
+                    <span className="mx-0.5 text-mistSkyBlue">·</span>
+                    <span>{summary.reviewCount}건</span>
                   </p>
                 </div>
 
-                <blockquote className="relative min-w-0 flex-1 overflow-hidden rounded-xl border border-mistSkyBlue/35 bg-white/55 px-4 py-4 pl-5 shadow-[0_1px_0_rgba(187,211,224,0.35)] md:px-5 md:py-5">
+                <blockquote className="relative min-w-0 flex-1 overflow-hidden rounded-xl border border-mistSkyBlue/35 bg-white/55 px-3 py-3 pl-4 shadow-[0_1px_0_rgba(187,211,224,0.35)] md:px-5 md:py-5">
                   <span
-                    className="absolute bottom-3 left-0 top-3 w-[3px] rounded-full bg-gradient-to-b from-waterlineBlue via-softAquaBlue to-mistSkyBlue/40"
+                    className="absolute bottom-2 left-0 top-2 w-[3px] rounded-full bg-gradient-to-b from-waterlineBlue via-softAquaBlue to-mistSkyBlue/40 md:bottom-3 md:top-3"
                     aria-hidden="true"
                   />
-                  <p className="text-sm leading-relaxed text-deepOceanNavy/90 md:text-[0.95rem]">
+                  <p className="text-xs leading-relaxed text-deepOceanNavy/90 md:text-[0.95rem]">
                     {summary.summary}
                   </p>
                 </blockquote>

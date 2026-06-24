@@ -40,7 +40,7 @@ export default function Tabs<T extends string>({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-flex flex-wrap gap-1 rounded-2xl border border-mistSkyBlue/40 bg-white/40 p-1.5 shadow-[0_4px_20px_rgba(52,74,100,0.10)] backdrop-blur-md ${className}`.trim()}
+      className={`relative inline-flex max-w-full flex-wrap justify-end gap-0.5 rounded-2xl border border-mistSkyBlue/40 bg-white/40 p-1 shadow-[0_4px_20px_rgba(52,74,100,0.10)] backdrop-blur-md sm:gap-1 sm:p-1.5 ${className}`.trim()}
       role="tablist"
       aria-label={ariaLabel}
     >
@@ -63,7 +63,7 @@ export default function Tabs<T extends string>({
             aria-selected={isActive}
             ref={isActive ? activeButtonRef : null}
             onClick={() => onTabChange(tab.key)}
-            className={`relative z-10 whitespace-nowrap rounded-xl px-4 py-2.5 font-pretendard text-sm font-semibold transition-colors duration-150 ${
+            className={`relative z-10 whitespace-nowrap rounded-xl px-2.5 py-1.5 font-pretendard text-xs font-semibold transition-colors duration-150 sm:px-4 sm:py-2.5 sm:text-sm ${
               isActive
                 ? 'text-white'
                 : 'text-deepOceanNavy/60 hover:text-deepOceanNavy'

@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import CourseReviewStepProgress from './CourseReviewStepProgress.tsx'
 import CourseFilterSelect from '../CourseFilterSelect.tsx'
 import type { CourseFilterConfig } from '../../../../services/course.ts'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_FOOTER,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 interface CourseVerifiedReviewStep5DetailModalProps {
   isOpen: boolean
@@ -65,7 +72,7 @@ function SegmentControl({
   onChange: (value: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 rounded-2xl border border-mistSkyBlue/65 bg-white p-1 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-0.5 rounded-xl border border-mistSkyBlue/65 bg-white p-0.5 sm:grid-cols-3 sm:rounded-2xl sm:p-1">
       {options.map((option) => {
         const isSelected = value === option.value
         return (
@@ -73,7 +80,7 @@ function SegmentControl({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`rounded-xl px-3 py-2.5 text-base font-semibold transition-colors ${
+            className={`rounded-lg px-2 py-2 text-xs font-semibold transition-colors sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-base ${
               isSelected ? 'bg-mistSkyBlue/55 text-deepOceanNavy' : 'text-secondary hover:bg-foamWhite/60'
             }`}
           >
@@ -133,18 +140,18 @@ export default function CourseVerifiedReviewStep5DetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label="인증 후기 작성 5단계"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">
             {isEditMode ? '후기 수정' : '후기 작성'}
           </h2>
           <button
@@ -159,13 +166,13 @@ export default function CourseVerifiedReviewStep5DetailModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-7 md:px-7 md:pb-7">
+        <div className={COURSE_REVIEW_MODAL_BODY}>
           <CourseReviewStepProgress currentStep={5} />
 
           <div className="space-y-4">
-            <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-4 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:p-5">
-              <div className="grid items-center gap-3 md:grid-cols-[190px_1fr]">
-                <p className="text-lg font-semibold text-deepOceanNavy">수료 여부</p>
+            <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:p-4 md:p-5">
+              <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[190px_1fr]">
+                <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">수료 여부</p>
                 <SegmentControl
                   value={completionStatus}
                   onChange={setCompletionStatus}
@@ -180,7 +187,7 @@ export default function CourseVerifiedReviewStep5DetailModal({
               {requiresDropoutReason ? (
                 <div className="mt-4 border-t border-mistSkyBlue/35 pt-4">
                   <div className="grid items-center gap-3 md:grid-cols-1">
-                    <p className="text-lg font-semibold text-deepOceanNavy">중도 포기 사유</p>
+                    <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">중도 포기 사유</p>
                     <CourseFilterSelect
                       filter={DROPOUT_MAJOR_REASON_FILTER}
                       value={dropoutMajorReason}
@@ -204,9 +211,9 @@ export default function CourseVerifiedReviewStep5DetailModal({
 
               {completionStatus === 'completed' ? (
                 <div className="mt-4 border-t border-mistSkyBlue/35 pt-4">
-                  <div className="grid items-center gap-3 md:grid-cols-[190px_1fr]">
-                    <p className="text-lg font-semibold text-deepOceanNavy">6개월 내 취업</p>
-                    <div className="grid grid-cols-2 rounded-2xl border border-mistSkyBlue/65 bg-white p-1">
+                  <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[190px_1fr]">
+                    <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">6개월 내 취업</p>
+                    <div className="grid grid-cols-2 gap-0.5 rounded-xl border border-mistSkyBlue/65 bg-white p-0.5 sm:rounded-2xl sm:p-1">
                       {[
                         { value: 'employed', label: '취업' },
                         { value: 'preparing', label: '준비중' },
@@ -217,7 +224,7 @@ export default function CourseVerifiedReviewStep5DetailModal({
                             key={option.value}
                             type="button"
                             onClick={() => setEmploymentStatus(option.value)}
-                            className={`rounded-xl px-4 py-2.5 text-base font-semibold transition-colors ${
+                            className={`rounded-lg px-2 py-2 text-xs font-semibold transition-colors sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-base ${
                               isSelected ? 'bg-mistSkyBlue/55 text-deepOceanNavy' : 'text-secondary hover:bg-foamWhite/60'
                             }`}
                           >
@@ -231,13 +238,13 @@ export default function CourseVerifiedReviewStep5DetailModal({
               ) : null}
             </article>
 
-            <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-4 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:p-5">
-              <p className="text-lg font-semibold text-deepOceanNavy">자유 후기</p>
+            <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:p-4 md:p-5">
+              <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">자유 후기</p>
               <textarea
                 value={collaborationComment}
                 onChange={(event) => setCollaborationComment(event.target.value)}
                 placeholder="과정 전반에 대한 의견을 자유롭게 작성해 주세요."
-                className="mt-3 h-40 w-full resize-none rounded-xl border border-mistSkyBlue/65 bg-foamWhite/30 p-4 text-base text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/70 focus:border-waterlineBlue"
+                className="mt-3 h-32 w-full resize-none rounded-xl border border-mistSkyBlue/65 bg-foamWhite/30 p-3 text-sm text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/70 focus:border-waterlineBlue sm:h-40 sm:p-4 sm:text-base"
               />
             </article>
 
@@ -245,14 +252,14 @@ export default function CourseVerifiedReviewStep5DetailModal({
         </div>
 
         {submitError ? (
-          <div className="px-6 md:px-7">
+          <div className="shrink-0 px-4 sm:px-6 md:px-7">
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
               {submitError}
             </div>
           </div>
         ) : null}
 
-        <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
+        <div className={COURSE_REVIEW_MODAL_FOOTER}>
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"

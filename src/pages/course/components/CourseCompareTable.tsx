@@ -6,6 +6,7 @@ import { isMissingDisplayValue } from '../../../services/course.ts'
 import type { VerifiedReviewStatistics } from '../../../services/review.ts'
 import { COMPARE_TABLE_ROWS } from '../data/courseCompareRows.ts'
 import type { CompareLayoutConfig } from './compareLayout.ts'
+import { COMPARE_RESPONSIVE_GRID_CLASS, getCompareGridVars } from './compareLayout.ts'
 import { CompareSectionIcon } from './compareSectionIcons.tsx'
 import { groupCompareRows } from './groupCompareRows.ts'
 
@@ -40,7 +41,7 @@ function CompareExpandableCell({
   relaxedLineHeight?: boolean
 }) {
   if (isMissingDisplayValue(content)) {
-    return <p className="w-full text-center text-sm font-semibold text-deepOceanNavy">-</p>
+    return <p className="w-full text-center text-[10px] font-semibold text-deepOceanNavy md:text-sm">-</p>
   }
 
   const trimmed = content.trim()
@@ -50,9 +51,9 @@ function CompareExpandableCell({
 
   if (expanded && lines.length > 1) {
     return (
-      <div className={`w-full space-y-3 text-left ${expandedLeading}`}>
+      <div className={`w-full space-y-2 text-left md:space-y-3 ${expandedLeading}`}>
         {lines.map((line, index) => (
-          <p key={index} className="text-sm text-deepOceanNavy/90">
+          <p key={index} className="break-words text-[10px] text-deepOceanNavy/90 md:text-sm">
             {line}
           </p>
         ))}
@@ -62,8 +63,8 @@ function CompareExpandableCell({
 
   return (
     <p
-      className={`w-full text-sm text-deepOceanNavy/90 ${
-        expanded ? `whitespace-pre-line text-left ${expandedLeading}` : `line-clamp-3 text-center ${collapsedLeading}`
+      className={`w-full break-words text-[10px] text-deepOceanNavy/90 md:text-sm ${
+        expanded ? `whitespace-pre-line text-left leading-relaxed ${expandedLeading}` : `line-clamp-3 text-center leading-snug ${collapsedLeading}`
       }`}
     >
       {trimmed}
@@ -255,6 +256,70 @@ function MetricGroupSummary({
   )
 }
 
+function PriorKnowledgeRatio({ stats }: { stats: VerifiedReviewStatistics }) {
+  const items = stats.priorKnowledgeDistribution
+  const total = items.reduce((sum, item) => sum + item.count, 0)
+  if (total === 0) return null
+
+  return (
+    <div className="rounded-md border border-mistSkyBlue/25 bg-foamWhite/40 px-2 py-1.5">
+      <p className="text-xs font-medium text-secondary">선수지식</p>
+      <ul className="mt-1 space-y-0.5">
+        {items.map((item) => (
+          <li key={item.level} className="flex items-center justify-between gap-1 text-[10px] text-deepOceanNavy/85">
+            <span className="inline-flex min-w-0 items-center gap-1">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ backgroundColor: item.color }}
+                aria-hidden="true"
+              />
+              <span>{item.level}</span>
+            </span>
+            <span className="shrink-0 font-bold tabular-nums text-deepOceanNavy">{item.count}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function CompareStatsCellMobile({ stats }: { stats: VerifiedReviewStatistics }) {
+  const hasReviews = stats.reviewCount > 0
+
+  return (
+    <div className="flex h-full w-full min-w-0 flex-col gap-1.5">
+      <div className="flex items-center justify-between gap-2 rounded-md border border-mistSkyBlue/35 bg-foamWhite/60 px-2 py-1.5">
+        <span className="text-xs font-bold text-deepOceanNavy">인증 {stats.reviewCount}건</span>
+        <span className="text-xs font-bold leading-none text-waterlineBlue md:text-sm">
+          {hasReviews ? stats.averageRating.toFixed(1) : '-'}
+        </span>
+      </div>
+      {hasReviews ? (
+        <div className="space-y-1">
+          <PriorKnowledgeRatio stats={stats} />
+          {METRIC_GROUP_KEYS.map((groupKey) => {
+            const { title, labels } = METRIC_GROUP_CONFIG[groupKey]
+            const average = averageMetricLabels(stats, [...labels])
+            return (
+              <div
+                key={groupKey}
+                className="flex items-center justify-between gap-1 rounded-md border border-mistSkyBlue/20 bg-foamWhite/30 px-2 py-1"
+              >
+                <span className="text-xs font-medium text-secondary">{title}</span>
+                <span className="text-[10px] font-bold tabular-nums text-deepOceanNavy md:text-xs">{average.toFixed(1)}</span>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <p className="flex flex-1 items-center justify-center py-2 text-center text-[10px] text-secondary">
+          인증 후기 없음
+        </p>
+      )}
+    </div>
+  )
+}
+
 function CompareStatsCell({
   stats,
   expandedMetricGroups,
@@ -269,6 +334,10 @@ function CompareStatsCell({
 
   return (
     <div className="flex h-full w-full flex-col gap-3">
+      <div className="md:hidden">
+        <CompareStatsCellMobile stats={stats} />
+      </div>
+      <div className="hidden md:flex md:flex-col md:gap-3">
       <div className="flex items-center justify-between gap-3 rounded-lg border border-mistSkyBlue/35 bg-foamWhite/60 px-3 py-2.5">
         <p className="text-lg font-bold text-deepOceanNavy">{stats.reviewCount}건</p>
         <p className="text-2xl font-bold leading-none text-waterlineBlue">
@@ -298,6 +367,7 @@ function CompareStatsCell({
           <p className="text-sm text-secondary">인증 후기가 없습니다</p>
         </div>
       )}
+      </div>
     </div>
   )
 }
@@ -352,17 +422,14 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
             {section.contentOnly && contentField ? (
               <>
               <div
-                className="grid items-stretch"
-                style={{ gridTemplateColumns: layout.gridTemplateColumns }}
+                className={`${COMPARE_RESPONSIVE_GRID_CLASS} items-stretch`}
+                style={getCompareGridVars(layout)}
               >
-                <div
-                  className="bg-foamWhite/50 px-3 py-5 md:px-3.5"
-                  aria-hidden="true"
-                />
+                <div className="bg-foamWhite/50 px-1 py-3 md:px-3.5 md:py-5" aria-hidden="true" />
                 {courses.map((course) => (
                   <div
                     key={`${section.label}-${course.courseSessionId ?? course.id}`}
-                    className="flex items-start justify-center border-l border-mistSkyBlue/30 bg-transparent px-3 py-4 md:px-4 md:py-5"
+                    className="flex min-w-0 items-start justify-center border-l border-mistSkyBlue/30 bg-transparent px-1.5 py-3 md:px-4 md:py-5"
                   >
                     <CompareExpandableCell
                       content={contentField.getValue(course)}
@@ -387,18 +454,18 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
               {section.fields.map((field) => (
                 <div
                   key={field.label}
-                  className="grid items-stretch"
-                  style={{ gridTemplateColumns: layout.gridTemplateColumns }}
+                  className={`${COMPARE_RESPONSIVE_GRID_CLASS} items-stretch`}
+                  style={getCompareGridVars(layout)}
                 >
-                  <div className="flex items-center justify-center bg-foamWhite/50 px-3 py-5 text-sm font-medium text-secondary md:px-3.5">
-                    {field.label}
+                  <div className="flex items-center justify-center bg-foamWhite/50 px-1.5 py-3 text-xs font-semibold leading-snug text-secondary md:px-3.5 md:py-5 md:text-sm">
+                    <span className="break-words text-center">{field.label}</span>
                   </div>
                   {courses.map((course) => (
                     <div
                       key={`${section.label}-${field.label}-${course.courseSessionId ?? course.id}`}
-                      className="flex items-center justify-center border-l border-mistSkyBlue/30 bg-transparent px-3 py-4 text-center md:px-4 md:py-5"
+                      className="flex min-w-0 items-center justify-center border-l border-mistSkyBlue/30 bg-transparent px-1 py-3 text-center md:px-4 md:py-5"
                     >
-                      <p className="w-full px-1 text-sm font-semibold leading-relaxed text-deepOceanNavy">
+                      <p className="w-full break-words px-0.5 text-[10px] font-semibold leading-snug text-deepOceanNavy md:px-1 md:text-sm md:leading-relaxed">
                         {field.getValue(course)}
                       </p>
                     </div>
@@ -408,17 +475,14 @@ export default function CourseCompareTable({ courses, statsByColumn, layout }: C
 
               {section.includeStats ? (
                 <div
-                  className="grid items-stretch bg-foamWhite/35"
-                  style={{ gridTemplateColumns: layout.gridTemplateColumns }}
+                  className={`${COMPARE_RESPONSIVE_GRID_CLASS} items-stretch bg-foamWhite/35`}
+                  style={getCompareGridVars(layout)}
                 >
-                  <div
-                    className="bg-foamWhite/50 px-3 py-4 md:px-3.5"
-                    aria-hidden="true"
-                  />
+                  <div className="bg-foamWhite/50 px-1 py-2 md:px-3.5 md:py-4" aria-hidden="true" />
                   {statsByColumn.map((stats, index) => (
                     <div
                       key={`stats-${courses[index]?.courseSessionId ?? courses[index]?.id ?? index}`}
-                      className="flex h-full border-l border-mistSkyBlue/30 bg-transparent px-4 py-4 md:px-5"
+                      className="flex h-full min-w-0 border-l border-mistSkyBlue/30 bg-transparent px-1 py-2 md:px-5 md:py-4"
                     >
                       <CompareStatsCell
                         stats={stats}

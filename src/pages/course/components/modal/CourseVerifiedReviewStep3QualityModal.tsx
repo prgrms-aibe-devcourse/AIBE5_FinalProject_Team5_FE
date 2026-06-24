@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import CourseReviewStepProgress from './CourseReviewStepProgress.tsx'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_FOOTER,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 interface CourseVerifiedReviewStep3QualityModalProps {
   isOpen: boolean
@@ -43,10 +50,10 @@ function RatingField({
   onChange: (value: number) => void
 }) {
   return (
-    <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-4 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-      <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-        <p className="text-lg font-semibold text-deepOceanNavy">{label}</p>
-        <div className="flex items-center gap-1">
+    <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-4 md:px-5">
+      <div className="flex flex-col gap-2 sm:grid sm:items-center sm:gap-3 md:grid-cols-[170px_1fr]">
+        <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">{label}</p>
+        <div className="flex flex-wrap items-center gap-0.5">
           {Array.from({ length: 5 }, (_, idx) => {
             const score = idx + 1
             return (
@@ -58,7 +65,7 @@ function RatingField({
               />
             )
           })}
-          <span className="ml-2 text-sm font-semibold text-deepOceanNavy/80">{value > 0 ? `${value}점` : ''}</span>
+          <span className="ml-1 text-xs font-semibold text-deepOceanNavy/80 sm:ml-2 sm:text-sm">{value > 0 ? `${value}점` : ''}</span>
         </div>
       </div>
     </article>
@@ -107,18 +114,18 @@ export default function CourseVerifiedReviewStep3QualityModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label="인증 후기 작성 3단계"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90dvh] w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">
             {isEditMode ? '후기 수정' : '후기 작성'}
           </h2>
           <button
@@ -133,7 +140,7 @@ export default function CourseVerifiedReviewStep3QualityModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-7 md:px-7 md:pb-7">
+        <div className={COURSE_REVIEW_MODAL_BODY}>
           <CourseReviewStepProgress currentStep={3} />
 
           <div className="space-y-3">
@@ -143,7 +150,7 @@ export default function CourseVerifiedReviewStep3QualityModal({
           </div>
         </div>
 
-        <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
+        <div className={COURSE_REVIEW_MODAL_FOOTER}>
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"

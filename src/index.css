@@ -20,7 +20,13 @@ body,
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 4rem;
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 5rem;
+  }
 }
 
 body {
@@ -434,6 +440,10 @@ html.home-snap {
 
   .hero-video__media {
     object-position: 85% top;
+  }
+
+  .hero-intro__message {
+    font-size: 11px;
   }
 
   .hero-scroll-indicator {

@@ -4,10 +4,10 @@ interface LoginVisualPanelProps {
   overlayText?: string
 }
 
-/** Auth 페이지 50% 사이드 배경 패널 */
+/** Auth 페이지 50% 사이드 배경 패널 — 모바일에서는 숨김 */
 export default function LoginVisualPanel({ overlayText = 'LOGIN' }: LoginVisualPanelProps) {
   return (
-    <div className="relative h-dvh w-1/2 shrink-0 overflow-hidden">
+    <div className="relative hidden h-dvh w-1/2 shrink-0 overflow-hidden md:block">
       {/* 사이드 이미지 배경 */}
       <img src={loginSideBg} alt=""
         className="h-full w-full object-cover object-center"

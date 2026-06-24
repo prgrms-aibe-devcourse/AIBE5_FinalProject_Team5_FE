@@ -59,18 +59,13 @@ function LinkIcon() {
 interface PipeRowProps {
   label: string
   value: string
-  /** 긴 텍스트 — 라벨 아래 값을 전체 너비로 표시 */
   multiline?: boolean
 }
 
-/** 헤더 InfoRow와 동일한 라벨 | 값 형식 (짧은 항목) */
 function PipeRow({ label, value, multiline }: PipeRowProps) {
   if (multiline) {
     return (
-      <div
-        aria-label={label}
-        className="rounded-lg border border-mistSkyBlue/35 px-3.5 py-3"
-      >
+      <div aria-label={label} className="rounded-lg border border-mistSkyBlue/35 px-3.5 py-3">
         <p className="text-sm font-semibold leading-[1.65] text-deepOceanNavy/95 md:text-[0.9375rem]">
           {value}
         </p>
@@ -94,7 +89,6 @@ interface ContactRowProps {
   label: string
   value: string
   href?: string
-  /** true면 전화번호·이메일과 동일한 값 텍스트 스타일 */
   plainLink?: boolean
 }
 
@@ -130,9 +124,50 @@ function ContactRow({ icon, label, value, href, plainLink }: ContactRowProps) {
   )
 }
 
-export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps) {
+export function CourseDetailSidebarCompact({ course }: CourseDetailSidebarProps) {
   return (
-    <aside className="flex flex-col gap-5 lg:sticky lg:top-28 lg:w-72 xl:w-80">
+    <aside className="flex flex-col gap-3 lg:hidden" aria-label="연락처 정보">
+      <div className="inline-flex w-fit items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-3 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center text-waterlineBlue">
+          <PhoneIcon />
+        </span>
+        <h3 className="text-xs font-bold tracking-tight text-deepOceanNavy">연락처</h3>
+      </div>
+
+      <div className="rounded-2xl glass-panel p-3 shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+        <div className="space-y-3">
+          <ContactRow icon={<PhoneIcon />} label="전화번호" value={course.contact.phone} />
+          <ContactRow icon={<MailIcon />} label="이메일" value={course.contact.email} />
+          {course.titleLink ? (
+            <ContactRow
+              icon={<LinkIcon />}
+              label="고용 24 과정 조회"
+              value="바로가기"
+              href={course.titleLink}
+              plainLink
+            />
+          ) : null}
+          {course.homepageUrl ? (
+            <ContactRow
+              icon={<LinkIcon />}
+              label="홈페이지"
+              value="바로가기"
+              href={course.homepageUrl}
+              plainLink
+            />
+          ) : null}
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+export function CourseDetailSidebarFull({ course }: CourseDetailSidebarProps) {
+  return (
+    <aside
+      className="hidden flex-col gap-5 lg:sticky lg:top-28 lg:flex lg:w-72 xl:w-80"
+      aria-label="과정 주요 정보"
+    >
       <div>
         <div className="mb-2 px-1">
           <div className="inline-flex items-center gap-2 rounded-full border border-mistSkyBlue/40 bg-white/30 px-4 py-1.5 shadow-[0_4px_16px_rgba(52,74,100,0.10)] backdrop-blur-md">
@@ -143,36 +178,33 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
           </div>
         </div>
         <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
-        <div className="space-y-5 px-5 py-5 md:px-6">
-          <div className="space-y-2.5">
-            <PipeRow label="과정명" value={course.title} multiline />
-            <PipeRow label="과정 기관" value={course.company} />
-            <PipeRow label="기수" value={course.batch} />
-            
-            
-            <PipeRow label="기관 위치" value={course.institutionAddress} />
-            <PipeRow label="부담 비용" value={course.price} />
-            <PipeRow label="진행 기간" value={course.dateRange} />
-          </div>
+          <div className="space-y-5 px-5 py-5 md:px-6">
+            <div className="space-y-2.5">
+              <PipeRow label="과정명" value={course.title} multiline />
+              <PipeRow label="과정 기관" value={course.company} />
+              <PipeRow label="기수" value={course.batch} />
+              <PipeRow label="기관 위치" value={course.institutionAddress} />
+              <PipeRow label="부담 비용" value={course.price} />
+              <PipeRow label="진행 기간" value={course.dateRange} />
+            </div>
 
-          {/* 연락처 */}
-          <div className="rounded-xl border border-mistSkyBlue/40 bg-foamWhite/50 p-4">
-            <p className="mb-3 text-sm font-semibold text-deepOceanNavy">연락처</p>
-            <div className="space-y-3.5">
-              <ContactRow icon={<PhoneIcon />} label="전화번호" value={course.contact.phone} />
-              <ContactRow icon={<MailIcon />} label="이메일" value={course.contact.email} />
-              {course.titleLink ? (
-                <ContactRow
-                  icon={<LinkIcon />}
-                  label="고용 24 과정 조회"
-                  value="바로가기"
-                  href={course.titleLink}
-                  plainLink
-                />
-              ) : null}
+            <div className="rounded-xl border border-mistSkyBlue/40 bg-foamWhite/50 p-4">
+              <p className="mb-3 text-sm font-semibold text-deepOceanNavy">연락처</p>
+              <div className="space-y-3.5">
+                <ContactRow icon={<PhoneIcon />} label="전화번호" value={course.contact.phone} />
+                <ContactRow icon={<MailIcon />} label="이메일" value={course.contact.email} />
+                {course.titleLink ? (
+                  <ContactRow
+                    icon={<LinkIcon />}
+                    label="고용 24 과정 조회"
+                    value="바로가기"
+                    href={course.titleLink}
+                    plainLink
+                  />
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
 
@@ -188,4 +220,8 @@ export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps
       ) : null}
     </aside>
   )
+}
+
+export default function CourseDetailSidebar({ course }: CourseDetailSidebarProps) {
+  return <CourseDetailSidebarFull course={course} />
 }

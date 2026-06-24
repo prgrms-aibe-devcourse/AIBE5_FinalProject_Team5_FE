@@ -8,15 +8,14 @@ import {
   HOME_CAROUSEL_SLIDE_MS,
   HOME_COURSE_VISIBLE,
   easeOutCubic,
-  getCourseCarouselMetrics,
-  useHomeCarouselBreakpointCounts,
+  getCourseCardHeight,
+  getCourseCardImageHeight,
+  useHomeCarouselLayout,
 } from './homeCarouselLayout.ts'
 
-/** 이미지 아래 본문(타이틀·기관·정보·뱃지) 영역 고정 높이 */
-const COURSE_CARD_CONTENT_HEIGHT = 204
 /** 썸네일 비율(3:2)에 맞춘 이미지 영역 높이 = 카드 폭 * 2/3 */
-const getCardImageHeight = (cardWidth: number) => Math.round((cardWidth * 2) / 3)
-const getCardHeight = (cardWidth: number) => getCardImageHeight(cardWidth) + COURSE_CARD_CONTENT_HEIGHT
+const getCardImageHeight = (cardWidth: number) => getCourseCardImageHeight(cardWidth)
+const getCardHeight = (cardWidth: number, isMobile = false) => getCourseCardHeight(cardWidth, isMobile)
 const HOME_POPULAR_INITIAL_SIZE = 10
 const POPULAR_ROTATE_INTERVAL_MS = 4000
 const POPULAR_MANUAL_ROTATE_PAUSE_MS = 6000
@@ -118,8 +117,8 @@ function PopularCourseCard({
         <CourseThumbnail imageUrl={course.logoUrl} company={course.company} seed={course.id} />
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-3.5">
-        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-deepOceanNavy font-pretendard">
+      <div className={`flex min-h-0 flex-1 flex-col px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4 sm:pt-3.5`}>
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-[13px] font-bold leading-snug text-deepOceanNavy font-pretendard sm:text-sm">
           {course.title}
         </h3>
         <p className="mt-1.5 line-clamp-1 text-xs font-semibold text-[#566370] font-pretendard">{course.company}</p>
@@ -184,10 +183,10 @@ function getPageCourses(courses: Course[], pageIndex: number, visibleCount: numb
 }
 
 function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
-  const { review: reviewVisibleCount, course: courseVisibleCount } = useHomeCarouselBreakpointCounts()
-  const { viewportWidth, cardWidth, cardStep } = getCourseCarouselMetrics(courseVisibleCount, reviewVisibleCount)
+  const { course: courseVisibleCount, courseMetrics, isMobile } = useHomeCarouselLayout()
+  const { viewportWidth, cardWidth, cardStep } = courseMetrics
   const imageHeight = getCardImageHeight(cardWidth)
-  const cardHeight = getCardHeight(cardWidth)
+  const cardHeight = getCardHeight(cardWidth, isMobile)
 
   const [activePageIndex, setActivePageIndex] = useState(0)
   const [progress, setProgress] = useState(0)
@@ -321,7 +320,7 @@ function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
         }}
         prevLabel="이전 과정"
         nextLabel="다음 과정"
-        contentHeight={cardHeight + 32}
+        contentHeight={cardHeight + (isMobile ? 20 : 32)}
       >
         <ul className="relative mx-auto h-full" style={{ width: viewportWidth }}>
           {prependedCourses.map(({ slot, item, itemIndex }) =>
@@ -361,10 +360,10 @@ function PopularCoursesCarousel({ courses }: { courses: Course[] }) {
 }
 
 function PopularCoursesCarouselSkeleton() {
-  const { review: reviewVisibleCount, course: courseVisibleCount } = useHomeCarouselBreakpointCounts()
-  const { viewportWidth, cardWidth, cardStep } = getCourseCarouselMetrics(courseVisibleCount, reviewVisibleCount)
+  const { course: courseVisibleCount, courseMetrics, isMobile } = useHomeCarouselLayout()
+  const { viewportWidth, cardWidth, cardStep } = courseMetrics
   const imageHeight = getCardImageHeight(cardWidth)
-  const cardHeight = getCardHeight(cardWidth)
+  const cardHeight = getCardHeight(cardWidth, isMobile)
   const trackWidth = courseVisibleCount * cardStep - HOME_CAROUSEL_GAP
   const trackOffset = (viewportWidth - trackWidth) / 2
 
@@ -376,7 +375,7 @@ function PopularCoursesCarouselSkeleton() {
       onNext={() => {}}
       prevLabel="이전 과정"
       nextLabel="다음 과정"
-      contentHeight={cardHeight + 32}
+      contentHeight={cardHeight + (isMobile ? 20 : 32)}
     >
       <ul className="relative mx-auto h-full" style={{ width: viewportWidth }}>
         {Array.from({ length: courseVisibleCount }, (_, slot) => (
@@ -396,11 +395,11 @@ function PopularCoursesCarouselSkeleton() {
 function PopularCoursesSectionHeader() {
   return (
     <>
-      <h2 className="text-center text-2xl font-bold text-deepOceanNavy font-pretendard md:text-[28px]">
+      <h2 className="text-center text-xl font-bold text-deepOceanNavy font-pretendard sm:text-2xl md:text-[28px]">
         이번 주 인기 과정
       </h2>
-      <p className="mt-2 text-center text-sm text-[#7b8795] font-pretendard">
-        사용자들이 이번 주 가장 관심있어 한 과정을 확인해보세요
+      <p className="mt-2 px-2 text-center text-xs text-[#7b8795] font-pretendard sm:text-sm">
+        사용자들이 가장 관심있어 한 과정을 확인해보세요
       </p>
     </>
   )
@@ -428,7 +427,7 @@ export default function PopularCoursesSection() {
 
   if (isLoading) {
     return (
-      <section id="popular-courses" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
+      <section id="popular-courses" className="w-full px-4 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
         <div className="mx-auto w-full max-w-desktop-content">
           <PopularCoursesSectionHeader />
           <PopularCoursesCarouselSkeleton />
@@ -439,7 +438,7 @@ export default function PopularCoursesSection() {
 
   if (error) {
     return (
-      <section id="popular-courses" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
+      <section id="popular-courses" className="w-full px-4 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
         <div className="mx-auto w-full max-w-desktop-content text-center">
           <PopularCoursesSectionHeader />
           <p className="mt-4 text-sm text-red-500 font-pretendard">{error}</p>
@@ -450,7 +449,7 @@ export default function PopularCoursesSection() {
 
   if (courses.length === 0) {
     return (
-      <section id="popular-courses" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
+      <section id="popular-courses" className="w-full px-4 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16" aria-label="이번 주 인기 과정" data-home-section>
         <div className="mx-auto w-full max-w-desktop-content text-center">
           <PopularCoursesSectionHeader />
           <p className="mt-4 text-sm text-[#7b8795] font-pretendard">현재 모집 예정인 인기 과정이 없습니다.</p>
