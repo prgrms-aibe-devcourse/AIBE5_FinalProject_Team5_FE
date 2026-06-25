@@ -143,7 +143,7 @@ export function mergeCourseSearchParams(
     sortKey: patch.sortKey ?? current.sortKey,
     filterValues: {
       ...current.filterValues,
-      ...patch.filterValues,
-    },
+      ...(patch.filterValues ?? {}),
+    } as Record<string, string>,
   })
 }
