@@ -1,4 +1,4 @@
-import type { Report, ReportStatusTab } from '../AdminReportsPage'
+import type { ReportStatusTab } from '../AdminReportsPage'
 
 export const REPORT_STATUS_TABS: { key: ReportStatusTab; label: string }[] = [
   { key: 'ALL', label: '전체' },
