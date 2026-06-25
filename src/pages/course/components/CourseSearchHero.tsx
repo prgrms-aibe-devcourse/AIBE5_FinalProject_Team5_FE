@@ -26,7 +26,7 @@ export default function CourseSearchHero({
 
   return (
     <section
-      className="relative z-20 w-full pt-8 md:pt-10"
+      className="relative z-20 w-full pt-6 sm:pt-8 md:pt-10"
       aria-label="과정 검색"
     >
       {/* blur 배경 */}
@@ -36,8 +36,8 @@ export default function CourseSearchHero({
       </div>
       
       {/* 콘텐츠 영역 */}
-      <div className="relative z-10 mx-auto w-full max-w-3xl overflow-visible px-6 pb-16 text-center font-pretendard md:px-12 md:pb-20">
-        <h1 className="mb-8 text-2xl font-bold leading-snug text-deepOceanNavy md:mb-10 md:text-3xl">
+      <div className="relative z-10 mx-auto w-full max-w-3xl overflow-visible px-4 pb-12 text-center font-pretendard sm:px-6 md:px-12 md:pb-20">
+        <h1 className="mb-6 text-xl font-bold leading-snug text-deepOceanNavy sm:mb-8 sm:text-2xl md:mb-10 md:text-3xl">
           나에게 맞는 과정을 탐색해보세요!
         </h1>
 
@@ -50,7 +50,7 @@ export default function CourseSearchHero({
               value={keyword}
               onChange={(e) => onKeywordChange(e.target.value)}
               placeholder="키워드, 과정명 등 입력"
-              className="w-full rounded-full border border-mistSkyBlue bg-white py-4 pl-6 pr-14 text-sm text-deepOceanNavy shadow-[0_4px_28px_rgba(34,130,168,0.28)] placeholder:text-softAquaBlue focus:border-waterlineBlue focus:outline-none focus:ring-2 focus:ring-[#2282A8]/20 md:text-base"
+              className="w-full rounded-full border border-mistSkyBlue bg-white py-3.5 pl-5 pr-14 text-sm text-deepOceanNavy shadow-[0_4px_28px_rgba(34,130,168,0.28)] placeholder:text-softAquaBlue focus:border-waterlineBlue focus:outline-none focus:ring-2 focus:ring-[#2282A8]/20 sm:py-4 sm:pl-6 md:text-base"
             />
             {/* 검색 버튼 */}
             <button
@@ -65,8 +65,8 @@ export default function CourseSearchHero({
             </button>
           </div>
 
-          {/* 필터 4종 — 검색바보다 약간 짧은 너비 (92%) */}
-          <div className="relative z-30 flex w-[92%] max-w-[calc(48rem*0.92)] flex-wrap items-center justify-center gap-2.5 overflow-visible sm:gap-3">
+          {/* 필터 4종 — 모바일 한 줄, sm+ 래핑 */}
+          <div className="relative z-30 grid w-full max-w-2xl grid-cols-4 gap-1 overflow-visible sm:flex sm:w-[92%] sm:max-w-[calc(48rem*0.92)] sm:flex-wrap sm:items-center sm:justify-center sm:gap-2.5 md:gap-3">
             {filters.map((filter) => (
               <CourseFilterSelect
                 key={filter.id} // 필터 id
@@ -80,7 +80,7 @@ export default function CourseSearchHero({
       </div>
 
       {/* 하단 구분선 — main 콘텐츠(max-w-desktop-content)와 동일 너비 */}
-      <div className="px-6 md:px-12">
+      <div className="px-4 sm:px-6 md:px-12">
         <div className="mx-auto w-full max-w-desktop-content border-b border-mistSkyBlue/60" />
       </div>
     </section>

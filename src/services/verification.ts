@@ -81,6 +81,7 @@ export function toUserCertificationRequest(item: VerificationListItem): UserCert
     id: item.verificationId,
     courseName: item.courseTitle,
     courseSessionId: item.courseSessionId,
+    batch: item.courseSessionRound != null ? `${item.courseSessionRound}기` : '-',
     requestedAt: toDateOnly(item.createdAt),
     status: item.status,
     rejectReason: item.rejectReason ?? undefined,

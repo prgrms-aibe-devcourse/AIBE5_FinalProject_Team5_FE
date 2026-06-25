@@ -3,8 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthPasswordInput from './components/AuthPasswordInput.tsx'
 import AuthInputWithButton from './components/AuthInputWithButton.tsx'
 import AuthButton from './components/AuthButton.tsx'
-import LoginVisualPanel from './components/LoginVisualPanel.tsx'
-import AuthExitButton from './components/AuthExitButton.tsx'
+import AuthPageLayout from './components/AuthPageLayout.tsx'
 import {
   PASSWORD_CONFIRM_REQUIRED_MESSAGE,
   PASSWORD_MATCH_MESSAGE,
@@ -17,7 +16,6 @@ import {
 import { resetPassword } from '../../services/auth.ts'
 import { ApiError } from '../../services/ApiError.ts'
 
-/** 비밀번호 재설정 — 토큰 기반 새 비밀번호 설정 */
 export default function ResetPasswordPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -109,100 +107,90 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden font-pretendard">
-      <div className="relative flex h-full w-1/2 flex-col overflow-y-auto glass-panel px-8 py-6">
-        <div className="absolute left-8 top-6 z-10">
-          <AuthExitButton />
-        </div>
+    <AuthPageLayout visualOverlayText="RESET">
+      <div className="w-full max-w-md px-1 sm:px-0">
+        <h1 className="mb-3 text-center text-xl font-semibold text-deepOceanNavy md:text-2xl">
+          새 비밀번호 설정
+        </h1>
+        <p className="mb-6 text-center text-xs text-softAquaBlue sm:mb-8 sm:text-sm">
+          8자 이상 64자 이하의 새 비밀번호를 입력해 주세요.
+        </p>
 
-        <div className="flex w-full flex-1 flex-col items-center justify-center">
-          <div className="w-full max-w-md">
-            <h1 className="mb-3 text-center text-2xl font-semibold text-deepOceanNavy">
-              새 비밀번호 설정
-            </h1>
-            <p className="mb-8 text-center text-sm text-softAquaBlue">
-              8자 이상 64자 이하의 새 비밀번호를 입력해 주세요.
+        {!token ? (
+          <div className="space-y-5 text-center sm:space-y-6">
+            <p className="text-sm text-red-500" role="alert">
+              유효하지 않은 비밀번호 재설정 링크입니다.
+              <br />
+              비밀번호 찾기를 다시 요청해 주세요.
             </p>
+            <AuthButton
+              type="button"
+              className="rounded-full py-3 text-base sm:py-3.5"
+              onClick={() => navigate('/forgot-password')}
+            >
+              비밀번호 찾기
+            </AuthButton>
+          </div>
+        ) : (
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
+            <AuthPasswordInput
+              label="새 비밀번호"
+              placeholder="8자 이상의 새 비밀번호를 입력해 주세요"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(event) => {
+                const value = event.target.value
+                setNewPassword(value)
+                resetPasswordConfirmState()
+                setPasswordError(getPasswordFormatError(value))
+                if (submitError) setSubmitError(null)
+              }}
+              error={passwordError ?? undefined}
+            />
 
-            {!token ? (
-              <div className="space-y-6 text-center">
-                <p className="text-sm text-red-500" role="alert">
-                  유효하지 않은 비밀번호 재설정 링크입니다.
-                  <br />
-                  비밀번호 찾기를 다시 요청해 주세요.
-                </p>
-                <AuthButton
-                  type="button"
-                  className="rounded-full py-3.5 text-base"
-                  onClick={() => navigate('/forgot-password')}
-                >
-                  비밀번호 찾기
-                </AuthButton>
-              </div>
-            ) : (
-              <form className="space-y-5" onSubmit={handleSubmit}>
-                <AuthPasswordInput
-                  label="새 비밀번호"
-                  placeholder="8자 이상의 새 비밀번호를 입력해 주세요"
-                  autoComplete="new-password"
-                  value={newPassword}
-                  onChange={(event) => {
-                    const value = event.target.value
-                    setNewPassword(value)
-                    resetPasswordConfirmState()
-                    setPasswordError(getPasswordFormatError(value))
-                    if (submitError) setSubmitError(null)
-                  }}
-                  error={passwordError ?? undefined}
-                />
+            <AuthInputWithButton
+              label="새 비밀번호 확인"
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => {
+                setConfirmPassword(event.target.value)
+                resetPasswordConfirmState()
+                if (submitError) setSubmitError(null)
+              }}
+              placeholder="새 비밀번호를 다시 입력해 주세요"
+              autoComplete="new-password"
+              buttonLabel="확인"
+              onButtonClick={handlePasswordConfirm}
+              buttonDisabled={!confirmPassword.trim() || !newPassword.trim()}
+              error={passwordConfirmError ?? undefined}
+              success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
+            />
 
-                <AuthInputWithButton
-                  label="새 비밀번호 확인"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(event) => {
-                    setConfirmPassword(event.target.value)
-                    resetPasswordConfirmState()
-                    if (submitError) setSubmitError(null)
-                  }}
-                  placeholder="새 비밀번호를 다시 입력해 주세요"
-                  autoComplete="new-password"
-                  buttonLabel="확인"
-                  onButtonClick={handlePasswordConfirm}
-                  buttonDisabled={!confirmPassword.trim() || !newPassword.trim()}
-                  error={passwordConfirmError ?? undefined}
-                  success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
-                />
-
-                {submitError && (
-                  <p className="text-sm text-red-500 font-pretendard" role="alert">
-                    {submitError}
-                  </p>
-                )}
-
-                <AuthButton
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className="mt-2 rounded-full py-3.5 text-base"
-                >
-                  {isSubmitting ? '변경 중...' : '비밀번호 변경'}
-                </AuthButton>
-              </form>
+            {submitError && (
+              <p className="text-sm text-red-500 font-pretendard" role="alert">
+                {submitError}
+              </p>
             )}
 
-            <p className="mt-6 text-center text-sm text-deepOceanNavy">
-              <Link
-                to="/login"
-                className="font-semibold text-waterlineBlue transition-colors hover:text-deepOceanNavy"
-              >
-                로그인으로 돌아가기
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
+            <AuthButton
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+              className="mt-1 rounded-full py-3 text-base sm:mt-2 sm:py-3.5"
+            >
+              {isSubmitting ? '변경 중...' : '비밀번호 변경'}
+            </AuthButton>
+          </form>
+        )}
 
-      <LoginVisualPanel />
-    </div>
+        <p className="mt-5 text-center text-sm text-deepOceanNavy sm:mt-6">
+          <Link
+            to="/login"
+            className="font-semibold text-waterlineBlue transition-colors hover:text-deepOceanNavy"
+          >
+            로그인으로 돌아가기
+          </Link>
+        </p>
+      </div>
+    </AuthPageLayout>
   )
 }

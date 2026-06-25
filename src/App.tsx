@@ -60,10 +60,10 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/dashboard/schedule" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard/profile" element={<ProfilePage />} />
-        <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
         <Route path="/dashboard/bookmarks" element={<BookmarksPage />} />
         <Route path="/dashboard/posts" element={<MyPostsPage />} />
         <Route path="/dashboard/portfolio" element={<AiPortfolioPage />} />
+        <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
       </Route>
       
       {/* 커뮤니티 */}

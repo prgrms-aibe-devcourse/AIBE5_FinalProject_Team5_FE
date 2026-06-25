@@ -6,17 +6,13 @@ import { HomeCarouselNavShell } from './HomeCarouselNav.tsx'
 import {
   HOME_CAROUSEL_SLIDE_MS,
   easeOutCubic,
-  getReviewViewportWidth,
   getWindowItems,
-  useHomeReviewVisibleCount,
+  useHomeCarouselLayout,
 } from './homeCarouselLayout.ts'
 
 const REVIEW_FETCH_LIMIT = 10
 const ROTATE_INTERVAL_MS = 4000
 const MANUAL_ROTATE_PAUSE_MS = 6000
-const CARD_WIDTH = 220
-const CARD_GAP = 28
-const CARD_STEP = CARD_WIDTH + CARD_GAP
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
 function resolveProfileImageUrl(url: string | null | undefined): string | null {
@@ -65,7 +61,13 @@ function getFeaturedSlot(visibleCount: number) {
 }
 
 const CARD_HEIGHT = 268
-const ARC_SPACING = CARD_STEP
+/** 모바일 후기 카드 — 인기 과정 카드 대비 높이 대폭 축소 */
+const REVIEW_MOBILE_HEIGHT_TRIM = 150
+const REVIEW_MOBILE_MIN_HEIGHT = 228
+
+function getMobileReviewCardHeight(mobileCardHeight: number) {
+  return Math.max(REVIEW_MOBILE_MIN_HEIGHT, mobileCardHeight - REVIEW_MOBILE_HEIGHT_TRIM)
+}
 
 function formatRating(rating: number) {
   return Number.isInteger(rating) ? String(rating) : rating.toFixed(1)
@@ -123,7 +125,12 @@ function getMaxArcDistance(visibleCount: number, featuredSlot: number) {
 }
 
 /** 중심으로부터의 거리(원 궤적)에 따라 위치·크기·투명도 계산 */
-function getArcTransform(distanceFromCenter: number, maxDistance: number) {
+function getArcTransform(
+  distanceFromCenter: number,
+  maxDistance: number,
+  arcSpacing: number,
+  disableScale = false,
+) {
   const abs = Math.abs(distanceFromCenter)
 
   if (abs > maxDistance + 0.55) {
@@ -135,9 +142,9 @@ function getArcTransform(distanceFromCenter: number, maxDistance: number) {
     }
   }
 
-  const scale = Math.max(0.84, 1.05 - abs * 0.075)
+  const scale = disableScale ? 1 : Math.max(0.84, 1.05 - abs * 0.075)
   const opacity = Math.max(0.52, 1 - abs * 0.17)
-  const translateX = distanceFromCenter * ARC_SPACING
+  const translateX = distanceFromCenter * arcSpacing
   const translateY = abs * abs * 3
 
   return {
@@ -183,7 +190,17 @@ function Avatar({
     </span>
   )
 }
-function ReviewCard({ review, featured }: { review: CourseReview; featured: boolean }) {
+function ReviewCard({
+  review,
+  featured,
+  cardWidth,
+  cardHeight,
+}: {
+  review: CourseReview
+  featured: boolean
+  cardWidth: number
+  cardHeight: number
+}) {
   const courseTitle = review.courseTitle || '과정'
 
   return (
@@ -193,11 +210,11 @@ function ReviewCard({ review, featured }: { review: CourseReview; featured: bool
           ? 'border-[#d0e0f0] bg-white px-5 pb-5 pt-5 shadow-[0_10px_28px_rgba(52,74,100,0.12)]'
           : 'border-[#e7edf3] bg-white/92 px-4 pb-4 pt-4 shadow-[0_2px_10px_rgba(52,74,100,0.05)] backdrop-blur-sm'
       }`}
-      style={{ height: CARD_HEIGHT }}
+      style={{ width: cardWidth, height: cardHeight }}
     >
       <header className="flex w-full shrink-0 flex-col items-center border-b border-[#e9eff5] pb-2.5">
         <Avatar imageUrl={review.userProfileImageUrl} nickname={review.userNickname} />
-        <p className="mt-2 w-full text-sm font-semibold tracking-[-0.01em] text-deepOceanNavy font-pretendard line-clamp-1">
+        <p className="mt-2 w-full text-xs font-semibold tracking-[-0.01em] text-deepOceanNavy font-pretendard line-clamp-1 sm:text-sm">
           {review.userNickname}
         </p>
       </header>
@@ -234,13 +251,21 @@ function ReviewCard({ review, featured }: { review: CourseReview; featured: bool
   )
 }
 
-function ReviewCardSkeleton({ featured }: { featured: boolean }) {
+function ReviewCardSkeleton({
+  featured,
+  cardWidth,
+  cardHeight,
+}: {
+  featured: boolean
+  cardWidth: number
+  cardHeight: number
+}) {
   return (
     <div
       className={`flex h-full w-full animate-pulse flex-col overflow-visible rounded-2xl border border-[#e7edf3] bg-white/50 ${
         featured ? 'px-5 pb-5 pt-5' : 'px-4 pb-4 pt-4'
       }`}
-      style={{ height: CARD_HEIGHT }}
+      style={{ width: cardWidth, height: cardHeight }}
     >
       <div className="flex flex-col items-center border-b border-[#e9eff5] pb-2.5">
         <div className="h-12 w-12 rounded-full bg-gray-200" />
@@ -262,7 +287,19 @@ function ReviewCardSkeleton({ featured }: { featured: boolean }) {
 }
 
 function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
-  const visibleCount = useHomeReviewVisibleCount()
+  const {
+    review: visibleCount,
+    reviewCardStep,
+    reviewCardWidth,
+    reviewViewportWidth,
+    mobileCardWidth,
+    mobileCardHeight,
+    mobileViewportWidth,
+    isMobile,
+  } = useHomeCarouselLayout()
+  const cardWidth = isMobile ? mobileCardWidth : reviewCardWidth
+  const cardHeight = isMobile ? getMobileReviewCardHeight(mobileCardHeight) : CARD_HEIGHT
+  const viewportWidth = isMobile ? mobileViewportWidth : reviewViewportWidth
   const [activeIndex, setActiveIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const [animDirection, setAnimDirection] = useState<0 | 1 | -1>(0)
@@ -274,7 +311,6 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
   const featuredSlot = getFeaturedSlot(visibleCount)
   const maxArcDistance = getMaxArcDistance(visibleCount, featuredSlot)
   const windowReviews = getWindowItems(reviewsList, activeIndex, visibleCount)
-  const viewportWidth = getReviewViewportWidth(visibleCount)
 
   const runArcAnimation = useCallback(
     (direction: 1 | -1, onComplete: () => void) => {
@@ -343,7 +379,7 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
   const prependedReview = animDirection === -1 ? reviewsList[(activeIndex - 1 + total) % total] : null
 
   const renderArcCard = (review: CourseReview, distance: number, key: string) => {
-    const arcStyle = getArcTransform(distance, maxArcDistance)
+    const arcStyle = getArcTransform(distance, maxArcDistance, reviewCardStep, isMobile)
     const featured = isFeaturedDistance(distance)
 
     return (
@@ -352,10 +388,10 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
         className="absolute left-1/2 overflow-visible will-change-transform"
         style={{
           top: '50%',
-          width: CARD_WIDTH,
-          height: CARD_HEIGHT,
-          marginLeft: -CARD_WIDTH / 2,
-          marginTop: -CARD_HEIGHT / 2,
+          width: cardWidth,
+          height: cardHeight,
+          marginLeft: -cardWidth / 2,
+          marginTop: -cardHeight / 2,
           opacity: arcStyle.opacity,
           transform: arcStyle.transform,
           zIndex: arcStyle.zIndex,
@@ -363,7 +399,7 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
         }}
         aria-hidden={!featured}
       >
-        <ReviewCard review={review} featured={featured} />
+        <ReviewCard review={review} featured={featured} cardWidth={cardWidth} cardHeight={cardHeight} />
       </li>
     )
   }
@@ -382,7 +418,7 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
       }}
       prevLabel="이전 후기"
       nextLabel="다음 후기"
-      contentHeight={CARD_HEIGHT + 48}
+      contentHeight={cardHeight + (isMobile ? 32 : 48)}
     >
       <ul className="relative h-full w-full" style={{ perspective: '1000px' }}>
         {prependedReview &&
@@ -416,10 +452,21 @@ function ReviewsCarousel({ reviewsList }: { reviewsList: CourseReview[] }) {
 }
 
 function ReviewsCarouselSkeleton() {
-  const visibleCount = useHomeReviewVisibleCount()
+  const {
+    review: visibleCount,
+    reviewCardStep,
+    reviewCardWidth,
+    reviewViewportWidth,
+    mobileCardWidth,
+    mobileCardHeight,
+    mobileViewportWidth,
+    isMobile,
+  } = useHomeCarouselLayout()
+  const cardWidth = isMobile ? mobileCardWidth : reviewCardWidth
+  const cardHeight = isMobile ? getMobileReviewCardHeight(mobileCardHeight) : CARD_HEIGHT
+  const viewportWidth = isMobile ? mobileViewportWidth : reviewViewportWidth
   const featuredSlot = getFeaturedSlot(visibleCount)
   const maxArcDistance = getMaxArcDistance(visibleCount, featuredSlot)
-  const viewportWidth = getReviewViewportWidth(visibleCount)
 
   return (
     <HomeCarouselNavShell
@@ -429,12 +476,12 @@ function ReviewsCarouselSkeleton() {
       onNext={() => {}}
       prevLabel="이전 후기"
       nextLabel="다음 후기"
-      contentHeight={CARD_HEIGHT + 48}
+      contentHeight={cardHeight + (isMobile ? 32 : 48)}
     >
       <ul className="relative h-full w-full">
         {Array.from({ length: visibleCount }, (_, slot) => {
           const distance = slot - featuredSlot
-          const arcStyle = getArcTransform(distance, maxArcDistance)
+          const arcStyle = getArcTransform(distance, maxArcDistance, reviewCardStep, isMobile)
           const featured = isFeaturedDistance(distance)
 
           return (
@@ -443,16 +490,16 @@ function ReviewsCarouselSkeleton() {
               className="absolute left-1/2 overflow-visible"
               style={{
                 top: '46%',
-                width: CARD_WIDTH,
-                height: CARD_HEIGHT,
-                marginLeft: -CARD_WIDTH / 2,
-                marginTop: -CARD_HEIGHT / 2,
+                width: cardWidth,
+                height: cardHeight,
+                marginLeft: -cardWidth / 2,
+                marginTop: -cardHeight / 2,
                 opacity: arcStyle.opacity,
                 transform: arcStyle.transform,
                 zIndex: arcStyle.zIndex,
               }}
             >
-              <ReviewCardSkeleton featured={featured} />
+              <ReviewCardSkeleton featured={featured} cardWidth={cardWidth} cardHeight={cardHeight} />
             </li>
           )
         })}
@@ -484,10 +531,10 @@ export default function ReviewsSection() {
 
   if (isLoading) {
     return (
-      <section id="reviews" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="수강생들의 후기" data-home-section>
+      <section id="reviews" className="w-full px-4 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16" aria-label="수강생들의 후기" data-home-section>
         <div className="mx-auto w-full max-w-desktop-content">
-          <h2 className="text-center text-2xl font-bold text-deepOceanNavy font-pretendard md:text-[28px]">수강생들의 후기</h2>
-          <p className="mt-2 text-center text-sm text-[#7b8795] font-pretendard">
+          <h2 className="text-center text-xl font-bold text-deepOceanNavy font-pretendard sm:text-2xl md:text-[28px]">수강생들의 후기</h2>
+          <p className="mt-2 px-2 text-center text-xs text-[#7b8795] font-pretendard sm:text-sm">
             실제 수강생들이 남긴 솔직한 후기를 확인해보세요
           </p>
           <ReviewsCarouselSkeleton />
@@ -501,10 +548,10 @@ export default function ReviewsSection() {
   }
 
   return (
-    <section id="reviews" className="w-full px-6 py-12 md:px-12 md:py-16" aria-label="수강생들의 후기" data-home-section>
+    <section id="reviews" className="w-full px-4 py-8 sm:px-6 sm:py-12 md:px-12 md:py-16" aria-label="수강생들의 후기" data-home-section>
       <div className="mx-auto w-full max-w-desktop-content">
-        <h2 className="text-center text-2xl font-bold text-deepOceanNavy font-pretendard md:text-[28px]">수강생들의 후기</h2>
-        <p className="mt-2 text-center text-sm text-[#7b8795] font-pretendard">
+        <h2 className="text-center text-xl font-bold text-deepOceanNavy font-pretendard sm:text-2xl md:text-[28px]">수강생들의 후기</h2>
+        <p className="mt-2 px-2 text-center text-xs text-[#7b8795] font-pretendard sm:text-sm">
           부트시그널의 솔직한 후기를 확인해보세요
         </p>
 

@@ -20,7 +20,7 @@ import {
 
 type CompareCoursesContextValue = {
   selectedCourses: CompareCourseItem[]
-  selectedIds: Set<string>
+  selectedSessionIds: Set<number>
   canAddMore: boolean
   toggleCompareCourse: (course: Course) => void
   toggleCompareBookmark: (course: {
@@ -30,7 +30,7 @@ type CompareCoursesContextValue = {
     academy: string
     logoUrl?: string
   }) => void
-  removeFromCompare: (courseId: string) => void
+  removeFromCompare: (courseSessionId: number) => void
 }
 
 const CompareCoursesContext = createContext<CompareCoursesContextValue | null>(null)
@@ -55,15 +55,15 @@ export function CompareCoursesProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
-  const selectedIds = useMemo(
-    () => new Set(selectedCourses.map((course) => course.id)),
+  const selectedSessionIds = useMemo(
+    () => new Set(selectedCourses.map((course) => course.courseSessionId)),
     [selectedCourses],
   )
 
   const toggleItem = useCallback((item: CompareCourseItem) => {
     setSelectedCourses((prev) => {
-      const exists = prev.some((entry) => entry.id === item.id)
-      if (exists) return prev.filter((entry) => entry.id !== item.id)
+      const exists = prev.some((entry) => entry.courseSessionId === item.courseSessionId)
+      if (exists) return prev.filter((entry) => entry.courseSessionId !== item.courseSessionId)
       if (prev.length >= MAX_COMPARE_COURSES) return prev
       return [...prev, item]
     })
@@ -91,20 +91,20 @@ export function CompareCoursesProvider({ children }: { children: ReactNode }) {
     [toggleItem],
   )
 
-  const removeFromCompare = useCallback((courseId: string) => {
-    setSelectedCourses((prev) => prev.filter((entry) => entry.id !== courseId))
+  const removeFromCompare = useCallback((courseSessionId: number) => {
+    setSelectedCourses((prev) => prev.filter((entry) => entry.courseSessionId !== courseSessionId))
   }, [])
 
   const value = useMemo(
     () => ({
       selectedCourses,
-      selectedIds,
+      selectedSessionIds,
       canAddMore: selectedCourses.length < MAX_COMPARE_COURSES,
       toggleCompareCourse,
       toggleCompareBookmark,
       removeFromCompare,
     }),
-    [selectedCourses, selectedIds, toggleCompareCourse, toggleCompareBookmark, removeFromCompare],
+    [selectedCourses, selectedSessionIds, toggleCompareCourse, toggleCompareBookmark, removeFromCompare],
   )
 
   return <CompareCoursesContext.Provider value={value}>{children}</CompareCoursesContext.Provider>

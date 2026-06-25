@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import CourseReviewStepProgress from './CourseReviewStepProgress.tsx'
 import CourseFilterSelect from '../CourseFilterSelect.tsx'
 import type { CourseFilterConfig } from '../../../../services/course.ts'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_FOOTER,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 interface CourseVerifiedReviewStep1InfoModalProps {
   isOpen: boolean
@@ -48,12 +55,12 @@ function SegmentField({
   onChange: (value: string) => void
 }) {
   return (
-    <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-      <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-        <p className="text-lg font-semibold text-deepOceanNavy">{label}</p>
+    <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-3.5 md:px-5">
+      <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[170px_1fr]">
+        <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">{label}</p>
         <div
-          className="rounded-2xl border border-mistSkyBlue/65 bg-white p-1"
-          style={{ display: 'grid', gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+          className="grid gap-0.5 rounded-xl border border-mistSkyBlue/65 bg-white p-0.5 sm:rounded-2xl sm:p-1"
+          style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
         >
           {options.map((option) => {
             const isSelected = value === option.value
@@ -62,7 +69,7 @@ function SegmentField({
                 key={option.value}
                 type="button"
                 onClick={() => onChange(option.value)}
-                className={`rounded-xl px-4 py-2.5 text-base font-semibold transition-colors ${
+                className={`rounded-lg px-1 py-2 text-xs font-semibold transition-colors sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-base ${
                   isSelected ? 'bg-mistSkyBlue/55 text-deepOceanNavy' : 'text-secondary hover:bg-foamWhite/60'
                 }`}
               >
@@ -120,18 +127,18 @@ export default function CourseVerifiedReviewStep1InfoModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label={isEditMode ? '인증 후기 수정 1단계' : '인증 후기 작성 1단계'}
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">
             {isEditMode ? '후기 수정' : '후기 작성'}
           </h2>
           <button
@@ -146,41 +153,41 @@ export default function CourseVerifiedReviewStep1InfoModal({
           </button>
         </div>
 
-        <div className="px-6 pb-6 pt-7 md:px-7 md:pb-7">
+        <div className={COURSE_REVIEW_MODAL_BODY}>
           <CourseReviewStepProgress currentStep={1} />
 
           <div className="space-y-3">
-            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-              <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-                <p className="text-lg font-semibold text-deepOceanNavy">기수</p>
+            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-3.5 md:px-5">
+              <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[170px_1fr]">
+                <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">기수</p>
                 <input
                   type="number"
                   min={1}
                   value={cohort}
                   onChange={(event) => setCohort(event.target.value)}
                   placeholder="기수를 입력해주세요"
-                  className="h-12 w-full rounded-2xl border border-mistSkyBlue/65 bg-foamWhite/40 px-5 text-base font-semibold text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/75 focus:border-waterlineBlue"
+                  className="h-11 w-full rounded-xl border border-mistSkyBlue/65 bg-foamWhite/40 px-4 text-sm font-semibold text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/75 focus:border-waterlineBlue sm:h-12 sm:rounded-2xl sm:px-5 sm:text-base"
                 />
               </div>
             </article>
 
-            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-              <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-                <p className="text-lg font-semibold text-deepOceanNavy">연령대</p>
+            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-3.5 md:px-5">
+              <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[170px_1fr]">
+                <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">연령대</p>
                 <input
                   type="number"
                   min={1}
                   value={age}
                   onChange={(event) => setAge(event.target.value)}
                   placeholder="나이를 입력해주세요"
-                  className="h-12 w-full rounded-2xl border border-mistSkyBlue/65 bg-foamWhite/40 px-5 text-base font-semibold text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/75 focus:border-waterlineBlue"
+                  className="h-11 w-full rounded-xl border border-mistSkyBlue/65 bg-foamWhite/40 px-4 text-sm font-semibold text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/75 focus:border-waterlineBlue sm:h-12 sm:rounded-2xl sm:px-5 sm:text-base"
                 />
               </div>
             </article>
 
-            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-4 py-3.5 shadow-[0_2px_10px_rgba(52,74,100,0.06)] md:px-5">
-              <div className="grid items-center gap-3 md:grid-cols-[170px_1fr]">
-                <p className="text-lg font-semibold text-deepOceanNavy">학습 주목적</p>
+            <article className="rounded-xl border border-mistSkyBlue/45 bg-white px-3 py-3 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:px-4 sm:py-3.5 md:px-5">
+              <div className="grid items-center gap-2 sm:gap-3 md:grid-cols-[170px_1fr]">
+                <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">학습 주목적</p>
                 <CourseFilterSelect filter={LEARNING_GOAL_FILTER} value={learningGoal} onChange={setLearningGoal} />
               </div>
             </article>
@@ -211,7 +218,7 @@ export default function CourseVerifiedReviewStep1InfoModal({
           </div>
         </div>
 
-        <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
+        <div className={COURSE_REVIEW_MODAL_FOOTER}>
           <div className="flex items-center justify-end gap-2">
             {onBack ? (
               <button

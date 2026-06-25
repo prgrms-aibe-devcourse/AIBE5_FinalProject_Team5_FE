@@ -1,4 +1,11 @@
 import { useEffect, useState } from 'react'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_FOOTER,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 interface CourseGeneralReviewModalProps {
   isOpen: boolean
@@ -72,18 +79,18 @@ export default function CourseGeneralReviewModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label={isEditMode ? '일반 후기 수정' : '일반 후기 작성'}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[720px] overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">
             {isEditMode ? '일반 후기 수정' : '일반 후기 작성'}
           </h2>
           <button
@@ -98,9 +105,9 @@ export default function CourseGeneralReviewModal({
           </button>
         </div>
 
-        <div className="space-y-4 px-6 pb-6 pt-7 md:px-7 md:pb-7">
-          <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-5 shadow-[0_2px_10px_rgba(52,74,100,0.06)]">
-            <div className="flex items-center justify-between gap-4">
+        <div className={`${COURSE_REVIEW_MODAL_BODY} space-y-4`}>
+          <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-4 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <p className="text-base font-semibold text-deepOceanNavy md:text-lg">전체 평점</p>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }, (_, idx) => {
@@ -119,26 +126,26 @@ export default function CourseGeneralReviewModal({
             </div>
           </article>
 
-          <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-5 shadow-[0_2px_10px_rgba(52,74,100,0.06)]">
+          <article className="rounded-xl border border-mistSkyBlue/45 bg-white p-4 shadow-[0_2px_10px_rgba(52,74,100,0.06)] sm:p-5">
             <p className="text-base font-semibold text-deepOceanNavy md:text-lg">후기 내용</p>
             <textarea
               value={content}
               onChange={(event) => setContent(event.target.value)}
               placeholder="과정에 대한 전체적인 후기를 작성해 주세요. (최소 10자)"
-              className="mt-3 h-44 w-full resize-none rounded-xl border border-mistSkyBlue/65 bg-foamWhite/30 p-4 text-base text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/70 focus:border-waterlineBlue"
+              className="mt-3 h-36 w-full resize-none rounded-xl border border-mistSkyBlue/65 bg-foamWhite/30 p-3 text-sm text-deepOceanNavy outline-none transition-colors placeholder:text-secondary/70 focus:border-waterlineBlue sm:h-44 sm:p-4 sm:text-base"
             />
           </article>
         </div>
 
         {submitError ? (
-          <div className="px-6 md:px-7">
+          <div className="shrink-0 px-4 sm:px-6 md:px-7">
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
               {submitError}
             </div>
           </div>
         ) : null}
 
-        <div className="border-t border-mistSkyBlue/45 px-6 py-4 md:px-7">
+        <div className={COURSE_REVIEW_MODAL_FOOTER}>
           <div className="flex items-center justify-end gap-2">
             {onBack ? (
               <button

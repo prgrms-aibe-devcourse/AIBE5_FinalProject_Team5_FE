@@ -1,7 +1,8 @@
-﻿import { useEffect, type ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 
 type DashboardModalProps = {
   title: string
+  subtitle?: ReactNode
   onClose: () => void
   children: ReactNode
   footer?: ReactNode
@@ -11,6 +12,7 @@ type DashboardModalProps = {
 
 export default function DashboardModal({
   title,
+  subtitle,
   onClose,
   children,
   footer,
@@ -41,9 +43,16 @@ export default function DashboardModal({
       >
         <div className="shrink-0 border-b border-mistSkyBlue/45 bg-linear-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-5 md:px-7">
           <div className="flex items-start justify-between gap-4">
-            <h2 id={ariaLabelledBy} className="font-pretendard text-lg font-bold text-deepOceanNavy md:text-xl">
-              {title}
-            </h2>
+            <div className="min-w-0">
+              <h2 id={ariaLabelledBy} className="font-pretendard text-lg font-bold text-deepOceanNavy md:text-xl">
+                {title}
+              </h2>
+              {subtitle ? (
+                <div className="mt-1 font-pretendard text-xs leading-relaxed text-secondary md:text-sm">
+                  {subtitle}
+                </div>
+              ) : null}
+            </div>
             <button
               type="button"
               onClick={onClose}

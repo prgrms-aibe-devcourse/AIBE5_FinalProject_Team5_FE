@@ -27,14 +27,14 @@ export default function AuthSocial({ variant = 'login' }: AuthSocialProps) {
   }
 
   return (
-    <div className="flex items-center justify-center gap-5">
+    <div className="flex items-center justify-center gap-4 sm:gap-5">
       {providers.map(({ name, icon }) => (
         <button
           key={name}
           type="button"
           onClick={() => handleProviderClick(name)}
           aria-label={`${name} ${actionLabel}`}
-          className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-mistSkyBlue transition-all duration-200 hover:scale-110 hover:shadow-md"
+          className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-mistSkyBlue transition-all duration-200 hover:scale-110 hover:shadow-md sm:h-14 sm:w-14"
         >
           <img src={icon} alt="" className="h-full w-full object-contain p-2" />
         </button>

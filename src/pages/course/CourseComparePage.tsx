@@ -81,16 +81,16 @@ export default function CourseComparePage() {
   return (
     <div className="flex min-h-screen flex-col font-pretendard">
       <Header fixed={false} />
-      <main className="flex-1 px-6 pb-16 pt-8 md:px-12 lg:px-20">
-        <div className="mx-auto flex w-full max-w-course-main flex-col gap-6 md:gap-8">
+      <main className="flex-1 px-4 pb-12 pt-6 sm:px-6 md:px-12 lg:px-20 lg:pb-16 lg:pt-8">
+        <div className="mx-auto flex w-full max-w-course-main flex-col gap-5 md:gap-8">
           <CourseCompareBreadcrumb />
           <div>
-            <h1 className="text-xl font-bold text-deepOceanNavy md:text-2xl">과정 비교</h1>
-            <p className="mt-1 text-sm text-secondary">
+            <h1 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">과정 비교</h1>
+            <p className="mt-1 text-xs text-secondary sm:text-sm">
               선택한 {courses.length}개 과정을 항목별로 비교합니다.
             </p>
           </div>
-          <div className="flex flex-col gap-6 md:gap-8">
+          <div className="flex flex-col gap-5 md:gap-8">
             <CourseCompareSummaryCards courses={courses} layout={layout} />
             <CourseCompareOverviewPanel courses={courses} layout={layout} />
             <CourseCompareTable courses={courses} statsByColumn={statsByColumn} layout={layout} />

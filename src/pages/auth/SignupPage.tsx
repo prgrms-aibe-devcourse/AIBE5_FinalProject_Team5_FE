@@ -5,8 +5,7 @@ import AuthInputWithButton from './components/AuthInputWithButton.tsx'
 import AuthPasswordInput from './components/AuthPasswordInput.tsx'
 import AuthButton from './components/AuthButton.tsx'
 import AuthSocial from './components/AuthSocial.tsx'
-import LoginVisualPanel from './components/LoginVisualPanel.tsx'
-import AuthExitButton from './components/AuthExitButton.tsx'
+import AuthPageLayout from './components/AuthPageLayout.tsx'
 import {
   EMAIL_AVAILABLE_MESSAGE,
   EMAIL_CHECK_REQUIRED_MESSAGE,
@@ -26,7 +25,6 @@ import {
 import { checkEmail, signup } from '../../services/auth.ts'
 import { ApiError } from '../../services/ApiError.ts'
 
-/** 데스크톱 회원가입 페이지 (50:50 — 사이드 배경 | 폼) */
 export default function SignupPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -57,9 +55,7 @@ export default function SignupPage() {
     setIsPasswordConfirmed(false)
   }
 
-  /* 이메일 중복 확인 */
   const handleEmailDuplicateCheck = async () => {
-    // 에러 체크
     if (!isValidEmail(email)) {
       setEmailError(EMAIL_INVALID_MESSAGE)
       setIsEmailVerified(false)
@@ -70,7 +66,6 @@ export default function SignupPage() {
     setIsEmailVerified(false)
     setIsEmailChecking(true)
 
-    // 이메일 중복 확인 요청 
     try {
       const result = await checkEmail(email.trim())
 
@@ -89,7 +84,6 @@ export default function SignupPage() {
     }
   }
 
-  // 비밀번호 확인
   const handlePasswordConfirm = () => {
     const passwordValidationError = getPasswordValidationError(password)
     if (passwordValidationError) {
@@ -116,11 +110,9 @@ export default function SignupPage() {
     setIsPasswordConfirmed(false)
   }
 
-  /* 회원가입 처리리 */
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    // 에러 체크
     if (!isValidEmail(email)) {
       setEmailError(EMAIL_INVALID_MESSAGE)
       return
@@ -157,13 +149,12 @@ export default function SignupPage() {
     setSignupError(null)
     setIsSubmitting(true)
 
-    // 회원가입 요청 전송
     try {
       const trimmedNickname = nickname.trim()
       await signup({
         email: email.trim(),
         password,
-        name: trimmedNickname, // 이름은 닉네임과 동일하게 사용
+        name: trimmedNickname,
         nickname: trimmedNickname,
       })
       navigate('/login')
@@ -186,121 +177,105 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden font-pretendard">
-      {/* 좌측 사이드 배경 — 추후 회원가입 전용 이미지로 교체 */}
-      <LoginVisualPanel overlayText="SIGN UP" />
+    <AuthPageLayout visualOverlayText="SIGN UP" visualPosition="left">
+      <div className="w-full max-w-md px-1 sm:px-0">
+        <h1 className="mb-6 text-center text-xl font-semibold text-deepOceanNavy md:mb-8 md:text-2xl">
+          회원가입
+        </h1>
 
-      {/* 우측 폼 영역 */}
-      <div className="relative flex h-full w-1/2 flex-col overflow-y-auto glass-panel px-8 py-6">
-        {/* 뒤로가기 */}
-        <div className="absolute left-8 top-6 z-10">
-          <AuthExitButton />
-        </div>
+        <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
+          <AuthInputWithButton
+            label="이메일"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setEmailError(null)
+              setIsEmailVerified(false)
+            }}
+            placeholder="example@email.com"
+            autoComplete="email"
+            buttonLabel={isEmailChecking ? '확인 중...' : '중복 확인'}
+            onButtonClick={handleEmailDuplicateCheck}
+            buttonDisabled={!email.trim() || isEmailChecking}
+            error={emailError ?? undefined}
+            success={isEmailVerified ? EMAIL_AVAILABLE_MESSAGE : undefined}
+          />
 
-        {/* 회원가입 폼 영역 */}
-        <div className="flex w-full flex-1 flex-col items-center justify-center">
-          <div className="w-full max-w-md">
-            <h1 className="mb-8 text-center text-2xl font-semibold text-deepOceanNavy">
-              회원가입
-            </h1>
-            {/* 입력 영역 */}
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <AuthInputWithButton
-                label="이메일"
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                  setEmailError(null)
-                  setIsEmailVerified(false)
-                }}
-                placeholder="example@email.com"
-                autoComplete="email"
-                buttonLabel={isEmailChecking ? '확인 중...' : '중복 확인'}
-                onButtonClick={handleEmailDuplicateCheck}
-                buttonDisabled={!email.trim() || isEmailChecking}
-                error={emailError ?? undefined}
-                success={isEmailVerified ? EMAIL_AVAILABLE_MESSAGE : undefined}
-              />
+          <AuthInput
+            label="닉네임"
+            type="text"
+            value={nickname}
+            onChange={(e) => {
+              const value = e.target.value
+              setNickname(value)
+              if (isNicknameTooLong(value)) {
+                setNicknameError(NICKNAME_LENGTH_MESSAGE)
+              } else if (nicknameError) {
+                setNicknameError(null)
+              }
+            }}
+            placeholder="Input nickname"
+            autoComplete="username"
+            error={nicknameError ?? undefined}
+          />
 
-              <AuthInput
-                label="닉네임"
-                type="text"
-                value={nickname}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setNickname(value)
-                  if (isNicknameTooLong(value)) {
-                    setNicknameError(NICKNAME_LENGTH_MESSAGE)
-                  } else if (nicknameError) {
-                    setNicknameError(null)
-                  }
-                }}
-                placeholder="Input nickname"
-                autoComplete="username"
-                error={nicknameError ?? undefined}
-              />
+          <AuthPasswordInput
+            placeholder="Password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => {
+              const value = e.target.value
+              setPassword(value)
+              resetPasswordConfirmState()
+              setPasswordError(getPasswordFormatError(value))
+            }}
+            error={passwordError ?? undefined}
+          />
 
-              <AuthPasswordInput
-                placeholder="Password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => {
-                  const value = e.target.value
-                  setPassword(value)
-                  resetPasswordConfirmState()
-                  setPasswordError(getPasswordFormatError(value))
-                }}
-                error={passwordError ?? undefined}
-              />
+          <AuthInputWithButton
+            label="비밀번호 확인"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value)
+              resetPasswordConfirmState()
+            }}
+            placeholder="Password Confirmation"
+            autoComplete="new-password"
+            buttonLabel="확인"
+            onButtonClick={handlePasswordConfirm}
+            buttonDisabled={!confirmPassword.trim()}
+            error={passwordConfirmError ?? undefined}
+            success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
+          />
 
-              <AuthInputWithButton
-                label="비밀번호 확인"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value)
-                  resetPasswordConfirmState()
-                }}
-                placeholder="Password Confirmation"
-                autoComplete="new-password"
-                buttonLabel="확인"
-                onButtonClick={handlePasswordConfirm}
-                buttonDisabled={!confirmPassword.trim()}
-                error={passwordConfirmError ?? undefined}
-                success={isPasswordConfirmed ? PASSWORD_MATCH_MESSAGE : undefined}
-              />
+          {signupError && (
+            <p className="text-sm text-red-500 font-pretendard" role="alert">
+              {signupError}
+            </p>
+          )}
 
-              {signupError && (
-                <p className="text-sm text-red-500 font-pretendard" role="alert">
-                  {signupError}
-                </p>
-              )}
+          <AuthButton
+            type="submit"
+            disabled={!canSubmit || isSubmitting}
+            className="mt-1 rounded-full py-3 text-base sm:mt-2 sm:py-3.5"
+          >
+            {isSubmitting ? '가입 중...' : '회원가입'}
+          </AuthButton>
+        </form>
 
-              <AuthButton
-                type="submit"
-                disabled={!canSubmit || isSubmitting}
-                className="mt-2 rounded-full py-3.5 text-base"
-              >
-                {isSubmitting ? '가입 중...' : '회원가입'}
-              </AuthButton>
-            </form>
-
-            {/* 구분선 */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-mistSkyBlue" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-transparent px-3 text-sm text-softAquaBlue font-pretendard">Or</span>
-              </div>
-            </div>
-
-            {/* 소셜 회원가입 */}
-            <AuthSocial variant="signup" />
+        <div className="relative my-6 sm:my-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-mistSkyBlue" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="bg-transparent px-3 text-sm text-softAquaBlue font-pretendard">Or</span>
           </div>
         </div>
+
+        <AuthSocial variant="signup" />
       </div>
-    </div>
+    </AuthPageLayout>
   )
 }

@@ -5,6 +5,7 @@ export type CertifiableCourse = {
   courseSessionId: number
   title: string
   academy: string
+  batch: string
 }
 
 export type CertificationDocumentType = 'TRAINING_HISTORY' | 'ONLINE_APPLICATION'
@@ -27,6 +28,7 @@ export type UserCertificationRequest = {
   id: number
   courseName: string
   courseSessionId: number
+  batch: string
   requestedAt: string
   status: UserCertificationStatus
   rejectReason?: string
@@ -64,41 +66,3 @@ export const CERTIFICATION_MAX_FILE_SIZE = 25 * 1024 * 1024
 export function getApprovedCertificationRequests(requests: UserCertificationRequest[]) {
   return requests.filter((request) => request.status === 'APPROVED')
 }
-
-/** API 연동 후 제거 예정 — 내 과정 인증 요청 더미 데이터 */
-export const myCertificationRequests: UserCertificationRequest[] = [
-  {
-    id: 1,
-    courseName: '[프로그래밍] 국비지원 프론트엔드 데브코스',
-    courseSessionId: 1001,
-    requestedAt: '2026-06-02',
-    status: 'PENDING',
-    documents: [
-      { id: 1, name: '직업훈련이력_캡처.png', type: 'TRAINING_HISTORY', uploadedAt: '2026-06-02' },
-      { id: 2, name: '온라인수강이력_캡처.png', type: 'ONLINE_APPLICATION', uploadedAt: '2026-06-02' },
-    ],
-  },
-  {
-    id: 2,
-    courseName: '데이터 분석가 부트캠프 12기',
-    courseSessionId: 1002,
-    requestedAt: '2026-05-28',
-    status: 'APPROVED',
-    documents: [
-      { id: 3, name: '직업훈련이력_부트캠프.jpg', type: 'TRAINING_HISTORY', uploadedAt: '2026-05-28' },
-      { id: 4, name: '온라인수강이력_부트캠프.jpg', type: 'ONLINE_APPLICATION', uploadedAt: '2026-05-28' },
-    ],
-  },
-  {
-    id: 3,
-    courseName: 'React Native 모바일 앱 개발',
-    courseSessionId: 1003,
-    requestedAt: '2026-05-25',
-    status: 'REJECTED',
-    rejectReason: '제출하신 수료증의 과정명이 신청 과정과 일치하지 않습니다.',
-    documents: [
-      { id: 5, name: '직업훈련이력_제출본.png', type: 'TRAINING_HISTORY', uploadedAt: '2026-05-25' },
-      { id: 6, name: '온라인수강이력_제출본.png', type: 'ONLINE_APPLICATION', uploadedAt: '2026-05-25' },
-    ],
-  },
-]

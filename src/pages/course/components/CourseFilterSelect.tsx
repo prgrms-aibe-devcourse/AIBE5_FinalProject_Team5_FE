@@ -28,13 +28,13 @@ export default function CourseFilterSelect({ filter, value, onChange }: CourseFi
         aria-haspopup="listbox"
         onClick={() => setOpen((prev) => !prev)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
-        className="flex w-full cursor-pointer items-center rounded-xl border border-mistSkyBlue/80 bg-white py-2.5 pl-4 pr-9 text-left text-sm font-medium text-deepOceanNavy shadow-sm transition-colors hover:border-waterlineBlue/60 focus:border-waterlineBlue focus:outline-none font-pretendard"
+        className="flex w-full cursor-pointer items-center rounded-lg border border-mistSkyBlue/80 bg-white py-1.5 pl-2 pr-6 text-left text-[11px] font-medium text-deepOceanNavy shadow-sm transition-colors hover:border-waterlineBlue/60 focus:border-waterlineBlue focus:outline-none font-pretendard sm:rounded-xl sm:py-2.5 sm:pl-4 sm:pr-9 sm:text-sm"
       >
         <span className="truncate">{selectedLabel}</span>
       </button>
 
       <svg
-        className={`pointer-events-none absolute right-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-deepOceanNavy/70 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        className={`pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-deepOceanNavy/70 transition-transform duration-200 sm:right-3.5 sm:h-3.5 sm:w-3.5 ${open ? 'rotate-180' : ''}`}
         viewBox="0 0 14 14"
         fill="none"
         aria-hidden="true"

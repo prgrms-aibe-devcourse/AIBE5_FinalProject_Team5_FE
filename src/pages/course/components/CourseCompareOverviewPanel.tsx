@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import type { CourseDetail } from '../../../services/course.ts'
 import { isMissingDisplayValue } from '../../../services/course.ts'
 import type { CompareLayoutConfig } from './compareLayout.ts'
+import { COMPARE_RESPONSIVE_GRID_CLASS, getCompareGridVars } from './compareLayout.ts'
 import { CompareSectionIcon } from './compareSectionIcons.tsx'
 
 interface CourseCompareOverviewPanelProps {
@@ -189,6 +190,7 @@ function EmploymentBar({
   )
 }
 
+
 function CombinedMetricCell({
   satisfaction,
   employmentPercent,
@@ -225,6 +227,46 @@ function CombinedMetricCell({
   )
 }
 
+function CompareOverviewRow({
+  label,
+  layout,
+  items,
+  renderCell,
+}: {
+  label: string
+  layout: CompareLayoutConfig
+  items: CourseDetail[]
+  renderCell: (course: CourseDetail, index: number) => ReactNode
+}) {
+  return (
+    <div
+      className={`${COMPARE_RESPONSIVE_GRID_CLASS} items-stretch`}
+      style={getCompareGridVars(layout)}
+    >
+      <div className="flex items-center justify-center bg-foamWhite/50 px-1.5 py-3 text-xs font-semibold leading-snug text-secondary md:px-3.5 md:py-5 md:text-sm">
+        <span className="break-words text-center">{label}</span>
+      </div>
+      {items.map((course, index) => (
+        <div
+          key={course.courseSessionId ?? course.id}
+          className="flex min-w-0 items-center justify-center border-l border-mistSkyBlue/30 bg-transparent px-1 py-3 text-center md:px-4 md:py-5"
+        >
+          {renderCell(course, index)}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function OverviewTextValue({ children }: { children: ReactNode }) {
+  return (
+    <p className="w-full break-words px-0.5 text-[10px] font-semibold leading-snug text-deepOceanNavy">
+      {children}
+    </p>
+  )
+}
+
+
 function parseEmploymentPercent(value: string): number | null {
   if (isMissingDisplayValue(value)) return null
   const parsed = parseFloat(value.replace(/[^\d.]/g, ''))
@@ -244,7 +286,30 @@ export default function CourseCompareOverviewPanel({ courses, layout }: CourseCo
         <InfoTooltip text="만족도는 5점 만점, 취업률은 백분율 기준으로 표시됩니다." />
       </div>
 
-      <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)]">
+      {/* 모바일 — 하단 테이블과 동일한 행 구조 */}
+      <div className="overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)] md:hidden">
+        <div className="divide-y divide-mistSkyBlue/25">
+          <CompareOverviewRow
+            label="만족도"
+            layout={layout}
+            items={courses}
+            renderCell={(course) => (
+              <OverviewTextValue>
+                {course.satisfactionOutOf5 != null ? course.satisfactionOutOf5.toFixed(1) : '-'}
+              </OverviewTextValue>
+            )}
+          />
+          <CompareOverviewRow
+            label="취업률"
+            layout={layout}
+            items={courses}
+            renderCell={(course) => <OverviewTextValue>{course.employmentRate}</OverviewTextValue>}
+          />
+        </div>
+      </div>
+
+      {/* 데스크톱 — 원그래프 + 막대그래프 나란히 */}
+      <div className="hidden overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)] md:block">
         <div
           className="grid items-stretch"
           style={{ gridTemplateColumns: layout.gridTemplateColumns }}

@@ -1,6 +1,6 @@
 /**
  * services/courseCompare.ts
- * 선택 과정 비교 — localStorage (courseSessionId·과정명·기관명 저장)
+ * 선택 과정 비교 — localStorage (courseId·courseSessionId·과정명·기관명 저장)
  */
 
 import { getCourseSessionDetail, type Course, type CourseDetail } from './course.ts'
@@ -17,31 +17,52 @@ const MAX_ITEMS = 3
 
 export const MAX_COMPARE_COURSES = MAX_ITEMS
 
-/** localStorage·사이드바·비교 페이지에 쓰는 최소 필드 */
+/** localStorage·사이드바·비교 페이지에 쓰는 최소 필드 (회차 단위 구분) */
 export interface CompareCourseItem {
-  id: string
+  courseId: number
   courseSessionId: number
   title: string
   company: string
   logoUrl?: string
 }
 
-function isCompareCourseItem(value: unknown): value is CompareCourseItem {
-  if (!value || typeof value !== 'object') return false
-  const item = value as CompareCourseItem
-  return (
-    typeof item.id === 'string' &&
-    typeof item.courseSessionId === 'number' &&
-    !Number.isNaN(item.courseSessionId) &&
-    typeof item.title === 'string' &&
-    typeof item.company === 'string'
-  )
+function normalizeCompareCourseItem(value: unknown): CompareCourseItem | null {
+  if (!value || typeof value !== 'object') return null
+
+  const raw = value as Record<string, unknown>
+  const courseSessionId = raw.courseSessionId
+  if (typeof courseSessionId !== 'number' || Number.isNaN(courseSessionId)) return null
+
+  let courseId: number | null = null
+  if (typeof raw.courseId === 'number' && !Number.isNaN(raw.courseId)) {
+    courseId = raw.courseId
+  } else if (typeof raw.id === 'string' && raw.id.trim()) {
+    const parsed = Number(raw.id)
+    if (!Number.isNaN(parsed)) courseId = parsed
+  } else if (typeof raw.id === 'number' && !Number.isNaN(raw.id)) {
+    courseId = raw.id
+  }
+  if (courseId == null) return null
+
+  if (typeof raw.title !== 'string' || typeof raw.company !== 'string') return null
+
+  return {
+    courseId,
+    courseSessionId,
+    title: raw.title,
+    company: raw.company,
+    logoUrl: typeof raw.logoUrl === 'string' ? raw.logoUrl : undefined,
+  }
 }
 
 export function toCompareCourseItem(course: Course): CompareCourseItem | null {
   if (course.courseSessionId == null) return null
+
+  const courseId = Number(course.id)
+  if (Number.isNaN(courseId)) return null
+
   return {
-    id: course.id,
+    courseId,
     courseSessionId: course.courseSessionId,
     title: course.title,
     company: course.company,
@@ -57,7 +78,7 @@ export function toCompareCourseItemFromBookmark(course: {
   logoUrl?: string
 }): CompareCourseItem {
   return {
-    id: String(course.id),
+    courseId: course.id,
     courseSessionId: course.courseSessionId,
     title: course.title,
     company: course.academy,
@@ -72,7 +93,19 @@ export function loadCompareCourses(): CompareCourseItem[] {
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(isCompareCourseItem).slice(0, MAX_ITEMS)
+
+    const items: CompareCourseItem[] = []
+    const seenSessionIds = new Set<number>()
+
+    for (const entry of parsed) {
+      const item = normalizeCompareCourseItem(entry)
+      if (!item || seenSessionIds.has(item.courseSessionId)) continue
+      seenSessionIds.add(item.courseSessionId)
+      items.push(item)
+      if (items.length >= MAX_ITEMS) break
+    }
+
+    return items
   } catch {
     return []
   }

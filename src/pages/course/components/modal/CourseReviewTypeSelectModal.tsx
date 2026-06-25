@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  COURSE_REVIEW_MODAL_BODY,
+  COURSE_REVIEW_MODAL_HEADER,
+  COURSE_REVIEW_MODAL_OVERLAY,
+  COURSE_REVIEW_MODAL_PANEL,
+} from './courseReviewModalLayout.ts'
 
 type ReviewType = 'general' | 'verified'
 
@@ -43,18 +49,18 @@ export default function CourseReviewTypeSelectModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-deepOceanNavy/45 px-4 py-6"
+      className={COURSE_REVIEW_MODAL_OVERLAY}
       role="dialog"
       aria-modal="true"
       aria-label="후기 유형 선택"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[720px] overflow-hidden rounded-2xl border border-mistSkyBlue/50 glass-modal shadow-[0_18px_50px_rgba(36,57,84,0.28)]"
+        className={COURSE_REVIEW_MODAL_PANEL}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-mistSkyBlue/45 bg-gradient-to-r from-mistSkyBlue/55 via-softAquaBlue/40 to-waterlineBlue/20 px-6 py-4 md:px-7">
-          <h2 className="text-xl font-bold text-deepOceanNavy md:text-2xl">후기 유형 선택</h2>
+        <div className={COURSE_REVIEW_MODAL_HEADER}>
+          <h2 className="text-lg font-bold text-deepOceanNavy sm:text-xl md:text-2xl">후기 유형 선택</h2>
           <button
             type="button"
             onClick={onClose}
@@ -67,8 +73,8 @@ export default function CourseReviewTypeSelectModal({
           </button>
         </div>
 
-        <div className="px-6 pb-6 pt-7 md:px-7 md:pb-7">
-          <div className="grid gap-3 md:grid-cols-2">
+        <div className={COURSE_REVIEW_MODAL_BODY}>
+          <div className="grid gap-3 sm:grid-cols-2">
             {REVIEW_TYPE_OPTIONS.map((option) => {
               const isSelected = selectedType === option.id
 
@@ -80,18 +86,18 @@ export default function CourseReviewTypeSelectModal({
                     setSelectedType(option.id)
                     onSelectType?.(option.id)
                   }}
-                  className="aspect-square rounded-xl border border-mistSkyBlue/50 bg-white p-6 text-left transition-colors hover:bg-foamWhite/70"
+                  className="rounded-xl border border-mistSkyBlue/50 bg-white p-4 text-left transition-colors hover:bg-foamWhite/70 sm:aspect-square sm:p-6"
                   aria-pressed={isSelected}
                 >
                   <div className="min-w-0 text-center">
                       <span
-                        className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full border border-mistSkyBlue/55 bg-foamWhite/65 text-2xl"
+                        className="mb-2 inline-flex h-11 w-11 items-center justify-center rounded-full border border-mistSkyBlue/55 bg-foamWhite/65 text-xl sm:mb-3 sm:h-14 sm:w-14 sm:text-2xl"
                         aria-hidden="true"
                       >
                         {option.emoji}
                       </span>
-                      <p className="text-lg font-semibold text-deepOceanNavy">{option.label}</p>
-                      <p className="mt-1 text-[0.92rem] text-secondary">{option.description}</p>
+                      <p className="text-base font-semibold text-deepOceanNavy sm:text-lg">{option.label}</p>
+                      <p className="mt-1 text-xs text-secondary sm:text-[0.92rem]">{option.description}</p>
                   </div>
                 </button>
               )

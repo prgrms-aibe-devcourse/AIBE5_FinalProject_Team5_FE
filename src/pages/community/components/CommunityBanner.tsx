@@ -79,7 +79,7 @@ function SectionCard({ sectionKey }: { sectionKey: CommunitySectionKey }) {
 export default function CommunityBanner() {
   return (
     <section className="relative w-full overflow-hidden rounded-3xl" aria-label="커뮤니티 소개">
-      <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-8 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] md:p-10 lg:p-12">
+      <div className="relative overflow-hidden rounded-3xl border border-white/75 bg-white/52 p-5 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] shadow-[0_20px_50px_rgba(28,46,92,0.20),0_6px_16px_rgba(28,46,92,0.12),inset_0_1px_0_rgba(255,255,255,0.88)] sm:p-8 md:p-10 lg:p-12">
         {/* 배너 내부 배경 그라데이션 */}
         <div
           className="pointer-events-none absolute inset-0 opacity-40"
@@ -105,7 +105,7 @@ export default function CommunityBanner() {
 
         {/* 배너 내부 컨텐츠 영역 */}
         <div className="relative z-10 grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
-          <div className="relative pl-5 md:pl-6">
+          <div className="relative pl-4 md:pl-6">
             
             {/* 배너 내부 선 */}
             <div
@@ -114,7 +114,7 @@ export default function CommunityBanner() {
             />
 
             {/* 배너 내부 제목 */}
-            <h1 className="text-3xl font-bold leading-[1.2] tracking-tight text-deepOceanNavy md:text-4xl lg:text-[2.65rem]">
+            <h1 className="text-2xl font-bold leading-[1.2] tracking-tight text-deepOceanNavy sm:text-3xl md:text-4xl lg:text-[2.65rem]">
               함께 나누고,
               <br />
               <span className="bg-linear-to-r from-[#005EB8] via-waterlineBlue to-softAquaBlue bg-clip-text text-transparent">
@@ -122,14 +122,14 @@ export default function CommunityBanner() {
               </span>
             </h1>
 
-            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-deepOceanNavy/65 md:text-base">
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-deepOceanNavy/65 sm:mt-5 sm:text-[15px] md:text-base">
               게시판, Q&amp;A, 모집, 아티클을 통해 실무 경험과 취업 정보를 나누고
               서로의 성장을 응원해 보세요.
             </p>
           </div>
 
-          {/* 배너 내부 커뮤니티 목록 카드 */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-3.5">
+          {/* 배너 내부 커뮤니티 목록 카드 — 모바일 숨김 (탭으로 이동) */}
+          <div className="hidden grid-cols-2 gap-3 sm:gap-3.5 md:grid">
             {sectionKeys.map((key) => (
               <SectionCard key={key} sectionKey={key} />
             ))}

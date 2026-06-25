@@ -18,7 +18,7 @@ export default function AuthInput({ label, error, id, suffix, className = '', ..
       <div className="relative">
         <input
           id={inputId}
-          className={`w-full rounded-lg border bg-white px-4 py-3 text-sm text-deepOceanNavy placeholder:text-softAquaBlue outline-none transition-colors font-pretendard ${error ? 'border-red-500 focus:border-red-500' : 'border-mistSkyBlue focus:border-waterlineBlue'} ${suffix ? 'pr-11' : ''} ${className}`}
+          className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-deepOceanNavy placeholder:text-softAquaBlue outline-none transition-colors font-pretendard sm:px-4 sm:py-3 ${error ? 'border-red-500 focus:border-red-500' : 'border-mistSkyBlue focus:border-waterlineBlue'} ${suffix ? 'pr-11' : ''} ${className}`}
           {...props}
         />
         {suffix && (

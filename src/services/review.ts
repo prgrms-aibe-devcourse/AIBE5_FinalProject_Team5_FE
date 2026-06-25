@@ -312,7 +312,7 @@ export interface VerifiedReviewStatisticsDTO {
   qualityMetrics: ReviewQualityMetric[]
 }
 
-/** UI 소비용 — mockCourseReviews.VerifiedReviewStats 와 동일 구조 */
+/** UI 소비용 */
 export interface VerifiedReviewStatistics {
   reviewCount: number
   averageRating: number
@@ -323,6 +323,24 @@ export interface VerifiedReviewStatistics {
     color: string
   }[]
   qualityMetrics: ReviewQualityMetric[]
+}
+
+export function buildPriorKnowledgeConicGradient(
+  distribution: VerifiedReviewStatistics['priorKnowledgeDistribution'],
+): string {
+  const total = distribution.reduce((sum, item) => sum + item.count, 0)
+  if (total === 0) return 'conic-gradient(#d8e4f0 0deg 360deg)'
+
+  let degree = 0
+  const segments = distribution
+    .filter((item) => item.count > 0)
+    .map((item) => {
+      const start = degree
+      degree += (item.count / total) * 360
+      return `${item.color} ${start}deg ${degree}deg`
+    })
+
+  return `conic-gradient(${segments.join(', ')})`
 }
 
 const PRIOR_KNOWLEDGE_LEVELS = ['비전공', '전공', '현직'] as const

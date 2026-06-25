@@ -1,6 +1,11 @@
 import { useEffect } from 'react'
 
-const HEADER_OFFSET = 80 // 고정 헤더 높이(5rem)
+const HEADER_OFFSET_DESKTOP = 80
+const HEADER_OFFSET_MOBILE = 64
+
+function getHeaderOffset() {
+  return window.matchMedia('(min-width: 768px)').matches ? HEADER_OFFSET_DESKTOP : HEADER_OFFSET_MOBILE
+}
 const DURATION = 700 // 섹션 간 이동 애니메이션 길이(ms)
 const COOLDOWN = 160 // 애니메이션 직후 트랙패드 관성으로 인한 연속 점프 방지(ms)
 
@@ -29,7 +34,7 @@ export function useSmoothSectionScroll() {
 
     // 헤더 아래에 섹션 상단이 오도록 하는 목표 스크롤 위치
     const targetY = (el: HTMLElement) =>
-      Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET))
+      Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY - getHeaderOffset()))
 
     // 현재 뷰포트에 가장 가까운 섹션 인덱스
     const currentIndex = () => {
@@ -87,7 +92,7 @@ export function useSmoothSectionScroll() {
       // 현재 섹션이 뷰포트보다 길면, 안쪽 끝까지는 네이티브로 스크롤하게 둔다
       const current = sections[index]
       const rect = current.getBoundingClientRect()
-      const viewport = window.innerHeight - HEADER_OFFSET
+      const viewport = window.innerHeight - getHeaderOffset()
       if (rect.height > viewport + 4) {
         const top = targetY(current)
         const innerBottom = top + (rect.height - viewport)

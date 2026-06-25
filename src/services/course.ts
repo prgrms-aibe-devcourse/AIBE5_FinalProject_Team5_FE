@@ -31,6 +31,8 @@ export interface Course {
   courseSessionId?: number
   title: string
   company: string
+  /** trprDegr → "N기" */
+  batch: string
   location: string
   price: string
   dateRange: string
@@ -55,7 +57,6 @@ export interface CourseContact {
 export interface CourseDetail extends Course {
   /** 과정 ID (회차 ID `courseSessionId`와 구분) */
   courseId: number
-  batch: string
   recruitment: CourseRecruitment
   eligibility: string
   goals: string
@@ -78,6 +79,7 @@ export interface CourseListItem {
   id: number
   courseId?: number
   courseSessionId?: number
+  trprDegr?: number | null
   trprId: string
   title: string
   institutionName: string
@@ -354,6 +356,11 @@ function formatAreaCode(code: string | null | undefined): string {
   return AREA_CODE_MAP[prefix] ?? code
 }
 
+function formatBatch(trprDegr: number | null | undefined): string {
+  if (trprDegr == null) return '-'
+  return `${trprDegr}기`
+}
+
 export function formatCoursePrice(amount: number | null | undefined): string {
   if (amount === null || amount === undefined) return '-'
   if (amount === 0) return '무료'
@@ -401,9 +408,9 @@ function isStatMissing(value: number | null | undefined): boolean {
   return value === null || value === undefined || value === 0
 }
 
-function formatScore(score: number | null | undefined): string {
+function formatSatisfactionScore(score: number | null | undefined): string {
   if (isStatMissing(score)) return COURSE_STAT_PLACEHOLDER
-  return String(score)
+  return `${score}%`
 }
 
 function formatEmploymentRate(rate: number | null | undefined): string {
@@ -439,10 +446,11 @@ export function toCourseCardVM(item: CourseListItem): Course {
     courseSessionId: item.courseSessionId ?? (item.courseId != null ? item.id : undefined),
     title: item.title,
     company: item.institutionName,
+    batch: formatBatch(item.trprDegr),
     location: formatAreaCode(item.trngAreaCd),
     price: formatCoursePrice(item.selfPaymentAmount),
     dateRange: formatDateRange(item.traStartDate, item.traEndDate),
-    satisfaction: formatScore(item.stdgScor),
+    satisfaction: formatSatisfactionScore(item.stdgScor),
     employmentRate: formatEmploymentRate(item.employmentRate),
     rating: formatRating(item.reviewRating),
     logoUrl: item.profileImageUrl ?? undefined,
@@ -505,7 +513,7 @@ export function toCourseDetailVMFromSession(detail: BECourseSessionDetail): Cour
     location: formatAreaCode(detail.trngAreaCd),
     price: formatCoursePrice(detail.selfPaymentAmount),
     dateRange,
-    satisfaction: formatScore(detail.stdgScor),
+    satisfaction: formatSatisfactionScore(detail.stdgScor),
     satisfactionOutOf5: stdgScorToFivePoint(detail.stdgScor),
     employmentRate,
     rating: '-',

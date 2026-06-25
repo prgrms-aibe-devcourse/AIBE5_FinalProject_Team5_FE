@@ -1,7 +1,11 @@
 // 과정 비교 요약 카드
 import { Link } from 'react-router-dom'
 import type { CourseDetail } from '../../../services/course.ts'
-import type { CompareLayoutConfig } from './compareLayout.ts'
+import {
+  COMPARE_RESPONSIVE_GRID_CLASS,
+  getCompareGridVars,
+  type CompareLayoutConfig,
+} from './compareLayout.ts'
 import CourseThumbnail from './CourseThumbnail.tsx'
 
 interface CourseCompareSummaryCardsProps {
@@ -54,7 +58,10 @@ function ArrowRightIcon() {
 export default function CourseCompareSummaryCards({ courses, layout }: CourseCompareSummaryCardsProps) {
   return (
     <div className={layout.containerClassName}>
-      <div className="grid gap-3" style={{ gridTemplateColumns: layout.gridTemplateColumns }}>
+      <div
+        className={`${COMPARE_RESPONSIVE_GRID_CLASS} gap-2 md:gap-3`}
+        style={getCompareGridVars(layout)}
+      >
         <div aria-hidden="true" />
         {courses.map((course) => {
           const detailPath =
@@ -63,9 +70,9 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
               : `/courses/${course.id}`
 
           return (
-            <div key={course.courseSessionId ?? course.id} className="flex justify-center px-1 sm:px-2">
+            <div key={course.courseSessionId ?? course.id} className="flex min-w-0 justify-center px-0.5 md:px-2">
               <article
-                className={`group flex w-full flex-col overflow-hidden rounded-2xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)] ring-1 ring-mistSkyBlue/25 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(52,74,100,0.12)] hover:ring-waterlineBlue/35 ${layout.summaryCardMaxWidth}`}
+                className={`group flex w-full max-md:max-w-none flex-col overflow-hidden rounded-xl glass-panel shadow-[0_2px_12px_rgba(52,74,100,0.06)] ring-1 ring-mistSkyBlue/25 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(52,74,100,0.12)] hover:ring-waterlineBlue/35 md:rounded-2xl ${layout.summaryCardMaxWidth}`}
               >
                 <div className="overflow-hidden border-b border-mistSkyBlue/20">
                   <CourseThumbnail
@@ -75,21 +82,21 @@ export default function CourseCompareSummaryCards({ courses, layout }: CourseCom
                   />
                 </div>
 
-                <div className="flex flex-1 flex-col items-center gap-2.5 px-4 py-4 text-center">
-                  <h2 className="line-clamp-2 min-h-[2.5rem] text-sm font-bold leading-snug text-deepOceanNavy">
+                <div className="flex flex-1 flex-col items-center gap-1.5 px-2 py-2 text-center md:gap-2.5 md:px-4 md:py-4">
+                  <h2 className="line-clamp-2 min-h-[2rem] text-[11px] font-bold leading-snug text-deepOceanNavy md:min-h-[2.5rem] md:text-sm">
                     {course.title}
                   </h2>
 
-                  <p className="flex w-full items-center justify-center gap-1.5 text-xs text-secondary">
+                  <p className="flex w-full items-center justify-center gap-1 text-[10px] text-secondary md:gap-1.5 md:text-xs">
                     <BuildingIcon />
                     <span className="line-clamp-1">{course.company}</span>
                   </p>
 
                   <Link
                     to={detailPath}
-                    className="mt-1 inline-flex items-center gap-1 rounded-lg border border-waterlineBlue/25 bg-waterlineBlue/[0.06] px-3.5 py-1.5 text-xs font-semibold text-waterlineBlue transition-colors hover:border-waterlineBlue/45 hover:bg-waterlineBlue/10 hover:text-deepOceanNavy"
+                    className="inline-flex items-center gap-0.5 rounded-md border border-waterlineBlue/25 bg-waterlineBlue/[0.06] px-2 py-1 text-[10px] font-semibold text-waterlineBlue transition-colors hover:border-waterlineBlue/45 hover:bg-waterlineBlue/10 hover:text-deepOceanNavy md:mt-1 md:gap-1 md:rounded-lg md:px-3 md:py-1.5 md:text-xs"
                   >
-                    상세 보기
+                    상세
                     <ArrowRightIcon />
                   </Link>
                 </div>

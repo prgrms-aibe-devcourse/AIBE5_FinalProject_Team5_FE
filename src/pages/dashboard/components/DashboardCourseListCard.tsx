@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import type { BookmarkCourseVM } from '../../../services/bookmark'
 import {
   CalendarIcon,
-  CourseMetaItems,
   CourseTitleBlock,
   EnrollmentIcon,
   LocationIcon,
@@ -67,9 +66,6 @@ export default function DashboardCourseListCard({
                   className="w-full cursor-pointer rounded-lg px-3 py-4 text-left transition-colors hover:bg-foamWhite/50"
                 >
                   <CourseTitleBlock course={toCourseMeta(course)} scoreVariant="satisfaction" />
-                  <div className="mt-3 grid grid-cols-1 gap-2 font-pretendard text-xs sm:grid-cols-2">
-                    <CourseMetaItems course={toCourseMeta(course)} />
-                  </div>
                 </button>
               </li>
             ))}

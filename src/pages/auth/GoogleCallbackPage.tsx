@@ -48,8 +48,8 @@ export default function GoogleCallbackPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 font-pretendard">
-        <p className="text-center text-sm text-red-500" role="alert">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-5 py-10 font-pretendard sm:px-6">
+        <p className="max-w-sm text-center text-sm leading-relaxed text-red-500" role="alert">
           {error}
         </p>
         <Link
@@ -63,7 +63,7 @@ export default function GoogleCallbackPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center font-pretendard">
+    <div className="flex min-h-dvh items-center justify-center px-5 font-pretendard">
       <p className="text-sm text-deepOceanNavy">Google 로그인 처리 중...</p>
     </div>
   )

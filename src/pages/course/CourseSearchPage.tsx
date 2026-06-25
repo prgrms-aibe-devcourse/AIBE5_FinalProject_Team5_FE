@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../../components/layout/Header.tsx'
 import Footer from '../../components/layout/Footer.tsx'
@@ -8,65 +8,22 @@ import CourseSearchHero from './components/CourseSearchHero.tsx'
 import CourseResultsToolbar from './components/CourseResultsToolbar.tsx'
 import CourseCard from './components/CourseCard.tsx'
 import CourseComparisonSidebar from './components/CourseComparisonSidebar.tsx'
-import { COURSE_FILTERS } from './data/mockCourses.ts'
+import { COURSE_FILTERS } from './data/courseFilters.ts'
 import type { Course, CourseSortKey } from '../../services/course.ts'
 import { getCourses, toCourseListParams } from '../../services/course.ts'
 import { MAX_COMPARE_COURSES } from '../../services/courseCompare.ts'
 import { useBookmarkSessions } from '../../hooks/useBookmarkSessions.ts'
 import { useCompareCourses } from '../../hooks/useCompareCourses.ts'
-
-function buildInitialFilterValues(): Record<string, string> {
-  return COURSE_FILTERS.reduce<Record<string, string>>((acc, filter) => {
-    acc[filter.id] = filter.options[0]?.value ?? ''
-    return acc
-  }, {})
-}
-
-/** 상세 진입 직전 페이지 번호 보관 키 (뒤로 가기 복원용) */
-const SAVED_PAGE_KEY = 'courseSearch:savedPage'
-
-/** 상세에서 돌아온 경우에만 저장된 페이지를 꺼내 복원하고, 키는 비운다. */
-function consumeSavedPage(): number {
-  const raw = sessionStorage.getItem(SAVED_PAGE_KEY)
-  sessionStorage.removeItem(SAVED_PAGE_KEY)
-  const page = raw ? Number.parseInt(raw, 10) : NaN
-  return Number.isFinite(page) && page >= 1 ? page : 1
-}
+import { mergeCourseSearchParams, parseCourseSearchParams } from './courseSearchParams.ts'
 
 export default function CourseSearchPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  const [keyword, setKeyword] = useState(() => {
-    return searchParams.get('q') || searchParams.get('keyword') || ''
-  })
-  const [searchKeyword, setSearchKeyword] = useState(() => {
-    return searchParams.get('q') || searchParams.get('keyword') || ''
-  })
-  const [filterValues, setFilterValues] = useState(() => {
-    const initial = buildInitialFilterValues()
-    const categoryParam = searchParams.get('category')
-    if (categoryParam) {
-      let resolvedCategory = categoryParam
-      if (categoryParam === 'sw') resolvedCategory = 'APP_SW'
-      else if (categoryParam === 'uiux') resolvedCategory = 'UI_UX'
-      else if (categoryParam === 'data') resolvedCategory = 'BIG_DATA'
-      else if (categoryParam === 'ai') resolvedCategory = 'AI'
-      else if (categoryParam === 'cloud') resolvedCategory = 'CLOUD'
-      else if (categoryParam === 'security') resolvedCategory = 'SECURITY'
-      else if (categoryParam === 'vr') resolvedCategory = 'VR'
+  const listState = useMemo(() => parseCourseSearchParams(searchParams), [searchParams])
+  const { q: searchKeyword, filterValues, sortKey, page: currentPage } = listState
 
-      const validCategories = ['AI', 'SECURITY', 'BIG_DATA', 'CLOUD', 'UI_UX', 'VR', 'APP_SW', 'OTHERS']
-      if (validCategories.includes(resolvedCategory.toUpperCase())) {
-        initial['category'] = resolvedCategory.toUpperCase()
-      }
-    }
-    return initial
-  })
-  const [sortKey, setSortKey] = useState<CourseSortKey>('latest')
-  // 상세에서 뒤로 가기로 돌아온 경우 저장된 페이지를 복원 (없으면 1)
-  const [currentPage, setCurrentPage] = useState(() => consumeSavedPage())
-
+  const [keyword, setKeyword] = useState(searchKeyword)
   const [courses, setCourses] = useState<Course[]>([])
   const [totalElements, setTotalElements] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
@@ -75,51 +32,22 @@ export default function CourseSearchPage() {
 
   const {
     selectedCourses,
-    selectedIds,
+    selectedSessionIds,
     canAddMore,
     toggleCompareCourse,
     removeFromCompare,
   } = useCompareCourses()
   const { bookmarkError, clearBookmarkError, toggleBookmark, isBookmarked, isPending } = useBookmarkSessions()
 
-  // 마운트 시점에는 searchParams 동기화 효과가 페이지를 1로 덮어쓰지 않도록 건너뛴다 (복원된 페이지 보존)
-  const skipSearchParamsSync = useRef(true)
-
-  // Sync state when URL query parameters change (e.g. from back/forward navigation or clicking header)
   useEffect(() => {
-    if (skipSearchParamsSync.current) {
-      skipSearchParamsSync.current = false
-      return
-    }
+    setKeyword(searchKeyword)
+  }, [searchKeyword])
 
-    const q = searchParams.get('q') || searchParams.get('keyword') || ''
-    setKeyword(q)
-    setSearchKeyword(q)
-
-    const categoryParam = searchParams.get('category') || ''
-    let resolvedCategory = 'all'
-    if (categoryParam) {
-      if (categoryParam === 'sw') resolvedCategory = 'APP_SW'
-      else if (categoryParam === 'uiux') resolvedCategory = 'UI_UX'
-      else if (categoryParam === 'data') resolvedCategory = 'BIG_DATA'
-      else if (categoryParam === 'ai') resolvedCategory = 'AI'
-      else if (categoryParam === 'cloud') resolvedCategory = 'CLOUD'
-      else if (categoryParam === 'security') resolvedCategory = 'SECURITY'
-      else if (categoryParam === 'vr') resolvedCategory = 'VR'
-      else {
-        const validCategories = ['AI', 'SECURITY', 'BIG_DATA', 'CLOUD', 'UI_UX', 'VR', 'APP_SW', 'OTHERS']
-        if (validCategories.includes(categoryParam.toUpperCase())) {
-          resolvedCategory = categoryParam.toUpperCase()
-        }
-      }
-    }
-
-    setFilterValues((prev) => ({
-      ...prev,
-      category: resolvedCategory,
-    }))
-    setCurrentPage(1)
-  }, [searchParams])
+  const updateListQuery = (
+    patch: Parameters<typeof mergeCourseSearchParams>[1],
+  ) => {
+    setSearchParams(mergeCourseSearchParams(searchParams, patch), { replace: true })
+  }
 
   useEffect(() => {
     const params = toCourseListParams(filterValues, searchKeyword, currentPage, sortKey)
@@ -140,14 +68,29 @@ export default function CourseSearchPage() {
   }, [searchKeyword, filterValues, currentPage, sortKey])
 
   const handleFilterChange = (filterId: string, value: string) => {
-    setFilterValues((prev) => ({ ...prev, [filterId]: value }))
-    setSearchKeyword(keyword)
-    setCurrentPage(1)
+    updateListQuery({
+      q: keyword.trim(),
+      page: 1,
+      filterValues: { [filterId]: value },
+    })
   }
 
   const handleSearch = () => {
-    setSearchKeyword(keyword)
-    setCurrentPage(1)
+    updateListQuery({
+      q: keyword.trim(),
+      page: 1,
+    })
+  }
+
+  const handleSortChange = (key: CourseSortKey) => {
+    updateListQuery({
+      sortKey: key,
+      page: 1,
+    })
+  }
+
+  const handlePageChange = (page: number) => {
+    updateListQuery({ page })
   }
 
   const handleCompare = () => {
@@ -181,16 +124,13 @@ export default function CourseSearchPage() {
         onFilterChange={handleFilterChange}
       />
 
-      <main className="flex-1 px-8 pb-16 pt-8 md:px-16 lg:px-20">
+      <main className="flex-1 px-4 pb-12 pt-6 sm:px-8 sm:pb-16 sm:pt-8 md:px-16 lg:px-20">
         <div className="mx-auto flex w-full max-w-course-main flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
           <div className="min-w-0 flex-1">
             <CourseResultsToolbar
               totalCount={totalElements}
               sortKey={sortKey}
-              onSortChange={(key) => {
-                setSortKey(key)
-                setCurrentPage(1)
-              }}
+              onSortChange={handleSortChange}
             />
 
             {isLoading ? (
@@ -206,12 +146,15 @@ export default function CourseSearchPage() {
                 검색 결과가 없습니다.
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 overflow-visible sm:gap-5 lg:grid-cols-3 lg:gap-6 2xl:grid-cols-4">
                 {courses.map((course) => (
-                  <div key={course.id} className="flex min-w-0 justify-center">
+                  <div key={course.courseSessionId ?? course.id} className="flex min-w-0 justify-center">
                     <CourseCard
                       course={course}
-                      isSelected={selectedIds.has(course.id)}
+                      isSelected={
+                        course.courseSessionId != null &&
+                        selectedSessionIds.has(course.courseSessionId)
+                      }
                       isBookmarked={isBookmarked(course.courseSessionId)}
                       isBookmarkPending={isPending(course.courseSessionId)}
                       canAddToCompare={canAddMore}
@@ -219,8 +162,6 @@ export default function CourseSearchPage() {
                       onToggleBookmark={() => void toggleBookmark(course.courseSessionId)}
                       onOpenDetail={(c) => {
                         if (c.courseSessionId == null) return
-                        // 뒤로 가기 복원을 위해 현재 페이지 저장
-                        sessionStorage.setItem(SAVED_PAGE_KEY, String(currentPage))
                         navigate(`/courses/${c.courseSessionId}`)
                       }}
                     />
@@ -232,7 +173,7 @@ export default function CourseSearchPage() {
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              onPageChange={handlePageChange}
             />
           </div>
 
