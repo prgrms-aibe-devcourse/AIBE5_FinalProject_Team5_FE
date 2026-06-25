@@ -188,7 +188,7 @@ npm run lint
 
 ## ☁️ 배포
 
-`main` 브랜치 push 또는 GitHub Actions 수동 실행(`workflow_dispatch`) 시 아래 파이프라인으로 자동 배포됩니다.
+`main` 브랜치 push 또는 GitHub Actions 수동 실행(`workflow_dispatch`) 시 아래 파이프라인으로 자동 배포됩니다..
 
 **GitHub Actions → `npm run build` → AWS S3 → CloudFront 캐시 무효화**
 
